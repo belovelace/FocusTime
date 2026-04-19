@@ -182,4 +182,39 @@
 <!-- Bottom Navigation Shell Overlay (Invisible/Placeholder for System Consistency) -->
 <!-- Suppression: Hide navigation shell as this is a task-focused focus session screen -->
 </main>
+<script src="/app/js/api.js"></script>
+<script>
+  (function(){
+    const sessionId = FTApi.getSessionId();
+    if (!sessionId){ alert('No session selected.'); window.location.href = '/app/stitch_minimalist_indigo_ui_system_home/code.html'; }
+
+    async function loadAll(){
+      const [sRes, mRes, gRes] = await Promise.all([FTApi.getSession(sessionId), FTApi.getMessages(sessionId), FTApi.getGoals(sessionId)]);
+      // (naive) render message list into DOM - append to first chat container
+      const msgs = mRes.body || [];
+      // messages area: find a container to append
+      const chatArea = document.querySelector('section .space-y-3');
+      if (chatArea && msgs.length){
+        msgs.slice().reverse().forEach(m=>{
+          const div = document.createElement('div');
+          div.className = m.userId === Number(FTApi.getToken()?0:0)?'bg-primary-container text-white px-3 py-2 rounded-xl':'bg-surface-container-lowest px-3 py-2 rounded-xl';
+          div.textContent = m.body;
+          chatArea.appendChild(div);
+        });
+      }
+    }
+    loadAll();
+
+    // wire up send button
+    const input = document.querySelector('input[placeholder="메시지 입력..."]');
+    const sendBtn = document.querySelector('button:has(span[data-icon="send"])') || document.querySelector('button');
+    if (sendBtn && input){ sendBtn.addEventListener('click', async ()=>{ const txt = input.value.trim(); if(!txt) return; const r = await FTApi.postMessage(sessionId, txt); if(r.ok) { const el = document.createElement('div'); el.className='bg-primary-container text-white px-3 py-2 rounded-xl'; el.textContent = r.body.body; document.querySelector('section .space-y-3').appendChild(el); input.value=''; } else alert('전송 실패'); }); }
+
+    // wire up goal addition (naive: reuse message input if present)
+    // video submit: add a small prompt button
+    const videoButton = document.querySelector('button:contains("영상 변경")') || document.querySelector('button');
+    if (videoButton){ videoButton.addEventListener('click', async ()=>{ const url = prompt('Youtube 링크 입력'); if (!url) return; const vid = FTApi.extractYouTubeId(url); if (!vid){ alert('유효한 YouTube URL이 아닙니다'); return; } const res = await FTApi.postVideo(sessionId, url); if (res.ok) alert('저장됨'); else alert('저장 실패'); }); }
+
+  })();
+</script>
 </body></html>
