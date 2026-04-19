@@ -86,10 +86,10 @@ if (process.env.NODE_ENV === 'test') {
   const globalForPrisma = globalThis;
   let prisma;
   if (process.env.NODE_ENV === 'production') {
-    prisma = new PrismaClient();
+    prisma = new PrismaClient({});
   } else {
     if (!globalForPrisma.__prisma) {
-      globalForPrisma.__prisma = new PrismaClient();
+      globalForPrisma.__prisma = new PrismaClient({});
     }
     prisma = globalForPrisma.__prisma;
   }
