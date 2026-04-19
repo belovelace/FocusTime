@@ -1,0 +1,318 @@
+// Prisma schema — improved with enums, referential actions, indexes, and updatedAt fields
+// Source: docs/REQUIREMENTS_v1.1.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  // NOTE: Prisma 7 moves connection URLs to runtime config (prisma.config.ts) or env.
+  // Remove `url` from schema for Prisma 7 — run-time will read DATABASE_URL from env when needed.
+}
+
+// Enums for constrained business values
+enum Role {
+  user
+  admin
+}
+
+enum UserStatus {
+  active
+  suspended
+  deleted
+}
+
+enum SessionStatus {
+  open
+  matched
+  active
+  done
+  cancelled
+}
+
+enum FocusMode {
+  desk
+  moving
+  any
+}
+
+enum SubscriptionPlan {
+  free
+  plus_monthly
+  plus_yearly
+}
+
+enum ReportReason {
+  spam
+  inappropriate
+  other
+}
+
+enum NotificationType {
+  matched
+  cancelled
+  reminder
+  invite
+  system
+}
+
+model User {
+  id            BigInt     @id @default(autoincrement())
+  email         String     @unique
+  passwordHash  String?    @map("password_hash")
+  nickname      String
+  avatarUrl     String?    @map("avatar_url")
+  bio           String?
+  timezone      String     @default("Asia/Seoul")
+  role          Role       @default(user)
+  status        UserStatus @default(active)
+  deletedAt     DateTime?  @map("deleted_at")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  sessionsHosted  Session[] @relation("HostSessions")
+  sessionsPartner Session[] @relation("PartnerSessions")
+  participants    SessionParticipant[]
+  goals           SessionGoal[]
+  messages        SessionMessage[]
+  videos          SessionVideo[]
+  favorites       Favorite[] @relation("UserFavorites")
+  favoriteOf      Favorite[] @relation("PartnerFavorites")
+  notifications   Notification[]
+  subscription    Subscription?
+  notificationSetting NotificationSetting?
+  oauthTokens     OAuthToken[]
+  refreshTokens   RefreshToken[]
+  passwordResets  PasswordReset[]
+  blocksMade      Block[]    @relation("BlocksMade")
+  blocksReceived  Block[]    @relation("BlocksReceived")
+  reportsFiled    Report[]   @relation("ReportsFiled")
+  reportsTargeted Report[]   @relation("ReportsTargeted")
+  announcements   Announcement[]
+
+  @@index([email], name: "idx_users_email")
+}
+
+model Session {
+  id           BigInt    @id @default(autoincrement())
+  hostId       BigInt    @map("host_id")
+  partnerId    BigInt?   @map("partner_id")
+  startsAt     DateTime  @map("starts_at")
+  durationMin  Int       @db.SmallInt @map("duration_min")
+  focusMode    FocusMode @map("focus_mode") @default(any)
+  status       SessionStatus @default(open)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  host         User      @relation("HostSessions", fields: [hostId], references: [id], onDelete: Cascade)
+  partner      User?     @relation("PartnerSessions", fields: [partnerId], references: [id], onDelete: SetNull)
+  participants SessionParticipant[]
+  goals        SessionGoal[]
+  messages     SessionMessage[]
+  videos       SessionVideo[]
+
+  @@index([startsAt], name: "idx_sessions_starts_at")
+}
+
+model SessionParticipant {
+  id          BigInt   @id @default(autoincrement())
+  sessionId   BigInt   @map("session_id")
+  userId      BigInt   @map("user_id")
+  role        String   @default("participant")
+  joinedAt    DateTime @default(now()) @map("joined_at")
+  leftAt      DateTime? @map("left_at")
+  quietMode   Boolean  @default(false) @map("quiet_mode")
+  status      String   @default("joined")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
+  @@index([sessionId], name: "idx_session_participants_session")
+}
+
+model SessionGoal {
+  id         BigInt   @id @default(autoincrement())
+  sessionId  BigInt   @map("session_id")
+  userId     BigInt   @map("user_id")
+  goalText   String?  @map("goal_text")
+  resultText String?  @map("result_text")
+  rating     Int?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  session    Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], name: "idx_session_goals_user")
+}
+
+model SessionMessage {
+  id         BigInt   @id @default(autoincrement())
+  sessionId  BigInt   @map("session_id")
+  userId     BigInt   @map("user_id")
+  body       String
+  sentAt     DateTime @default(now()) @map("sent_at")
+
+  session    Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, sentAt], name: "idx_session_messages_sent_at")
+}
+
+model SessionVideo {
+  id          BigInt   @id @default(autoincrement())
+  sessionId   BigInt   @map("session_id")
+  userId      BigInt   @map("user_id")
+  youtubeUrl  String   @map("youtube_url")
+  setAt       DateTime @default(now()) @map("set_at")
+
+  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Favorite {
+  userId     BigInt  @map("user_id")
+  partnerId  BigInt  @map("partner_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user       User   @relation("UserFavorites", fields: [userId], references: [id], onDelete: Cascade)
+  partner    User   @relation("PartnerFavorites", fields: [partnerId], references: [id], onDelete: Cascade)
+
+  @@id([userId, partnerId])
+}
+
+model Notification {
+  id         BigInt   @id @default(autoincrement())
+  userId     BigInt   @map("user_id")
+  type       NotificationType
+  payload    Json?
+  isRead     Boolean  @default(false) @map("is_read")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt], name: "idx_notifications_user_created")
+}
+
+model NotificationSetting {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt   @unique @map("user_id")
+  settings  Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id           BigInt   @id @default(autoincrement())
+  userId       BigInt   @unique @map("user_id")
+  plan         SubscriptionPlan @default(free)
+  startsAt     DateTime @default(now()) @map("starts_at")
+  expiresAt    DateTime? @map("expires_at")
+  paymentKey   String?  @map("payment_key")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments     Payment[]
+
+  @@index([expiresAt], name: "idx_subscriptions_expires_at")
+}
+
+model Payment {
+  id                 BigInt   @id @default(autoincrement())
+  subscriptionId     BigInt?  @map("subscription_id")
+  provider           String?
+  providerPaymentId  String?  @map("provider_payment_id")
+  status             String?
+  amountCents        BigInt?
+  currency           String?  @default("KRW")
+  metadata           Json?
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  subscription       Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+}
+
+model Block {
+  blockerId  BigInt @map("blocker_id")
+  blockedId  BigInt @map("blocked_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  blocker    User   @relation("BlocksMade", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked    User   @relation("BlocksReceived", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@id([blockerId, blockedId])
+}
+
+model Report {
+  id          BigInt  @id @default(autoincrement())
+  reporterId  BigInt  @map("reporter_id")
+  targetId    BigInt  @map("target_id")
+  reason      ReportReason
+  status      String  @default("pending")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  reporter    User    @relation("ReportsFiled", fields: [reporterId], references: [id], onDelete: Cascade)
+  target      User    @relation("ReportsTargeted", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@index([status], name: "idx_reports_status")
+}
+
+model OAuthToken {
+  id               BigInt   @id @default(autoincrement())
+  userId           BigInt   @map("user_id")
+  provider         String
+  providerUserId   String?  @map("provider_user_id")
+  accessToken      String?
+  refreshToken     String?
+  expiresAt        DateTime?
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RefreshToken {
+  id         BigInt   @id @default(autoincrement())
+  userId     BigInt   @map("user_id")
+  tokenHash  String   @map("token_hash")
+  expiresAt  DateTime @map("expires_at")
+  revokedAt  DateTime? @map("revoked_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordReset {
+  id         BigInt   @id @default(autoincrement())
+  userId     BigInt   @map("user_id")
+  tokenHash  String   @map("token_hash")
+  expiresAt  DateTime @map("expires_at")
+  usedAt     DateTime? @map("used_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Announcement {
+  id           BigInt   @id @default(autoincrement())
+  title        String
+  body         String?
+  authorId     BigInt?  @map("author_id")
+  status       String   @default("draft")
+  publishedAt  DateTime? @map("published_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  author       User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+}
+
+model Faq {
+  id         BigInt   @id @default(autoincrement())
+  question   String
+  answer     String
+  ord        Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+}
