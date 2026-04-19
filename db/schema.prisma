@@ -7,6 +7,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
+  url = env("DATABASE_URL")
 }
 
 // Enums for constrained business values
@@ -90,6 +91,7 @@ model User {
   announcements   Announcement[]
 
   @@index([email], name: "idx_users_email")
+  @@map("users")
 }
 
 model Session {
@@ -111,6 +113,7 @@ model Session {
   videos       SessionVideo[]
 
   @@index([startsAt], name: "idx_sessions_starts_at")
+  @@map("sessions")
 }
 
 model SessionParticipant {
@@ -129,6 +132,7 @@ model SessionParticipant {
 
   @@unique([sessionId, userId])
   @@index([sessionId], name: "idx_session_participants_session")
+  @@map("session_participants")
 }
 
 model SessionGoal {
@@ -145,6 +149,7 @@ model SessionGoal {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId], name: "idx_session_goals_user")
+  @@map("session_goals")
 }
 
 model SessionMessage {
@@ -158,6 +163,7 @@ model SessionMessage {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([sessionId, sentAt], name: "idx_session_messages_sent_at")
+  @@map("session_messages")
 }
 
 model SessionVideo {
@@ -169,6 +175,8 @@ model SessionVideo {
 
   session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session_videos")
 }
 
 model Favorite {
@@ -180,6 +188,7 @@ model Favorite {
   partner    User   @relation("PartnerFavorites", fields: [partnerId], references: [id], onDelete: Cascade)
 
   @@id([userId, partnerId])
+  @@map("favorites")
 }
 
 model Notification {
@@ -193,6 +202,7 @@ model Notification {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt], name: "idx_notifications_user_created")
+  @@map("notifications")
 }
 
 model NotificationSetting {
@@ -202,6 +212,7 @@ model NotificationSetting {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("notification_settings")
 }
 
 model Subscription {
@@ -217,6 +228,7 @@ model Subscription {
   payments     Payment[]
 
   @@index([expiresAt], name: "idx_subscriptions_expires_at")
+  @@map("subscriptions")
 }
 
 model Payment {
@@ -231,6 +243,7 @@ model Payment {
   createdAt          DateTime @default(now()) @map("created_at")
 
   subscription       Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  @@map("payments")
 }
 
 model Block {
@@ -242,6 +255,7 @@ model Block {
   blocked    User   @relation("BlocksReceived", fields: [blockedId], references: [id], onDelete: Cascade)
 
   @@id([blockerId, blockedId])
+  @@map("blocks")
 }
 
 model Report {
@@ -256,6 +270,7 @@ model Report {
   target      User    @relation("ReportsTargeted", fields: [targetId], references: [id], onDelete: Cascade)
 
   @@index([status], name: "idx_reports_status")
+  @@map("reports")
 }
 
 model OAuthToken {
@@ -269,6 +284,7 @@ model OAuthToken {
   createdAt        DateTime @default(now()) @map("created_at")
 
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("oauth_tokens")
 }
 
 model RefreshToken {
@@ -280,6 +296,7 @@ model RefreshToken {
   createdAt  DateTime @default(now()) @map("created_at")
 
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("refresh_tokens")
 }
 
 model PasswordReset {
@@ -291,6 +308,7 @@ model PasswordReset {
   createdAt  DateTime @default(now()) @map("created_at")
 
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("password_resets")
 }
 
 model Announcement {
@@ -304,6 +322,7 @@ model Announcement {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   author       User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  @@map("announcements")
 }
 
 model Faq {
@@ -313,4 +332,5 @@ model Faq {
   ord        Int      @default(0)
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
+  @@map("faqs")
 }

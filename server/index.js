@@ -26,12 +26,12 @@ app.use('/api/webhooks', webhookRoutes);
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 4000;
-if (process.env.NODE_ENV !== 'test') {
+if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
   });
 } else {
-  console.log('Server not started (test env)');
+  console.log('Server not started (required as module)');
 }
 
 module.exports = app;

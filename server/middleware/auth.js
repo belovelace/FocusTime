@@ -5,7 +5,12 @@ module.exports = function(req,res,next){
   const token = auth.slice(7);
   try{
     const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev');
-    req.userId = payload.userId;
+    // If userId was serialized as a string, convert back to BigInt when possible
+    let uid = payload.userId;
+    if (typeof uid === 'string' && /^\d+$/.test(uid)) {
+      try { uid = BigInt(uid); } catch (e) { /* leave as string if conversion fails */ }
+    }
+    req.userId = uid;
     req.userRole = payload.role;
     next();
   }catch(e){
