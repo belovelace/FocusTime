@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=390, height=844, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link as="style" crossorigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-card { backdrop-filter: blur(20px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#007326",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed-dim": "#91cdff",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-fixed-dim": "#71dd7a",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-secondary": "#ffffff",
+                    "primary-fixed": "#dde1ff",
+                    "on-secondary-fixed": "#002106",
+                    "primary-fixed-dim": "#b8c3ff",
+                    "on-primary-container": "#e2e5ff",
+                    "error-container": "#ffdad6",
+                    "surface-container-high": "#e7e8e9",
+                    "on-tertiary-fixed": "#001e31",
+                    "primary": "#1a40c2",
+                    "outline-variant": "#c4c5d6",
+                    "tertiary": "#00547f",
+                    "surface-bright": "#f8f9fa",
+                    "surface-container": "#edeeef",
+                    "on-surface-variant": "#444654",
+                    "secondary-container": "#8af791",
+                    "tertiary-fixed": "#cce5ff",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#8dfa94",
+                    "inverse-primary": "#b8c3ff",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#e1e3e4",
+                    "on-surface": "#191c1d",
+                    "on-secondary-fixed-variant": "#005319",
+                    "surface-dim": "#d9dadb",
+                    "surface-container-low": "#f3f4f5",
+                    "secondary": "#006e24",
+                    "primary-container": "#3b5bdb",
+                    "surface": "#f8f9fa",
+                    "on-tertiary-container": "#d4e9ff",
+                    "on-background": "#191c1d",
+                    "inverse-on-surface": "#f0f1f2",
+                    "surface-tint": "#3052d2",
+                    "inverse-surface": "#2e3132",
+                    "on-primary-fixed": "#001355",
+                    "tertiary-container": "#006da4",
+                    "on-tertiary-fixed-variant": "#004b72",
+                    "error": "#ba1a1a",
+                    "background": "#f8f9fa",
+                    "on-primary": "#ffffff",
+                    "outline": "#747686",
+                    "on-primary-fixed-variant": "#0736ba"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Pretendard"],
+                    "body": ["Pretendard"],
+                    "label": ["Pretendard"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col items-center justify-start overflow-x-hidden">
+<!-- Top Navigation Shell (Suppressed for focused completion task as per rule: Task-Focused) -->
+<header class="fixed top-0 w-full z-50 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl flex items-center justify-between px-6 h-16 w-full">
+<span class="text-xl font-bold tracking-tighter text-indigo-900 dark:text-indigo-100">FocusTime</span>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-indigo-700 dark:text-indigo-400 p-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-colors rounded-full cursor-pointer" data-icon="close">close</span>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="w-full max-w-[390px] pt-24 pb-32 px-6 flex flex-col gap-10">
+<!-- Success Hero Section -->
+<section class="relative flex flex-col items-center text-center">
+<!-- Decorative Confetti Hint -->
+<div class="absolute -top-4 w-full flex justify-around opacity-40">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary translate-y-4"></div>
+<div class="w-2 h-2 rounded-full bg-primary-container -translate-y-2"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary-container translate-y-6"></div>
+<div class="w-2 h-2 rounded-full bg-primary translate-y-2"></div>
+</div>
+<div class="w-20 h-20 bg-primary-container flex items-center justify-center rounded-full shadow-lg shadow-primary/10 mb-6">
+<span class="material-symbols-outlined text-white text-4xl" data-icon="check" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<h1 class="text-3xl font-bold tracking-tight text-on-surface mb-2">집중 완료! 🎉</h1>
+<p class="text-on-surface-variant font-medium opacity-80">50분 세션을 완료했습니다</p>
+</section>
+<!-- Achievement Section -->
+<section class="flex flex-col gap-3">
+<label class="text-[11px] font-bold tracking-[0.05em] text-on-surface-variant uppercase px-1">오늘의 성취를 적어보세요</label>
+<div class="relative">
+<textarea class="w-full h-32 p-4 bg-surface-container-high rounded-xl border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all duration-200 resize-none text-on-surface placeholder:text-outline" placeholder="논문 2장 초안 완성!"></textarea>
+<span class="absolute bottom-3 right-4 text-[10px] font-medium text-outline uppercase tracking-widest">0/100</span>
+</div>
+</section>
+<!-- Rating & Partner Section -->
+<section class="flex flex-col gap-6">
+<div class="flex flex-col gap-3">
+<label class="text-[11px] font-bold tracking-[0.05em] text-on-surface-variant uppercase px-1">파트너는 어땠나요?</label>
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-outline-variant text-3xl" data-icon="star">star</span>
+</div>
+</div>
+<!-- Partner Card -->
+<div class="bg-surface-container-lowest p-5 rounded-xl flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.03)] group transition-all">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img alt="Partner Avatar" class="w-12 h-12 rounded-full object-cover" data-alt="friendly portrait of a young man with a slight smile in a bright minimalist room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzmt3_4tfUFnou3h8UI16gzyzOeiKQqUuP68dNUURhm5XMQQWLvSriPvCbAbJrAno_2vKR1EN_CjetfyVlP5Tnbkt3w0tkvnHKoHNTHR7kFtKsNjK_O8zYU7HwI7aIRsdp1bMG95X6Fe0y53ns3Ap0QvoJEqBUCcl1iZmG-QTrZnoGXHSexyNcxnpoJbgy_eNaWecagj7pWXzYyH549wI_xhSeWB2rJsCs3_Unr-H6Q9m5dtELNiqaK3Wi3PKW60vi5p2P6FfpPHM"/>
+<div class="absolute -bottom-1 -right-1 w-4 h-4 bg-secondary border-2 border-surface-container-lowest rounded-full"></div>
+</div>
+<div class="flex flex-col">
+<span class="text-on-surface font-bold">민수님</span>
+<span class="text-[11px] text-on-secondary-container font-medium">오늘 집중도가 높았어요!</span>
+</div>
+</div>
+<button class="flex items-center gap-1.5 px-3 py-2 border border-outline-variant hover:border-primary hover:text-primary transition-colors rounded-lg text-[12px] font-semibold text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]" data-icon="star">star</span>
+                    즐겨찾기 추가
+                </button>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="flex flex-col gap-3 mt-auto">
+<button class="w-full py-4 bg-gradient-to-r from-primary to-primary-container text-white font-bold rounded-lg shadow-lg shadow-primary/20 active:scale-[0.98] transition-all duration-150">
+                다음 세션 바로 예약하기
+            </button>
+<button class="w-full py-4 text-primary font-bold hover:bg-surface-container-high transition-colors rounded-lg active:scale-[0.98] transition-all duration-150">
+                대시보드로 돌아가기
+            </button>
+</section>
+</main>
+<!-- Bottom Navigation Shell (Mapped from JSON - Suppressed on transactional/success screen as per "Relevance Check") -->
+<!-- Not rendering as this is a focused success screen -->
+</body></html>

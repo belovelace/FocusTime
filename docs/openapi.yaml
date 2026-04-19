@@ -1,0 +1,376 @@
+openapi: 3.0.3
+info:
+  title: FocusTime API
+  version: "1.0.0"
+  description: |
+    FocusTime backend API — virtual co-working clone (Korean).
+    Reference: docs/REQUIREMENTS_v1.1.md
+servers:
+  - url: https://api.localhost
+    description: Local dev
+paths:
+  /api/auth/signup:
+    post:
+      summary: 회원가입 (이메일)
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthSignup'
+      responses:
+        '201':
+          description: Created — verification email sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Validation error
+
+  /api/auth/login:
+    post:
+      summary: 로그인 (이메일+비밀번호)
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLogin'
+      responses:
+        '200':
+          description: Returns access token and refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '401':
+          description: Invalid credentials
+
+  /api/users/me:
+    get:
+      summary: 내 프로필 조회
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+    patch:
+      summary: 내 프로필 수정
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+    delete:
+      summary: 회원 탈퇴 (soft-delete)
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Soft-deleted
+
+  /api/sessions:
+    get:
+      summary: "Public sessions browse (filters: date, duration, mode)"
+      tags:
+        - Sessions
+      parameters:
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: duration
+          schema:
+            type: integer
+            enum:
+              - 25
+              - 50
+              - 75
+        - in: query
+          name: mode
+          schema:
+            type: string
+            enum:
+              - desk
+              - moving
+              - any
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: paginated sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionList'
+    post:
+      summary: 세션 생성 (host)
+      tags:
+        - Sessions
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionCreate'
+      responses:
+        '201':
+          description: Created session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+
+  /api/sessions/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: 세션 상세
+      tags:
+        - Sessions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+    delete:
+      summary: 세션 취소
+      tags:
+        - Sessions
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: cancelled
+    patch:
+      summary: 세션 상태 변경
+      tags:
+        - Sessions
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/SessionStatusEnum'
+      responses:
+        '200':
+          description: updated session
+
+  /api/sessions/{id}/join:
+    post:
+      summary: 세션 참가(매칭)
+      tags:
+        - Sessions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quietMode:
+                  type: boolean
+      responses:
+        '200':
+          description: matched or waitlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionParticipantResponse'
+        '409':
+          description: conflict / full
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AuthSignup:
+      type: object
+      required:
+        - email
+        - password
+        - nickname
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        nickname:
+          type: string
+    AuthLogin:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    AuthTokens:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        nickname:
+          type: string
+        timezone:
+          type: string
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        status:
+          $ref: '#/components/schemas/UserStatusEnum'
+    UserUpdate:
+      type: object
+      properties:
+        nickname:
+          type: string
+        bio:
+          type: string
+    SessionCreate:
+      type: object
+      required:
+        - startsAt
+        - durationMin
+      properties:
+        startsAt:
+          type: string
+          format: date-time
+        durationMin:
+          type: integer
+          enum:
+            - 25
+            - 50
+            - 75
+        focusMode:
+          $ref: '#/components/schemas/FocusModeEnum'
+    SessionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        hostId:
+          type: integer
+        partnerId:
+          type: integer
+          nullable: true
+        startsAt:
+          type: string
+          format: date-time
+        durationMin:
+          type: integer
+        focusMode:
+          $ref: '#/components/schemas/FocusModeEnum'
+        status:
+          $ref: '#/components/schemas/SessionStatusEnum'
+    SessionList:
+      type: object
+      properties:
+        total:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionResponse'
+    SessionParticipantResponse:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+        userId:
+          type: integer
+        role:
+          type: string
+        status:
+          type: string
+
+    # enums
+    RoleEnum:
+      type: string
+      enum:
+        - user
+        - admin
+    UserStatusEnum:
+      type: string
+      enum:
+        - active
+        - suspended
+        - deleted
+    SessionStatusEnum:
+      type: string
+      enum:
+        - open
+        - matched
+        - active
+        - done
+        - cancelled
+    FocusModeEnum:
+      type: string
+      enum:
+        - desk
+        - moving
+        - any

@@ -7,8 +7,6 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  // NOTE: Prisma 7 moves connection URLs to runtime config (prisma.config.ts) or env.
-  // Remove `url` from schema for Prisma 7 — run-time will read DATABASE_URL from env when needed.
 }
 
 // Enums for constrained business values

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker run *)",
+      "Bash(netstat -ano)",
+      "Bash(findstr 3306)",
+      "Bash(DATABASE_URL_TEST=\"mysql://root:1234@localhost:3306/focustime_test\" npm test --silent)"
+    ]
+  }
+}
