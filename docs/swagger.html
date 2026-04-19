@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FocusTime API — Swagger UI</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
+  <style>
+    html, body { height: 100%; margin: 0; }
+    .swagger-ui { height: 100vh; }
+    .topbar { display:none; } /* hide big topbar for cleaner view */
+  </style>
+</head>
+<body>
+  <div id="swagger"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
+  <script>
+    async function loadSpec() {
+      try {
+        const res = await fetch('./openapi.yaml');
+        if (!res.ok) throw new Error('Failed to fetch openapi.yaml: ' + res.status);
+        const text = await res.text();
+        const spec = jsyaml.load(text);
+
+        const ui = SwaggerUIBundle({
+          spec,
+          dom_id: '#swagger',
+          deepLinking: true,
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+          ],
+          layout: 'BaseLayout',
+          docExpansion: 'none',
+          defaultModelsExpandDepth: -1
+        });
+
+        window.ui = ui;
+      } catch (err) {
+        document.body.innerHTML = '<pre style="padding:16px;color:#900">Error loading OpenAPI spec:\n' + (err.message || err) + '</pre>';
+        console.error(err);
+      }
+    }
+
+    loadSpec();
+  </script>
+</body>
+</html>
