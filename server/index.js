@@ -6,6 +6,15 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const authRoutes = require('./routes/auth');
+
+// Ensure BigInt can be JSON-stringified (used by JWT signing in tests and elsewhere)
+if (typeof BigInt !== 'undefined' && typeof BigInt.prototype.toJSON !== 'function') {
+  Object.defineProperty(BigInt.prototype, 'toJSON', {
+    value: function () { return this.toString(); },
+    configurable: true,
+    writable: true,
+  });
+}
 const userRoutes = require('./routes/users');
 const sessionRoutes = require('./routes/sessions');
 const notificationRoutes = require('./routes/notifications');
