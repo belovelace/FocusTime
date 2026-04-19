@@ -116,7 +116,7 @@
 <div class="w-full space-y-4">
 <div class="space-y-1.5">
 <label class="label-md font-bold text-xs uppercase tracking-widest text-on-surface-variant ml-1">이메일 주소</label>
-<input class="w-full h-[56px] px-4 rounded-xl bg-surface-container-high border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all duration-100 outline-none text-on-surface placeholder:text-outline" placeholder="example@focus.com" type="email"/>
+<input id="email" class="w-full h-[56px] px-4 rounded-xl bg-surface-container-high border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all duration-100 outline-none text-on-surface placeholder:text-outline" placeholder="example@focus.com" type="email"/>
 </div>
 <div class="space-y-1.5">
 <label class="label-md font-bold text-xs uppercase tracking-widest text-on-surface-variant ml-1">비밀번호 (8자 이상)</label>
@@ -154,6 +154,30 @@
 </div>
 </main>
 <!-- Background Decoration (Asymmetric Monolith Style) -->
+
+<script src="/app/js/api.js"></script>
+<script>
+  (function(){
+    const form = document.querySelector('main');
+    const emailInput = form.querySelector('input[type="email"]');
+    const passInputs = form.querySelectorAll('input[type="password"]');
+    const submit = document.querySelector('button');
+
+    submit.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      const password = passInputs[0].value;
+      const password2 = passInputs[1].value;
+      if (!email || !password || password.length < 8 || password !== password2){ alert('필드를 확인하세요'); return; }
+      const res = await FTApi.signup({ email, password, nickname: email.split('@')[0], timezone: 'Asia/Seoul' });
+      if (res.ok && res.body && res.body.accessToken){ FTApi.setToken(res.body.accessToken); window.location.href = '/app/stitch_minimalist_indigo_ui_system_home/code.html'; return; }
+      // If signup response didn't include token, try login
+      const login = await FTApi.login(email, password);
+      if (login.ok && login.body && login.body.accessToken){ FTApi.setToken(login.body.accessToken); window.location.href = '/app/stitch_minimalist_indigo_ui_system_home/code.html'; return; }
+      alert('가입 또는 로그인에 실패했습니다');
+    });
+  })();
+</script>
 <div class="fixed -bottom-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 <div class="fixed top-1/4 -right-12 w-48 h-48 bg-secondary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 </body></html>

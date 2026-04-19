@@ -25,6 +25,11 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+const path = require('path');
+
+// Serve frontWorkspace static files under /app
+app.use('/app', express.static(path.join(__dirname, '..', 'frontWorkspace')));
+
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/sessions', sessionRoutes);
