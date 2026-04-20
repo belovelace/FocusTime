@@ -39,6 +39,17 @@
         <div class="w-full bg-black rounded-lg overflow-hidden aspect-video">
           <!-- Local video player -->
           <video id="localVideo" class="w-full h-full object-cover" controls playsinline preload="metadata" src="/images/video/focustime.mov">해당 브라우저에서 비디오를 재생할 수 없습니다.</video>
+<!-- fallback poster if video missing -->
+<noscript><img src="/images/video-placeholder.png" alt="video placeholder"/></noscript>
+<script>
+  // If the demo video resource is missing, show the placeholder poster
+  (function(){
+    const vid = document.getElementById('localVideo');
+    vid.addEventListener('error', ()=>{
+      try{ vid.poster = '/images/video-placeholder.png'; }catch(e){}
+    });
+  })();
+</script>
         </div>
 
         <div class="bg-white rounded-xl p-6 shadow text-center">

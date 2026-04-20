@@ -21,46 +21,68 @@ router.patch('/me', auth, async (req, res) => {
   res.json(user);
 });
 
-// GET /api/users/me/stats - simple weekly focused time summary
+// GET /api/users/me/stats - weekly focused time summary with Monday-start week and per-day totals
 router.get('/me/stats', auth, async (req, res) => {
   try {
-    // compute a 7-day window ending now
+    // find current date and compute Monday of current week (local timezone)
     const now = new Date();
-    const end = now.toISOString();
-    const startDate = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
-    startDate.setHours(0,0,0,0);
-    const start = startDate.toISOString();
+    const day = now.getDay(); // 0 (Sun) - 6 (Sat)
+    const daysSinceMonday = (day + 6) % 7; // Monday = 0
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - daysSinceMonday);
+    monday.setHours(0,0,0,0);
+    const weekStart = new Date(monday);
 
-    // sessions where the user is host or partner within the window
-    const items = await prisma.session.findMany({
-      where: {
-        AND: [
-          { startsAt: { gte: start, lt: end } },
-          { OR: [ { hostId: req.userId }, { partnerId: req.userId } ] }
-        ]
-      }
-    });
-
-    // consider finished sessions as those whose (startsAt + duration) <= now
-    const ended = items.filter(s => {
-      const sStart = new Date(s.startsAt).getTime();
-      const sEnd = sStart + (Number(s.durationMin || 0) * 60000);
-      return sEnd <= Date.now();
-    });
-
-    const focusedMinutesWeek = ended.reduce((acc, s) => acc + Number(s.durationMin || 0), 0);
-    const completedSessionsWeek = ended.length;
-
-    // consecutiveDays: count how many consecutive days ending today the user had at least one ended session
-    const daysWith = new Set(ended.map(s => (new Date(s.startsAt)).toISOString().slice(0,10)));
-    let consecutive = 0;
-    for (let i = 0; i < 30; i++) {
-      const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
-      const key = d.toISOString().slice(0,10);
-      if (daysWith.has(key)) consecutive++; else break;
+    // Build per-day range for 7 days starting Monday
+    const dayRanges = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStart);
+      d.setDate(weekStart.getDate() + i);
+      const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0,0,0,0);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 1);
+      dayRanges.push({ start: start.toISOString(), end: end.toISOString(), key: start.toISOString().slice(0,10) });
     }
 
-    res.json({ focusedMinutesWeek, completedSessionsWeek, weekGoalMinutes: null, consecutiveDays: consecutive });
+    // fetch sessions in this week where user is host or partner
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 7);
+    const items = await prisma.session.findMany({ where: { AND: [ { startsAt: { gte: weekStart.toISOString(), lt: weekEnd.toISOString() } }, { OR: [ { hostId: req.userId }, { partnerId: req.userId } ] } ] } });
+
+    // compute per-day completed minutes: session is completed if startsAt + duration <= now
+    const perDay = {};
+    dayRanges.forEach(r => perDay[r.key] = { minutes: 0, sessions: [] });
+
+    // iterate sessions and prefer actual duration recorded in sessionGoal (resultText: 'actual:NN') for this user
+    for (const s of items) {
+      const sStart = new Date(s.startsAt).getTime();
+      const sEnd = sStart + (Number(s.durationMin || 0) * 60000);
+      const dayKey = new Date(s.startsAt).toISOString().slice(0,10);
+      if (sEnd <= Date.now()) {
+        // check for recorded actual duration for this user
+        let actual = null;
+        try {
+          const goals = await prisma.sessionGoal.findMany({ where: { sessionId: s.id, userId: req.userId } });
+          for (const g of goals) {
+            if (g.resultText && typeof g.resultText === 'string' && g.resultText.startsWith('actual:')) {
+              const v = parseInt(g.resultText.split(':')[1], 10);
+              if (!isNaN(v)) { actual = v; break; }
+            }
+          }
+        } catch (e) { /* ignore per-session goal errors */ }
+
+        const mins = actual != null ? actual : Number(s.durationMin || 0);
+        if (perDay[dayKey]) {
+          perDay[dayKey].minutes += mins;
+          perDay[dayKey].sessions.push({ id: s.id, startsAt: s.startsAt, durationMin: s.durationMin, actualDurationMin: mins, status: s.status });
+        }
+      }
+    }
+
+    const focusedMinutesWeek = Object.values(perDay).reduce((acc, v) => acc + v.minutes, 0);
+    const completedSessionsWeek = Object.values(perDay).reduce((acc, v) => acc + v.sessions.length, 0);
+
+    res.json({ weekStart: weekStart.toISOString().slice(0,10), focusedMinutesWeek, completedSessionsWeek, perDay, weekDays: dayRanges.map(r => r.key) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'stats failed' });
