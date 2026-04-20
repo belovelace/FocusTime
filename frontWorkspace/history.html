@@ -32,19 +32,44 @@
     const listEl = document.getElementById('historyList');
     try{
       if (!FTApi) { listEl.textContent = 'API 없음'; return; }
-      const res = await FTApi.request('/api/sessions');
+      // request server for past sessions explicitly
+      const res = await FTApi.request('/api/sessions?past=1');
       if (!res || !res.ok || !res.body) { listEl.textContent = '불러오기 실패'; return; }
-      const now = Date.now();
-      const past = (res.body.items || []).filter(s => new Date(s.startsAt).getTime() < now).sort((a,b)=> new Date(b.startsAt) - new Date(a.startsAt));
+      const past = (res.body.items || []).sort((a,b)=> new Date(b.startsAt) - new Date(a.startsAt));
       if (!past.length) { listEl.textContent = '지난 세션이 없습니다.'; return; }
       listEl.innerHTML = '';
-      past.forEach(s => {
+
+      // get current user id to find my goal entries
+      let meId = null;
+      try{ const meRes = await FTApi.request('/api/users/me'); if (meRes && meRes.ok && meRes.body) meId = String(meRes.body.id); }catch(e){}
+
+      for (const s of past){
         const el = document.createElement('div');
         el.className = 'p-3 bg-surface-container-lowest rounded-lg';
         const starts = new Date(s.startsAt);
-        el.innerHTML = `<div class=\"flex justify-between\"><div><div class=\"font-bold\">${s.durationMin}분</div><div class=\"text-sm text-on-surface-variant\">${new Intl.DateTimeFormat('ko-KR',{dateStyle:'medium', timeStyle:'short'}).format(starts)}</div></div><div class=\"text-sm text-on-surface-variant\">상태: ${s.status}</div></div>`;
+        // fetch goals and pick my goal
+        let myGoalText = '';
+        try{
+          const gRes = await FTApi.getGoals(s.id);
+          if (gRes && gRes.ok && Array.isArray(gRes.body)){
+            const g = gRes.body.find(x => String(x.userId) === String(meId));
+            if (g) myGoalText = g.goalText || g.resultText || '';
+          }
+        }catch(e){}
+
+        el.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="font-bold">${s.durationMin}분</div>
+              <div class="text-sm text-on-surface-variant">${new Intl.DateTimeFormat('ko-KR',{dateStyle:'medium', timeStyle:'short'}).format(starts)}</div>
+              ${ myGoalText ? `<div class="text-sm text-on-surface-variant mt-2">나의 목표: ${myGoalText.replace(/</g,'&lt;')}</div>` : '' }
+            </div>
+            <div class="text-sm text-on-surface-variant">상태: ${s.status}</div>
+          </div>
+        `;
         listEl.appendChild(el);
-      });
+      }
+
     }catch(e){ console.error(e); listEl.textContent = '서버 오류'; }
   })();
   </script>

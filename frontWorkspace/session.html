@@ -241,7 +241,31 @@
         const params = new URLSearchParams(location.search);
         if (params.get('autoplay') === '1'){
           const vid = document.getElementById('localVideo');
-          if (vid && typeof vid.play === 'function'){ try{ await vid.play(); }catch(e){ /* autoplay may be blocked */ } }
+          // attempt priming: use a short silent AudioContext on user gesture (click already initiated when joining)
+          try{
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+              const ctx = new AudioCtx();
+              if (ctx.state === 'suspended') await ctx.resume();
+              const o = ctx.createOscillator();
+              const g = ctx.createGain();
+              g.gain.value = 0; // silent
+              o.connect(g);
+              g.connect(ctx.destination);
+              o.start(0);
+              o.stop(0);
+            }
+          }catch(_){}
+          if (vid && typeof vid.play === 'function'){
+            try{
+              // try muted play first (most browsers allow muted autoplay)
+              const wasMuted = vid.muted;
+              vid.muted = true;
+              await vid.play();
+              // restore mute state after a short delay to allow audible playback when user interacts
+              setTimeout(()=>{ try{ vid.muted = wasMuted; }catch(e){} }, 1000);
+            }catch(e){ /* autoplay may be blocked */ }
+          }
         }
       }catch(e){}
       refreshInterval = setInterval(loadAll, 3000);
