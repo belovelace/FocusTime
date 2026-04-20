@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = { theme: { extend: { colors: { primary: '#3B5BDB', 'background': '#F8F9FA', surface: '#FFFFFF', 'on-surface': '#212529', 'on-surface-variant':'#6C757D' }, borderRadius: { DEFAULT: '0.5rem' }, fontFamily: { body: ['Pretendard','sans-serif'] } } } }
+  </script>
+  <style>body{font-family:'Pretendard',sans-serif;min-height:100dvh}</style>
+  <title>로그인 — FocusTime</title>
+</head>
+<body class="bg-background text-on-surface antialiased">
+  <header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 py-3 bg-background">
+    <button aria-label="뒤로" class="p-2 rounded-lg">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </button>
+    <h1 class="text-xl font-black text-primary">포커스타임</h1>
+    <div class="w-10"></div>
+  </header>
+
+  <main class="flex min-h-screen flex-col pt-20 pb-12 px-6 max-w-md mx-auto w-full">
+    <div class="mt-8 mb-8 text-center">
+      <h2 class="text-3xl font-extrabold tracking-tight">로그인</h2>
+      <p class="mt-2 text-on-surface-variant">다시 집중의 시간으로 돌아올 시간입니다</p>
+    </div>
+
+    <form id="loginForm" class="flex flex-col gap-4" onsubmit="return false;">
+      <div class="space-y-2">
+        <label for="email" class="text-sm font-bold tracking-widest text-on-surface-variant uppercase ml-1">이메일 주소</label>
+        <input id="email" name="email" type="email" required placeholder="email@example.com"
+               class="w-full h-14 px-4 bg-surface-container-high rounded-xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest outline-none text-on-surface" />
+      </div>
+
+      <div class="space-y-2">
+        <label for="password" class="text-sm font-bold tracking-widest text-on-surface-variant uppercase ml-1">비밀번호</label>
+        <div class="relative">
+          <input id="password" name="password" type="password" required placeholder="비밀번호 (8자 이상)"
+                 class="w-full h-14 px-4 bg-surface-container-high rounded-xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest outline-none text-on-surface" />
+          <button type="button" id="togglePassword" aria-label="비밀번호 보기" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
+            <span class="material-symbols-outlined">visibility</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <a href="#" class="text-sm font-medium text-primary hover:underline">비밀번호를 잊으셨나요?</a>
+      </div>
+
+      <button id="loginBtn" type="button" class="w-full h-14 mt-2 bg-gradient-to-r from-[#1a40c2] to-[#3b5bdb] text-white font-bold rounded-xl shadow-lg active:scale-[0.98]">로그인</button>
+
+      <div class="my-6 flex items-center gap-4">
+        <div class="h-[1px] flex-1 bg-surface-variant/50"></div>
+        <span class="text-xs font-bold text-surface-variant uppercase tracking-widest">또는</span>
+        <div class="h-[1px] flex-1 bg-surface-variant/50"></div>
+      </div>
+
+      <div class="space-y-3">
+        <button id="kakaoBtn" type="button" class="w-full h-14 bg-[#FEE500] text-[#191919] font-bold rounded-xl flex items-center justify-center gap-3">
+          <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1;">chat_bubble</span>
+          카카오로 시작하기
+        </button>
+        <button id="googleBtn" type="button" class="w-full h-14 bg-surface-container-lowest text-on-surface font-bold rounded-xl flex items-center justify-center gap-3 shadow-sm">
+          <span class="material-symbols-outlined text-xl">mail</span>
+          Google로 로그인
+        </button>
+      </div>
+    </form>
+
+    <div class="mt-auto pt-10 text-center">
+      <p class="text-on-surface-variant font-medium">
+        아직 계정이 없으신가요?
+        <a href="/app/signup.html" class="ml-1 text-primary font-bold">회원가입</a>
+      </p>
+    </div>
+
+    <div class="absolute top-1/4 -right-20 w-64 h-64 bg-primary/5 rounded-full blur-[80px] -z-10"></div>
+  </main>
+
+  <script src="/app/js/api.js"></script>
+  <script>
+  (function(){
+    // Back button fallback
+    const backBtn = document.querySelector('button[aria-label="뒤로"]');
+    if (backBtn) backBtn.addEventListener('click', ()=>{ if (history.length > 1) history.back(); else window.location.href = '/app/home.html'; });
+
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    const toggle = document.getElementById('togglePassword');
+
+    toggle.addEventListener('click', ()=>{
+      if (!password) return;
+      const visible = password.type === 'text';
+      password.type = visible ? 'password' : 'text';
+      toggle.querySelector('span').textContent = visible ? 'visibility' : 'visibility_off';
+    });
+
+    loginBtn.addEventListener('click', async ()=>{
+      if (!email || !password) { alert('필드를 확인하세요'); return; }
+      const em = email.value.trim(), pw = password.value;
+      if (!em || !pw) { alert('이메일과 비밀번호를 입력하세요'); return; }
+      try {
+        const res = await FTApi.login(em, pw);
+        if (res && res.ok && res.body && res.body.accessToken) {
+          FTApi.setToken(res.body.accessToken);
+          // if caller passed a `next` param, redirect there
+          const params = new URLSearchParams(location.search);
+          const next = params.get('next');
+          // default to dashboard after login
+          window.location.href = next ? next : '/app/home_dashboard.html';
+          return;
+        }
+        alert('로그인 실패');
+      } catch (e) {
+        console.error(e);
+        alert('서버 오류');
+      }
+    });
+
+    document.getElementById('kakaoBtn').addEventListener('click', ()=>{ window.location.href = '/auth/kakao'; });
+    document.getElementById('googleBtn').addEventListener('click', ()=>{ window.location.href = '/auth/google'; });
+  })();
+  </script>
+</body>
+</html>

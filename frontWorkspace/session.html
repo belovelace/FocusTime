@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <title>세션 — FocusTime</title>
+  <style>
+    /* small, self-contained tweaks for chat bubbles and responsive heights */
+    .chat-scroll { max-height: 60vh; overflow-y: auto; }
+    .bubble { max-width: 80%; word-wrap: break-word; }
+    @media (min-width: 768px) {
+      .chat-scroll { max-height: 72vh; }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+  <header class="fixed top-0 left-0 w-full bg-white/80 backdrop-blur-sm z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button aria-label="뒤로" id="backBtn" class="p-2 rounded-lg"><span class="material-symbols-outlined">arrow_back</span></button>
+        <div>
+          <div class="text-sm font-semibold">집중 세션</div>
+          <div id="sessionBadge" class="text-xs text-gray-500">--분</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="leaveBtn" class="text-sm text-red-600">세션 종료</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 pt-20 pb-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Left: Video + Timer (span 2 on desktop) -->
+      <section class="md:col-span-2 space-y-6">
+        <div class="w-full bg-black rounded-lg overflow-hidden aspect-video">
+          <!-- Local video player -->
+          <video id="localVideo" class="w-full h-full object-cover" controls playsinline preload="metadata" src="/images/video/focustime.mov">해당 브라우저에서 비디오를 재생할 수 없습니다.</video>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 shadow text-center">
+          <div id="timer" class="text-5xl font-extrabold text-indigo-600 tabular-nums" aria-live="polite">00:00:00</div>
+          <div id="timerLabel" class="text-sm text-gray-500 mt-2">남은 시간</div>
+          <div id="goalText" class="text-sm text-gray-600 mt-3">나의 목표: —</div>
+        </div>
+
+        <div class="bg-white rounded-xl p-4 shadow">
+          <h3 class="text-sm font-semibold text-gray-700 mb-2">세션 정보</h3>
+          <div class="text-sm text-gray-600">호스트: <span id="hostName">—</span></div>
+          <div class="text-sm text-gray-600 mt-1">상태: <span id="sessionStatus">--</span></div>
+        </div>
+      </section>
+
+      <!-- Right: Chat -->
+      <aside class="md:col-span-1 flex flex-col">
+        <div class="bg-white rounded-xl p-4 shadow flex-1 flex flex-col">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center"> <span class="material-symbols-outlined text-gray-500">people</span></div>
+            <div>
+              <div id="chatTitle" class="text-sm font-semibold">채팅</div>
+              <div id="chatSub" class="text-xs text-gray-500">참가자와 메시지를 주고받으세요</div>
+            </div>
+          </div>
+
+          <div id="messages" class="chat-scroll overflow-y-auto space-y-4 px-1 pb-2 flex-1">
+            <!-- messages injected here -->
+          </div>
+
+          <form id="msgForm" class="mt-3 flex gap-2" onsubmit="return false;">
+            <div class="flex-1">
+              <textarea id="msgInput" rows="2" placeholder="메시지 입력 (Enter=전송)" class="w-full resize-none rounded-lg border border-gray-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200" ></textarea>
+              <div id="inputMeta" class="mt-1 text-xs text-gray-400 flex justify-between">
+                <span id="charCount">0</span>
+                <span>Shift+Enter 줄바꿈</span>
+              </div>
+            </div>
+            <div class="flex md:flex-col flex-row gap-2 items-stretch">
+              <button id="sendBtn" type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg min-w-[64px]">전송</button>
+              <button id="joinBtn" type="button" class="px-4 py-2 border border-gray-200 rounded-lg text-sm min-w-[64px]">참가</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="mt-4 text-center text-xs text-gray-500">Tip: Enter를 눌러 메시지를 전송하세요. Shift+Enter로 줄바꿈.</div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="/app/js/api.js"></script>
+  <script>
+  (function(){
+    // Helpers
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function fmtHMS(ms){ if (ms <= 0) return '00:00:00'; const total = Math.max(0, Math.floor(ms/1000)); const hh = Math.floor(total/3600); const mm = Math.floor((total%3600)/60); const ss = total%60; return pad(hh)+ ':' + pad(mm) + ':' + pad(ss); }
+
+    // Resolve sessionId (localStorage or ?id=)
+    let sessionId = FTApi.getSessionId();
+    const params = new URLSearchParams(location.search);
+    const idParam = params.get('id');
+    if (!sessionId && idParam) { sessionId = idParam; FTApi.setSessionId(String(sessionId)); }
+    if (!sessionId){ alert('세션이 선택되지 않았습니다.'); window.location.href='/app/home.html'; return; }
+
+    const messagesEl = document.getElementById('messages');
+    const input = document.getElementById('msgInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const timerEl = document.getElementById('timer');
+    const timerLabel = document.getElementById('timerLabel');
+    const sessionBadge = document.getElementById('sessionBadge');
+    const hostName = document.getElementById('hostName');
+    const sessionStatus = document.getElementById('sessionStatus');
+    const goalText = document.getElementById('goalText');
+
+    let meId = null;
+    let timerInterval = null;
+    let refreshInterval = null;
+
+    async function fetchMe(){
+      try{
+        const r = await FTApi.request('/api/users/me');
+        if (r && r.ok && r.body) { meId = String(r.body.id); }
+      }catch(e){ /* unauthenticated handled by FTApi */ }
+    }
+
+    function renderMessageNode(m){
+      const isMe = String(m.userId) === String(meId);
+      const wrap = document.createElement('div');
+      wrap.className = isMe ? 'flex justify-end px-2' : 'flex items-start gap-2 px-2';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble p-3 rounded-lg text-sm';
+      bubble.textContent = m.body;
+
+      const ts = document.createElement('div');
+      ts.className = 'text-xs text-gray-400 mt-1';
+      const t = new Date(m.sentAt || m.createdAt || Date.now());
+      ts.textContent = t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      if (isMe){
+        bubble.classList.add('bg-indigo-600','text-white','rounded-br-none');
+        const container = document.createElement('div');
+        container.appendChild(bubble);
+        container.appendChild(ts);
+        wrap.appendChild(container);
+      } else {
+        const avatar = document.createElement('div'); avatar.className='w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600'; avatar.innerHTML='<span class="material-symbols-outlined text-sm">person</span>';
+        wrap.appendChild(avatar);
+        bubble.classList.add('bg-gray-100','text-gray-800','rounded-tl-none');
+        const container = document.createElement('div');
+        container.appendChild(bubble);
+        container.appendChild(ts);
+        wrap.appendChild(container);
+      }
+      return wrap;
+    }
+
+    async function renderMessages(list){
+      messagesEl.innerHTML = '';
+      if (!Array.isArray(list)) return;
+      const ordered = list.slice().reverse(); // oldest first
+      ordered.forEach(m => messagesEl.appendChild(renderMessageNode(m)));
+      // scroll to bottom
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    // Timer handling
+    let sessionEnd = null;
+    function startTimer(endTime){
+      if (timerInterval) clearInterval(timerInterval);
+      sessionEnd = new Date(endTime).getTime();
+      function tick(){
+        const now = Date.now();
+        const rem = sessionEnd - now;
+        timerEl.textContent = fmtHMS(rem);
+        if (rem <= 0){ clearInterval(timerInterval); timerLabel.textContent = '세션 종료'; }
+      }
+      tick();
+      timerInterval = setInterval(tick, 1000);
+    }
+
+    // Load session, messages, goals
+    async function loadAll(){
+      try{
+        const [sRes, mRes] = await Promise.all([FTApi.getSession(sessionId), FTApi.getMessages(sessionId)]);
+        if (sRes && sRes.ok && sRes.body){
+          const s = sRes.body;
+          hostName.textContent = s.hostId || '—';
+          sessionStatus.textContent = s.status || '—';
+          sessionBadge.textContent = (s.durationMin ? s.durationMin + '분' : '--분');
+          // compute timer end using startsAt + duration
+          if (s.startsAt && s.durationMin){
+            const start = new Date(s.startsAt).getTime();
+            const end = start + (s.durationMin*60000);
+            startTimer(end);
+          }
+          if (s.goalText) goalText.textContent = '나의 목표: ' + s.goalText;
+        }
+        if (mRes && mRes.ok){ await renderMessages(mRes.body); }
+      }catch(e){ if (e.message === 'unauthenticated') return; console.error(e); }
+    }
+
+    // send message with join-on-403 fallback
+    async function sendMessage(text){
+      if (!text) return;
+      sendBtn.disabled = true;
+      try{
+        const r = await FTApi.postMessage(sessionId, text);
+        if (r && r.ok){ input.value=''; await loadAll(); }
+        else if (r && r.status === 403){
+          const j = await FTApi.joinSession(sessionId);
+          if (j && j.ok){ const r2 = await FTApi.postMessage(sessionId, text); if (r2 && r2.ok){ input.value=''; await loadAll(); } else alert('전송 실패'); }
+          else alert('세션 참가 실패');
+        } else {
+          alert('전송 실패');
+        }
+      }catch(e){ if (e.message === 'unauthenticated') return; console.error(e); alert('서버 오류'); }
+      finally{ sendBtn.disabled = false; }
+    }
+
+    // wire up events
+    document.getElementById('backBtn').addEventListener('click', ()=>{ if (history.length>1) history.back(); else window.location.href='/app/home.html'; });
+    document.getElementById('leaveBtn').addEventListener('click', ()=>{ if (confirm('세션을 종료하시겠습니까?')) { window.location.href='/app/complete.html'; } });
+
+    sendBtn.addEventListener('click', ()=> sendMessage(input.value.trim()));
+    input.addEventListener('input', ()=>{ document.getElementById('charCount').textContent = input.value.length + '자'; });
+    input.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(input.value.trim()); }
+    });
+    // join button (manual)
+    const joinBtnEl = document.getElementById('joinBtn');
+    if (joinBtnEl) joinBtnEl.addEventListener('click', async ()=>{ try{ const res = await FTApi.joinSession(sessionId); if (res && res.ok){ alert('세션에 참가했습니다'); await loadAll(); } else alert('참가 실패'); }catch(e){ console.error(e); alert('서버 오류'); } });
+
+    // initial fetch
+    (async ()=>{
+      await fetchMe();
+      await loadAll();
+      refreshInterval = setInterval(loadAll, 3000);
+    })();
+
+    // cleanup on page hide
+    window.addEventListener('beforeunload', ()=>{ if (timerInterval) clearInterval(timerInterval); if (refreshInterval) clearInterval(refreshInterval); });
+
+  })();
+  </script>
+</body>
+</html>

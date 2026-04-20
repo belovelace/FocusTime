@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <title>홈 대시보드 — FocusTime</title>
+</head>
+<body class="bg-background text-on-surface min-h-screen">
+  <header class="fixed top-0 w-full bg-white z-50">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-100"><img src="/app/assets/avatar-sample.jpg" alt="avatar" class="w-full h-full object-cover"></div>
+        <div>
+          <div class="text-sm text-gray-600">안녕하세요, 은지님 👋</div>
+          <div class="text-lg font-bold">FocusTime</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/app/profile.html" class="text-sm text-primary">프로필</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="pt-20 max-w-5xl mx-auto px-4 space-y-6">
+    <section class="bg-white rounded-xl p-6 shadow">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold">대시보드</h2>
+        <div class="text-sm text-gray-500">환영합니다</div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="p-4 bg-primary-container text-on-primary-container rounded-lg">
+          <div class="text-sm">이번 주 집중</div>
+          <div class="text-2xl font-bold mt-2">2시간 30분</div>
+        </div>
+        <div class="p-4 bg-surface-container-lowest rounded-lg">
+          <div class="text-sm text-gray-600">완료 세션</div>
+          <div class="text-2xl font-bold mt-2">128</div>
+        </div>
+        <div class="p-4 bg-surface-container-lowest rounded-lg">
+          <div class="text-sm text-gray-600">이번 주 목표</div>
+          <div class="text-2xl font-bold mt-2">5시간</div>
+        </div>
+      </div>
+    </section>
+    <section class="bg-white rounded-xl p-6 shadow">
+      <h2 class="text-lg font-bold mb-3">즐겨찾기 파트너</h2>
+      <div id="favoritesRow" class="flex gap-3 overflow-x-auto pb-2"></div>
+    </section>
+
+    <section class="bg-white rounded-xl p-6 shadow">
+      <h2 class="text-lg font-bold mb-3">예정된 세션</h2>
+      <div id="upcoming" class="space-y-3"></div>
+    </section>
+  </main>
+
+  <script src="/app/js/api.js"></script>
+  <script>
+    (async function(){
+      const favRow = document.getElementById('favoritesRow');
+      async function loadFavorites(){
+        try{
+          const res = await FTApi.getFavorites();
+          const list = res && res.ok ? (res.body || res) : [];
+          favRow.innerHTML = '';
+          if (!list.length) { favRow.innerHTML = '<div class="text-sm text-gray-500">즐겨찾기가 없습니다.</div>'; return; }
+          list.forEach(p=>{
+            const el = document.createElement('div');
+            el.className = 'w-36 p-3 bg-surface-container-lowest rounded-lg flex flex-col items-center gap-2';
+            el.innerHTML = `
+              <img src="${p.avatarUrl||'/app/assets/avatar-sample.jpg'}" class="w-12 h-12 rounded-full object-cover"/>
+              <div class="text-sm font-medium">${p.nickname||p.email}</div>
+              <button class="text-xs text-primary add-unfav" data-id="${p.id}">제거</button>
+            `;
+            favRow.appendChild(el);
+          });
+          document.querySelectorAll('.add-unfav').forEach(b=> b.addEventListener('click', async ()=>{
+            const id = b.getAttribute('data-id');
+            try{ const r = await FTApi.removeFavorite(id); if (r && r.ok){ loadFavorites(); } else alert('제거 실패'); }catch(e){ console.error(e); alert('서버 오류'); }
+          }));
+        }catch(e){ console.error(e); }
+      }
+      await loadFavorites();
+
+      // upcoming sessions implementation
+      const upcomingEl = document.getElementById('upcoming');
+      let upcomingSessions = [];
+      function renderUpcoming(){
+        if (!upcomingSessions || !upcomingSessions.length) { upcomingEl.innerHTML = '<div class="text-sm text-gray-500">예정된 세션이 없습니다.</div>'; return; }
+        upcomingEl.innerHTML = '';
+        upcomingSessions.forEach(s => {
+          const starts = new Date(s.startsAt);
+          const ends = new Date(starts.getTime() + (s.durationMin||25)*60000);
+          const now = new Date();
+          let status = '예정';
+          if (now >= starts && now < ends) status = '진행중';
+          else if (now >= ends) status = '완료';
+          const el = document.createElement('div');
+          el.className = 'p-4 bg-surface-container-lowest rounded-lg mb-3 flex items-center justify-between';
+          el.innerHTML = `
+            <div>
+              <div class="text-sm text-on-surface-variant">${new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }).format(starts)}</div>
+              <div class="text-base font-medium">${s.hostId === Number(FTApi.getToken()?FTApi.getToken():0) ? '나의 세션' : (s.partnerName || '파트너와의 세션')}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm text-on-surface-variant">${s.durationMin}분</div>
+              <div class="text-sm font-medium session-status" data-session-id="${s.id}">${status}</div>
+              <div class="text-xs text-on-surface-variant session-timer" data-session-id="${s.id}"></div>
+            </div>
+          `;
+          upcomingEl.appendChild(el);
+        });
+      }
+
+      async function loadUpcoming(){
+        try{
+          const res = await FTApi.request('/api/sessions?date=' + (new Date()).toISOString().slice(0,10));
+          if (res && res.ok && res.body && res.body.items){ upcomingSessions = res.body.items; renderUpcoming(); }
+          else { upcomingEl.innerHTML = '<div class="text-sm text-gray-500">예정된 세션을 불러오지 못했습니다.</div>'; }
+        }catch(e){ console.error(e); upcomingEl.innerHTML = '<div class="text-sm text-gray-500">서버 오류</div>'; }
+      }
+
+      // update timers for active sessions
+      function updateTimers(){
+        const now = new Date();
+        upcomingSessions.forEach(s=>{
+          const starts = new Date(s.startsAt);
+          const ends = new Date(starts.getTime() + (s.durationMin||25)*60000);
+          const statusEl = document.querySelector(`.session-status[data-session-id="${s.id}"]`);
+          const timerEl = document.querySelector(`.session-timer[data-session-id="${s.id}"]`);
+          if (!statusEl || !timerEl) return;
+          if (now < starts){ statusEl.textContent = '예정'; const delta = Math.max(0, Math.floor((starts - now)/1000)); timerEl.textContent = '시작까지 ' + formatDuration(delta); }
+          else if (now >= starts && now < ends){ statusEl.textContent = '진행중'; const delta = Math.max(0, Math.floor((ends - now)/1000)); timerEl.textContent = '남은 시간 ' + formatDuration(delta); }
+          else { statusEl.textContent = '완료'; timerEl.textContent = ''; }
+        });
+      }
+
+      function formatDuration(sec){ if (sec <= 0) return '0초'; const m = Math.floor(sec/60); const s = sec%60; return (m? m + '분 ':'') + s + '초'; }
+
+      // quick create session integration
+      const createBtn = document.querySelector('button:contains("세션 만들기")') || document.querySelector('button');
+      if (createBtn){
+        createBtn.addEventListener('click', async (e)=>{
+          e.preventDefault();
+          const durationSelect = document.getElementById('duration') || { value: '25' };
+          const modeSelect = document.getElementById('focusMode') || { value: 'any' };
+          const duration = Number(durationSelect.value);
+          const mode = modeSelect.value;
+          if (!FTApi.getToken()){
+            const next = `/app/home.html?create=1&duration=${encodeURIComponent(duration)}&mode=${encodeURIComponent(mode)}`;
+            window.location.href = `/app/login.html?next=${encodeURIComponent(next)}`;
+            return;
+          }
+          createBtn.disabled = true;
+          try{
+            const res = await FTApi.createSession({ startsAt: new Date().toISOString(), durationMin: duration, focusMode: mode });
+            if (res && res.ok && res.body && res.body.id){ const id = res.body.id; FTApi.setSessionId(String(id)); // prepend to upcoming
+              upcomingSessions.unshift(res.body); renderUpcoming(); updateTimers(); showCreateToast('세션이 생성되었습니다');
+              // navigate to session page
+              window.location.href = `/app/session.html?id=${encodeURIComponent(String(id))}`;
+            } else if (res && res.status === 401){ const next = `/app/home.html?create=1&duration=${encodeURIComponent(duration)}&mode=${encodeURIComponent(mode)}`; window.location.href = `/app/login.html?next=${encodeURIComponent(next)}`; }
+            else { alert('세션 생성 실패'); }
+          }catch(e){ console.error(e); alert('서버 오류'); }
+          finally{ createBtn.disabled = false; }
+        });
+      }
+
+      function showCreateToast(msg){ const t = document.getElementById('createToast') || (function(){ const el=document.createElement('div'); el.id='createToast'; el.style.position='fixed'; el.style.right='16px'; el.style.top='80px'; el.style.background='rgba(0,0,0,0.75)'; el.style.color='#fff'; el.style.padding='8px 12px'; el.style.borderRadius='6px'; el.style.zIndex='60'; document.body.appendChild(el); return el; })();
+        t.textContent = msg; t.style.display='block'; clearTimeout(t._hide); t._hide = setTimeout(()=> t.style.display='none',2500);
+      }
+
+      await loadUpcoming();
+      renderUpcoming();
+      updateTimers();
+      setInterval(updateTimers, 1000);
+
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#e1e3e4",
+                        "on-secondary-container": "#007326",
+                        "on-primary-fixed-variant": "#0736ba",
+                        "primary-container": "#3b5bdb",
+                        "on-primary": "#ffffff",
+                        "background": "#f8f9fa",
+                        "on-tertiary-fixed": "#001e31",
+                        "inverse-surface": "#2e3132",
+                        "tertiary": "#00547f",
+                        "on-surface": "#191c1d",
+                        "outline": "#747686",
+                        "on-tertiary-fixed-variant": "#004b72",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#d9dadb",
+                        "primary": "#1a40c2",
+                        "outline-variant": "#c4c5d6",
+                        "surface-bright": "#f8f9fa",
+                        "on-tertiary-container": "#d4e9ff",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#001355",
+                        "inverse-primary": "#b8c3ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f4f5",
+                        "on-secondary-fixed-variant": "#005319",
+                        "on-background": "#191c1d",
+                        "surface": "#f8f9fa",
+                        "on-surface-variant": "#444654",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-primary-container": "#e2e5ff",
+                        "secondary-fixed-dim": "#71dd7a",
+                        "primary-fixed": "#dde1ff",
+                        "secondary-fixed": "#8dfa94",
+                        "tertiary-container": "#006da4",
+                        "secondary-container": "#8af791",
+                        "tertiary-fixed-dim": "#91cdff",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#cce5ff",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed": "#002106",
+                        "surface-container": "#edeeef"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Pretendard", "Inter", "sans-serif"],
+                        "body": ["Pretendard", "Inter", "sans-serif"],
+                        "label": ["Pretendard", "Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface flex justify-center items-start min-h-screen">
+<!-- Mobile Container (390x844px context) -->
+<main class="w-[390px] h-[844px] bg-background relative flex flex-col overflow-hidden shadow-2xl">
+<!-- TopAppBar Shared Component -->
+<header class="flex justify-between items-center px-6 h-16 w-full bg-[#F8F9FA] dark:bg-slate-950 z-10">
+<div class="flex items-center gap-2">
+<h1 class="font-['Pretendard'] tracking-tight text-lg font-bold text-[#191c1d] dark:text-slate-100">집중 세션</h1>
+<span class="px-2 py-0.5 bg-primary-container/10 text-primary-container text-[11px] font-bold rounded-full">50분</span>
+</div>
+<button class="hover:bg-[#F1F3F5] dark:hover:bg-slate-800 transition-colors rounded-full p-2 scale-95 duration-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-500 text-xl" data-icon="close">close</span>
+</button>
+</header>
+<!-- Content Canvas -->
+<div class="flex-1 overflow-y-auto px-5 pt-2 pb-24 space-y-8">
+<!-- Partner Info Strip -->
+<section class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full overflow-hidden bg-surface-container-high">
+<img alt="Partner profile" class="w-full h-full object-cover" data-alt="Close-up portrait of a young professional person with a friendly expression in soft, natural studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATroY84qBeRQvOCl94rGZEjdS9Djy03iPe2TKAHFGa_2kCVJ-xroPJIEjhij5XW_zMxmG7MfK4He9743xzHsduPBd-9AXgjMW7clRdc2mDbe0hp7Ozgi5v49xrpnprA_SNQ2SPZXzu4TFzyFwuvc9GqotKc8Tl7Me32XQbydQHZ_W0hmjmAQ9i89WqQ5DvURhhursHpWvdNkxOlqAHV5am7Mbssk7oUPfC2U-MJFL_-Ajk4xnnGuuaeYVIA-KxFLsDN9yNzHx8EGY"/>
+</div>
+<span class="font-semibold text-sm">민수님과 함께</span>
+</div>
+<div class="px-3 py-1 bg-surface-container-low text-on-surface-variant text-[11px] font-medium rounded-full flex items-center gap-1">
+<span>조용한 모드</span>
+<span class="text-[10px]">🤫</span>
+</div>
+</section>
+<!-- YouTube Area -->
+<section class="space-y-3">
+<div class="aspect-video w-full rounded-xl bg-surface-container-lowest overflow-hidden relative flex flex-col items-center justify-center group cursor-pointer border border-outline-variant/10 shadow-sm">
+<img alt="Background music visuals" class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay" data-alt="Atmospheric moody interior of a dark music studio with glowing blue and purple ambient neon lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCe7fKXV_w78AJSsL718dXRdeDDm0MR5JNA3PDwwC1kXlTjzcErckpfNwjWNB7vcHXyLJCinPx8ndF3Sf2BCejR6AJwDVsyUYhLQLHjJjp_sDPV9mOWDyYZamMb_ops3Na173yPB93ejOOZLrlz2IuZU1QXrt_Hbs0n1ijCGy8bMimleHm8iiURaGD8rRlFaIgPquZTAh5ECX5Gro8dpci8Tr8YgQRhGEjaxjCRCt6X_X7jM3SSr_RPm7l-Meu2juhYCDZzkGJq7Ug"/>
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-12 h-12 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+</div>
+<p class="text-xs font-medium text-on-surface-variant">집중 음악 재생 중 🎵</p>
+</div>
+</div>
+<div class="flex justify-center">
+<button class="text-[12px] font-semibold text-slate-400 hover:text-primary transition-colors flex items-center gap-1 px-4 py-1.5 rounded-lg hover:bg-surface-container-low">
+                        영상 변경
+                        <span class="material-symbols-outlined text-[14px]" data-icon="swap_horiz">swap_horiz</span>
+</button>
+</div>
+</section>
+<!-- Center Focus Timer -->
+<section class="flex flex-col items-center py-6">
+<div class="relative">
+<!-- Subtle ambient glow background for timer -->
+<div class="absolute -inset-10 bg-primary-container/5 blur-3xl rounded-full"></div>
+<h2 class="relative text-[64px] font-black tracking-tighter text-[#3B5BDB] leading-none">38:24</h2>
+</div>
+<div class="mt-4 px-5 py-2 bg-surface-container-low rounded-full">
+<p class="text-[13px] text-slate-500 font-medium flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="target">target</span>
+                        나의 목표: <span class="text-on-surface font-semibold">논문 2장 작성</span>
+</p>
+</div>
+</section>
+<!-- Chat Area -->
+<section class="space-y-4">
+<div class="space-y-3">
+<div class="flex gap-3">
+<div class="w-6 h-6 rounded-full bg-surface-container-high flex-shrink-0">
+<img alt="Partner" class="w-full h-full object-cover rounded-full" data-alt="Small round headshot of a person" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpBVFBpHQ3jXy9aeUYdXKo807wYBayuOhxzGLHWSBeaGZ5G4GY1F-5dS7RoviD5OsLdOyYz3a4uNwRHa1di3xbpMdwkZxlh-iOQHw4vYawKvZPvU3miNvJ-uxSZlKf9XUM2ua_LIEwAsJ0w0FtWSGdzTWWGDI38LlRhj5j1nJnEgsGqF05FmXc3F30kNztGklOHnidRxZMrIOziq8ue1VNZQjeJwVLkCRbvwMH6J4hyLNhv2CplELHbo0oR3p-0QFuyJzsKmfJcUU"/>
+</div>
+<div class="bg-surface-container-lowest px-3 py-2 rounded-xl rounded-tl-none shadow-sm text-sm max-w-[80%]">
+<p class="text-on-surface">함께 힘내봐요! 거의 다 왔어요.</p>
+</div>
+</div>
+<div class="flex flex-row-reverse gap-3">
+<div class="bg-primary-container text-white px-3 py-2 rounded-xl rounded-tr-none shadow-sm text-sm max-w-[80%]">
+<p>네! 10분만 더 집중하고 쉴게요.</p>
+</div>
+</div>
+<div class="flex gap-3 items-end">
+<div class="w-6 h-6 rounded-full bg-surface-container-high flex-shrink-0">
+<img alt="Partner" class="w-full h-full object-cover rounded-full" data-alt="Small round headshot of a person" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYxsQ9i0O-1RcCtGEWE5p5peu-GoGAreUPu96ekit4DmUSRtqZw9fXNYiA2q5uNy-03RWppfjGs3-UGHV_i21oGubZ0BCKFgKS6kJAnBOPPoUPjArWh_MgxExxiRKFnVCLFSzqhZLbkdC0yurZH60cStGL0zr2SQk8KozL-sphEU6KWyjjTaOQZZt7ZslL2AUp_dVQ617r8lkVfwGoCoJA8aGJ6J8qBD0n09EYyS-YgcjFluYL2nPxz--Gcbx6DAFx_KSW5PxJFBE"/>
+</div>
+<div class="bg-surface-container-lowest px-3 py-2 rounded-xl rounded-tl-none shadow-sm text-sm max-w-[80%]">
+<p class="text-on-surface">🔥🔥🔥</p>
+</div>
+</div>
+</div>
+<!-- Input Bar -->
+<div class="bg-surface-container-low rounded-xl px-4 py-3 flex items-center gap-2">
+<input class="bg-transparent border-none focus:ring-0 text-sm flex-1 p-0 placeholder-slate-400" placeholder="메시지 입력..." type="text"/>
+<button class="text-primary-container">
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</div>
+</section>
+</div>
+<!-- Footer Action -->
+<footer class="absolute bottom-10 left-0 w-full flex justify-center pointer-events-none">
+<button class="pointer-events-auto flex items-center gap-1 px-4 py-2 text-error font-semibold text-[13px] hover:bg-error-container/10 transition-colors rounded-lg">
+<span class="material-symbols-outlined text-[18px]" data-icon="logout">logout</span>
+                세션 종료
+            </button>
+</footer>
+<!-- Bottom Navigation Shell Overlay (Invisible/Placeholder for System Consistency) -->
+<!-- Suppression: Hide navigation shell as this is a task-focused focus session screen -->
+</main>
+<script src="/app/js/api.js"></script>
+<script>
+  (function(){
+    const sessionId = FTApi.getSessionId();
+    if (!sessionId){ alert('No session selected.'); window.location.href = '/app/stitch_minimalist_indigo_ui_system_home/code.html'; }
+
+    async function loadAll(){
+      const [sRes, mRes, gRes] = await Promise.all([FTApi.getSession(sessionId), FTApi.getMessages(sessionId), FTApi.getGoals(sessionId)]);
+      // (naive) render message list into DOM - append to first chat container
+      const msgs = mRes.body || [];
+      // messages area: find a container to append
+      const chatArea = document.querySelector('section .space-y-3');
+      if (chatArea && msgs.length){
+        msgs.slice().reverse().forEach(m=>{
+          const div = document.createElement('div');
+          div.className = m.userId === Number(FTApi.getToken()?0:0)?'bg-primary-container text-white px-3 py-2 rounded-xl':'bg-surface-container-lowest px-3 py-2 rounded-xl';
+          div.textContent = m.body;
+          chatArea.appendChild(div);
+        });
+      }
+    }
+    loadAll();
+
+    // wire up send button
+    const input = document.querySelector('input[placeholder="메시지 입력..."]');
+    const sendBtn = document.querySelector('button:has(span[data-icon="send"])') || document.querySelector('button');
+    if (sendBtn && input){ sendBtn.addEventListener('click', async ()=>{ const txt = input.value.trim(); if(!txt) return; const r = await FTApi.postMessage(sessionId, txt); if(r.ok) { const el = document.createElement('div'); el.className='bg-primary-container text-white px-3 py-2 rounded-xl'; el.textContent = r.body.body; document.querySelector('section .space-y-3').appendChild(el); input.value=''; } else alert('전송 실패'); }); }
+
+    // wire up goal addition (naive: reuse message input if present)
+    // video submit: add a small prompt button
+    const videoButton = document.querySelector('button:contains("영상 변경")') || document.querySelector('button');
+    if (videoButton){ videoButton.addEventListener('click', async ()=>{ const url = prompt('Youtube 링크 입력'); if (!url) return; const vid = FTApi.extractYouTubeId(url); if (!vid){ alert('유효한 YouTube URL이 아닙니다'); return; } const res = await FTApi.postVideo(sessionId, url); if (res.ok) alert('저장됨'); else alert('저장 실패'); }); }
+
+  })();
+</script>
+</body></html>

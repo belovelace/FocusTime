@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#e2e5ff",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#f3f4f5",
+                        "secondary-container": "#8af791",
+                        "surface-variant": "#e1e3e4",
+                        "on-secondary": "#ffffff",
+                        "tertiary-container": "#006da4",
+                        "on-tertiary-fixed": "#001e31",
+                        "surface-tint": "#3052d2",
+                        "surface-bright": "#f8f9fa",
+                        "on-error-container": "#93000a",
+                        "surface": "#f8f9fa",
+                        "inverse-surface": "#2e3132",
+                        "background": "#f8f9fa",
+                        "surface-dim": "#d9dadb",
+                        "primary-container": "#3b5bdb",
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#007326",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#8dfa94",
+                        "outline": "#747686",
+                        "secondary-fixed-dim": "#71dd7a",
+                        "secondary": "#006e24",
+                        "primary": "#1a40c2",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#b8c3ff",
+                        "on-primary-fixed": "#001355",
+                        "tertiary-fixed-dim": "#91cdff",
+                        "inverse-on-surface": "#f0f1f2",
+                        "inverse-primary": "#b8c3ff",
+                        "on-secondary-fixed-variant": "#005319",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-background": "#191c1d",
+                        "on-tertiary-container": "#d4e9ff",
+                        "on-surface-variant": "#444654",
+                        "surface-container": "#edeeef",
+                        "tertiary": "#00547f",
+                        "outline-variant": "#c4c5d6",
+                        "surface-container-high": "#e7e8e9",
+                        "primary-fixed": "#dde1ff",
+                        "on-secondary-fixed": "#002106",
+                        "on-primary-fixed-variant": "#0736ba",
+                        "tertiary-fixed": "#cce5ff",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary-fixed-variant": "#004b72",
+                        "on-surface": "#191c1d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "pretendard": ["Pretendard", "sans-serif"],
+                        "headline": ["Pretendard", "sans-serif"],
+                        "body": ["Pretendard", "sans-serif"],
+                        "label": ["Pretendard", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar from Shared Components JSON -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 py-3 bg-[#F8F9FA] dark:bg-slate-950 no-border space-y-4 flat no shadows">
+<div class="flex items-center justify-center w-10 h-10 transition-all duration-100 ease-in-out active:scale-95 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-on-surface">arrow_back</span>
+</div>
+<h1 class="absolute left-1/2 -translate-x-1/2 font-pretendard tracking-tight font-bold text-on-surface text-lg">회원가입</h1>
+<div class="w-10 h-10"></div> <!-- Spacer for center alignment -->
+</header>
+<main class="flex-1 w-full max-w-md mx-auto px-6 pt-24 pb-12 flex flex-col items-center">
+<!-- Profile Avatar Placeholder -->
+<div class="relative mb-10 group">
+<div class="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden transition-all duration-100 ease-in-out group-active:scale-95">
+<img class="w-full h-full object-cover opacity-50 grayscale" data-alt="abstract minimalist profile placeholder with soft grey tones and clean studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAE2eF48psIOqUhnq6TVfeL08WEpJ4pdRhR4H15wKRQqW7A9azu4-Q9TA27-AUvIZwL5lQVvzB1WuNdKQk_Lbq3MR_wGY7Yfc8JHp9TSBO_Eobbp6q_ZI7zD25fHtrEsC7v4A_1NrANq2f0G2sMUso_SYUYnxktO0E_KfZhNjYJ2J1zKP1RbWK4J86BdWy6eblB8Z6-6OO8kkNRMW0_RrzdUyIZfSfl2rxlr8wWWE2xKMYGtMrSKDkt0zTCjwG0RElld9wfCupB7bw"/>
+</div>
+<div class="absolute bottom-0 right-0 w-7 h-7 bg-primary rounded-full border-2 border-surface flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-on-primary text-sm" style="font-variation-settings: 'FILL' 1;">add_a_photo</span>
+</div>
+</div>
+<!-- Form Fields -->
+<div class="w-full space-y-4">
+<div class="space-y-1.5">
+<label class="label-md font-bold text-xs uppercase tracking-widest text-on-surface-variant ml-1">이메일 주소</label>
+<input id="email" class="w-full h-[56px] px-4 rounded-xl bg-surface-container-high border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all duration-100 outline-none text-on-surface placeholder:text-outline" placeholder="example@focus.com" type="email"/>
+</div>
+<div class="space-y-1.5">
+<label class="label-md font-bold text-xs uppercase tracking-widest text-on-surface-variant ml-1">비밀번호 (8자 이상)</label>
+<div class="relative">
+<input class="w-full h-[56px] px-4 rounded-xl bg-surface-container-high border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all duration-100 outline-none text-on-surface placeholder:text-outline" placeholder="••••••••" type="password"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline cursor-pointer">visibility_off</span>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="label-md font-bold text-xs uppercase tracking-widest text-on-surface-variant ml-1">비밀번호 확인</label>
+<input class="w-full h-[56px] px-4 rounded-xl bg-surface-container-high border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all duration-100 outline-none text-on-surface placeholder:text-outline border-error/50" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="w-full h-[56px] mt-8 bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold rounded-xl shadow-lg shadow-primary/10 transition-all duration-100 active:scale-[0.98] flex items-center justify-center gap-2">
+            시작하기
+        </button>
+<!-- Divider -->
+<div class="w-full flex items-center gap-4 my-8">
+<div class="flex-1 h-[1px] bg-surface-variant"></div>
+<span class="text-xs font-bold tracking-widest text-outline uppercase">또는</span>
+<div class="flex-1 h-[1px] bg-surface-variant"></div>
+</div>
+<!-- Kakao Login -->
+<button class="w-full h-[56px] bg-[#FEE500] text-[#191919] font-bold rounded-xl transition-all duration-100 active:scale-[0.98] flex items-center justify-center relative overflow-hidden">
+<span class="material-symbols-outlined absolute left-5 text-xl" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+            카카오로 시작하기
+        </button>
+<!-- Bottom Link -->
+<div class="mt-auto pt-12 text-center">
+<p class="text-sm text-on-surface-variant">
+                이미 계정이 있으신가요? 
+                <a class="text-primary font-bold ml-1 hover:underline underline-offset-4 decoration-2 transition-all" href="#">로그인</a>
+</p>
+</div>
+</main>
+<!-- Background Decoration (Asymmetric Monolith Style) -->
+
+<script src="/app/js/api.js"></script>
+<script>
+  (function(){
+    const form = document.querySelector('main');
+    const emailInput = form.querySelector('input[type="email"]');
+    const passInputs = form.querySelectorAll('input[type="password"]');
+    const submit = document.querySelector('button');
+
+    submit.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      const password = passInputs[0].value;
+      const password2 = passInputs[1].value;
+      if (!email || !password || password.length < 8 || password !== password2){ alert('필드를 확인하세요'); return; }
+      const res = await FTApi.signup({ email, password, nickname: email.split('@')[0], timezone: 'Asia/Seoul' });
+      if (res.ok && res.body && res.body.accessToken){ FTApi.setToken(res.body.accessToken); window.location.href = '/app/stitch_minimalist_indigo_ui_system_home/code.html'; return; }
+      // If signup response didn't include token, try login
+      const login = await FTApi.login(email, password);
+      if (login.ok && login.body && login.body.accessToken){ FTApi.setToken(login.body.accessToken); window.location.href = '/app/stitch_minimalist_indigo_ui_system_home/code.html'; return; }
+      alert('가입 또는 로그인에 실패했습니다');
+    });
+  })();
+</script>
+<div class="fixed -bottom-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+<div class="fixed top-1/4 -right-12 w-48 h-48 bg-secondary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+</body></html>

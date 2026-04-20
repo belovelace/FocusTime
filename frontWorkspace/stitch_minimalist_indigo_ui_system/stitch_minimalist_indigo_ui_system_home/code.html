@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#f8f9fa",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#0736ba",
+                        "secondary": "#006e24",
+                        "on-secondary": "#ffffff",
+                        "surface-variant": "#e1e3e4",
+                        "on-secondary-fixed": "#002106",
+                        "primary-fixed-dim": "#b8c3ff",
+                        "on-background": "#191c1d",
+                        "surface-tint": "#3052d2",
+                        "secondary-fixed": "#8dfa94",
+                        "on-secondary-fixed-variant": "#005319",
+                        "surface": "#f8f9fa",
+                        "on-secondary-container": "#007326",
+                        "on-primary-fixed": "#001355",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#91cdff",
+                        "outline-variant": "#c4c5d6",
+                        "surface-container-high": "#e7e8e9",
+                        "on-primary": "#ffffff",
+                        "primary": "#1a40c2",
+                        "inverse-primary": "#b8c3ff",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#2e3132",
+                        "on-tertiary-fixed-variant": "#004b72",
+                        "surface-dim": "#d9dadb",
+                        "on-tertiary-fixed": "#001e31",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#f0f1f2",
+                        "outline": "#747686",
+                        "background": "#f8f9fa",
+                        "secondary-container": "#8af791",
+                        "on-tertiary-container": "#d4e9ff",
+                        "on-surface-variant": "#444654",
+                        "tertiary-container": "#006da4",
+                        "surface-container-low": "#f3f4f5",
+                        "secondary-fixed-dim": "#71dd7a",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#cce5ff",
+                        "surface-container": "#edeeef",
+                        "tertiary": "#00547f",
+                        "primary-container": "#3b5bdb",
+                        "on-primary-container": "#e2e5ff",
+                        "primary-fixed": "#dde1ff",
+                        "on-surface": "#191c1d",
+                        "surface-container-highest": "#e1e3e4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar { display: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-slate-950 flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high border-2 border-primary-fixed">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="Close-up portrait of a cheerful young woman with a warm smile, soft natural lighting in a modern interior" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD22PMScl9TpfdkwzZUXRnMigQrsBV2auCoiE5Xq1v3Y5vIc5ZnvYSjUKss0fSqzBDtqjfDporZXg5uTTG9Q426-KQFq2HobtfmPpGZxR7-sCoMvpv31-09bsYy31TbVOKNbfeL6ajJg7Iiw_HAa5WT_8LSuy6T6_h4wcLG3Lvi3IgL6FGSAXiuspdOIMb0kzN4tq1KZMdX4iT6sq9RE_imtQdpLBEpwnrse5JAnxGfpfEZ4yc8P178tYGbNZ_9mo6k1HnJGWjBeco"/>
+</div>
+<div class="flex flex-col">
+<span class="text-xs text-on-surface-variant font-medium">안녕하세요, 은지님 👋</span>
+<h1 class="text-xl font-bold text-[#191c1d] dark:text-slate-100 tracking-tight leading-[1.6]">FocusTime</h1>
+</div>
+</div>
+<div class="relative">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200">
+<span class="material-symbols-outlined text-slate-500" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+</div>
+</header>
+<main class="pt-24 px-6 space-y-8">
+<!-- Weekly Stats Card -->
+<section>
+<div class="bg-primary-container rounded-xl p-6 text-on-primary-container shadow-sm overflow-hidden relative">
+<div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
+<div class="relative z-10">
+<h2 class="text-sm font-semibold opacity-90 tracking-wide uppercase mb-4">이번 주 집중 시간</h2>
+<div class="flex justify-between items-end mb-4">
+<div class="text-3xl font-extrabold tracking-tighter">2시간 30분</div>
+<div class="text-sm font-medium opacity-80">목표 5시간</div>
+</div>
+<div class="h-3 w-full bg-primary/20 rounded-full overflow-hidden">
+<div class="h-full bg-secondary-fixed rounded-full" style="width: 50%"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Upcoming Sessions -->
+<section class="space-y-4">
+<div class="flex justify-between items-center">
+<h3 class="text-lg font-bold text-on-surface tracking-tight">예정된 세션</h3>
+<button class="text-sm font-semibold text-primary">모두 보기</button>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-5 shadow-sm space-y-4">
+<div class="flex justify-between items-start">
+<div class="px-3 py-1 bg-surface-container-low rounded-lg text-xs font-bold text-on-surface-variant">
+                        10월 24일
+                    </div>
+<div class="px-3 py-1 bg-secondary/10 rounded-lg text-xs font-bold text-secondary">
+                        25분
+                    </div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-high">
+<img alt="Partner" class="w-full h-full object-cover" data-alt="Professional headshot of a friendly young man with glasses, neutral studio lighting and clean background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaHRHbvlMIsE6LBazuyEjnQbEcPCGQOugpOShKXYSqioEQtrEdhpc5vNAF6Cuxx2b3Hy7rDqzsIqVr9-UAOGWD0yLgjmvN_nzm4yeXzhoVjnzfACNavp0ETiTjmnXFSzwyfR-6xcvE23vX_SGLV6Y8hWM3fpo405LPzIRvf1wjuIaMgrScvhz-4ASvboC1vbVp3nZKi2rvpVBLvEWoG5l_QfZtvU_l1fDXDRU6Bxs-KfhMe6qzr9VmDfbkHWZ80PSL-AZ-DvUWJNI"/>
+</div>
+<div class="flex-1">
+<div class="text-base font-bold text-on-surface">김철수</div>
+<div class="text-sm text-on-surface-variant">기말고사 공부</div>
+</div>
+<div class="bg-secondary-container/30 px-3 py-1 rounded-full text-[10px] font-bold text-on-secondary-container uppercase tracking-wider">
+                        매칭 완료
+                    </div>
+</div>
+</div>
+</section>
+<!-- Quick Booking -->
+<section class="space-y-6">
+<h3 class="text-lg font-bold text-on-surface tracking-tight">빠른 예약</h3>
+<!-- Duration Pills -->
+<div class="flex gap-3">
+<button class="flex-1 py-3 bg-primary-container text-on-primary-container rounded-full text-sm font-bold shadow-sm ring-1 ring-primary/20">
+                    25분
+                </button>
+<button class="flex-1 py-3 bg-transparent text-outline rounded-full text-sm font-bold ring-1 ring-outline-variant hover:bg-surface-container-low transition-colors">
+                    50분
+                </button>
+<button class="flex-1 py-3 bg-transparent text-outline rounded-full text-sm font-bold ring-1 ring-outline-variant hover:bg-surface-container-low transition-colors">
+                    75분
+                </button>
+</div>
+<!-- Date Picker Strip -->
+<div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+<div class="flex-shrink-0 w-16 py-4 rounded-2xl bg-primary text-white flex flex-col items-center justify-center gap-1 shadow-md shadow-primary/20">
+<span class="text-[10px] font-medium uppercase opacity-80">오늘</span>
+<span class="text-lg font-bold">24</span>
+</div>
+<div class="flex-shrink-0 w-16 py-4 rounded-2xl bg-surface-container-lowest text-on-surface-variant flex flex-col items-center justify-center gap-1">
+<span class="text-[10px] font-medium uppercase">금</span>
+<span class="text-lg font-bold">25</span>
+</div>
+<div class="flex-shrink-0 w-16 py-4 rounded-2xl bg-surface-container-lowest text-on-surface-variant flex flex-col items-center justify-center gap-1">
+<span class="text-[10px] font-medium uppercase">토</span>
+<span class="text-lg font-bold">26</span>
+</div>
+<div class="flex-shrink-0 w-16 py-4 rounded-2xl bg-surface-container-lowest text-on-surface-variant flex flex-col items-center justify-center gap-1">
+<span class="text-[10px] font-medium uppercase">일</span>
+<span class="text-lg font-bold">27</span>
+</div>
+<div class="flex-shrink-0 w-16 py-4 rounded-2xl bg-surface-container-lowest text-on-surface-variant flex flex-col items-center justify-center gap-1">
+<span class="text-[10px] font-medium uppercase">월</span>
+<span class="text-lg font-bold">28</span>
+</div>
+</div>
+<!-- CTA Button -->
+<button class="w-full py-5 bg-gradient-to-r from-primary to-primary-container text-white rounded-xl font-bold text-base shadow-lg shadow-primary/10 active:scale-95 transition-transform">
+                세션 만들기
+            </button>
+</section>
+</main>
+<!-- BottomNavBar -->
+
+<script src="/app/js/api.js"></script>
+<script>
+  (function(){
+    // quick create session: find the CTA button and wire up a simple handler
+    const btn = document.querySelector('button[aria-label="create-session"]') || document.querySelector('button:contains("세션 만들기")') || document.querySelector('button');
+    if (btn) btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      // Default new session starts now, duration 25
+      const startsAt = new Date().toISOString();
+      const res = await FTApi.createSession({ startsAt, durationMin: 25, focusMode: 'any' });
+      if (res.ok){ const id = res.body.id; FTApi.setSessionId(String(id)); window.location.href = '/app/stitch_minimalist_indigo_ui_system_session/code.html'; }
+      else alert('세션 생성 실패');
+    });
+  })();
+</script>
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-100/10 shadow-[0_-4px_32px_rgba(25,28,29,0.04)] flex justify-around items-center px-4 pb-6 pt-3 rounded-t-2xl">
+<div class="flex flex-col items-center justify-center bg-[#3B5BDB]/10 dark:bg-[#3B5BDB]/20 text-[#3B5BDB] dark:text-[#748ffc] rounded-xl px-4 py-2 transition-all duration-300 ease-out">
+<span class="material-symbols-outlined mb-1" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-['Pretendard'] text-[11px] font-medium tracking-wide uppercase">홈</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-4 py-2 hover:text-[#3B5BDB] transition-colors duration-200">
+<span class="material-symbols-outlined mb-1" data-icon="bar_chart">bar_chart</span>
+<span class="font-['Pretendard'] text-[11px] font-medium tracking-wide uppercase">탐색</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-4 py-2 hover:text-[#3B5BDB] transition-colors duration-200">
+<span class="material-symbols-outlined mb-1" data-icon="event_note">event_note</span>
+<span class="font-['Pretendard'] text-[11px] font-medium tracking-wide uppercase">이력</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-4 py-2 hover:text-[#3B5BDB] transition-colors duration-200">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-['Pretendard'] text-[11px] font-medium tracking-wide uppercase">프로필</span>
+</div>
+</nav>
+</body></html>

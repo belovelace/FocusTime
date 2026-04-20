@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <title>세션 완료 — FocusTime</title>
+</head>
+<body class="bg-background text-on-surface antialiased">
+  <main class="max-w-md mx-auto pt-20 px-4">
+    <div class="text-center mb-6">
+      <div class="w-20 h-20 mx-auto rounded-full bg-primary text-white flex items-center justify-center text-4xl">✓</div>
+      <h1 class="text-2xl font-bold mt-4">집중 완료! 🎉</h1>
+      <p class="text-on-surface-variant mt-2">50분 세션을 완료했습니다</p>
+    </div>
+
+    <div class="bg-surface rounded-xl p-4 mb-4">
+      <label class="block text-sm font-semibold mb-2">오늘의 성취를 적어보세요</label>
+      <textarea id="resultText" class="w-full h-24 p-3 rounded-lg bg-surface-container-high" placeholder="논문 2장 초안 완성!"></textarea>
+      <div class="text-right text-sm text-on-surface-variant mt-2">0 / 100</div>
+
+      <div class="mt-4">
+        <label class="block text-sm font-semibold mb-2">파트너는 어땠나요?</label>
+        <div class="flex gap-2 items-center" id="starRow" role="radiogroup" aria-label="파트너 평점">
+          <button class="star text-2xl leading-none px-2 py-1 rounded text-gray-400" data-value="1" aria-label="1점" role="radio">☆</button>
+          <button class="star text-2xl leading-none px-2 py-1 rounded text-gray-400" data-value="2" aria-label="2점" role="radio">☆</button>
+          <button class="star text-2xl leading-none px-2 py-1 rounded text-gray-400" data-value="3" aria-label="3점" role="radio">☆</button>
+          <button class="star text-2xl leading-none px-2 py-1 rounded text-gray-400" data-value="4" aria-label="4점" role="radio">☆</button>
+          <button class="star text-2xl leading-none px-2 py-1 rounded text-gray-400" data-value="5" aria-label="5점" role="radio">☆</button>
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <img id="favPartnerAvatar" src="/app/assets/avatar-sample.jpg" alt="partner" class="w-10 h-10 rounded-full"/>
+          <div>
+            <div id="favPartnerName" class="font-medium">김민준</div>
+            <div class="text-sm text-on-surface-variant">파트너</div>
+          </div>
+        </div>
+        <button id="favToggle" class="px-3 py-2 border rounded text-primary" data-partner-id="1">즐겨찾기 추가 ☆</button>
+      </div>
+    </div>
+
+    <div class="space-y-3">
+      <button id="nextBtn" class="w-full px-4 py-3 bg-primary text-white rounded-lg">다음 세션 바로 예약하기</button>
+      <button id="backBtn" class="w-full px-4 py-3 bg-surface-container-low rounded-lg">대시보드로 돌아가기</button>
+    </div>
+  </main>
+
+  <script src="/app/js/api.js"></script>
+  <script>
+    (function(){
+      // star rating interaction
+      const stars = Array.from(document.querySelectorAll('#starRow .star'));
+      let selectedRating = 0;
+      function updateStars(n){
+        stars.forEach(s=>{
+          const v = Number(s.getAttribute('data-value'));
+          s.classList.toggle('text-yellow-400', v <= n);
+          s.textContent = v <= n ? '★' : '☆';
+          s.setAttribute('aria-checked', String(v === n));
+        });
+      }
+      stars.forEach(s=> s.addEventListener('click', ()=>{ selectedRating = Number(s.getAttribute('data-value')); updateStars(selectedRating); }));
+
+      document.getElementById('nextBtn').addEventListener('click', async ()=>{
+        // submit result + rating if session present
+        const sessionId = FTApi.getSessionId();
+        const text = document.getElementById('resultText').value.trim();
+        const payload = { resultText: text, rating: selectedRating || null };
+        if (sessionId){ try{ const res = await FTApi.postGoal(sessionId, payload); if (res && res.ok){ FTApi.setSessionId(null); window.location.href = '/app/home.html'; return; } else { console.error(res); alert('저장 실패'); } }catch(e){ console.error(e); alert('서버 오류'); } }
+        else { window.location.href = '/app/home.html'; }
+      });
+
+      document.getElementById('backBtn').addEventListener('click', ()=>{ window.location.href = '/app/home.html'; });
+
+      // favorite toggle
+      const favBtn = document.getElementById('favToggle');
+      async function refreshFavUI(){
+        // naive: check /api/users/me/favorites and see if partnerId is included
+        try{
+          const list = await FTApi.getFavorites();
+          const partnerId = favBtn.getAttribute('data-partner-id');
+          const found = Array.isArray(list.body?list.body:list) && (list.body || list).some(p => String(p.id) === String(partnerId));
+          if (found){ favBtn.textContent = '즐겨찾기 제거 ★'; favBtn.dataset.favorited = '1'; }
+          else { favBtn.textContent = '즐겨찾기 추가 ☆'; favBtn.dataset.favorited = '0'; }
+        }catch(e){ console.error(e); }
+      }
+
+      if (favBtn){
+        favBtn.addEventListener('click', async ()=>{
+          const partnerId = favBtn.getAttribute('data-partner-id');
+          try{
+            if (favBtn.dataset.favorited === '1'){
+              const res = await FTApi.removeFavorite(partnerId);
+              if (res && res.ok){ favBtn.textContent = '즐겨찾기 추가 ☆'; favBtn.dataset.favorited = '0'; alert('즐겨찾기에서 제거되었습니다'); }
+              else alert('제거 실패');
+            } else {
+              const res = await FTApi.addFavorite(partnerId);
+              if (res && res.ok){ favBtn.textContent = '즐겨찾기 제거 ★'; favBtn.dataset.favorited = '1'; alert('즐겨찾기에 추가되었습니다'); }
+              else if (res && res.status === 409) alert('이미 즐겨찾기 되어 있습니다');
+              else alert('추가 실패');
+            }
+          }catch(e){ console.error(e); alert('서버 오류'); }
+        });
+        // init
+        refreshFavUI();
+      }
+
+    })();
+  </script>
+</body>
+</html>

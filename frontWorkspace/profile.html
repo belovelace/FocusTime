@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <title>프로필 — FocusTime</title>
+</head>
+<body class="bg-background text-on-surface antialiased">
+  <header class="fixed top-0 left-0 w-full bg-white/60 backdrop-blur-sm z-40">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button id="profileBack" aria-label="뒤로" class="p-2 rounded-lg"><span class="material-symbols-outlined">arrow_back</span></button>
+        <div class="font-bold">프로필</div>
+      </div>
+      <button id="edit" class="text-primary">편집</button>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto pt-20 px-4">
+    <div id="toast" aria-live="polite" style="position:fixed;left:50%;transform:translateX(-50%);top:18px;display:none;padding:8px 12px;border-radius:6px;background:rgba(0,0,0,0.75);color:#fff;z-index:60;font-size:14px;"></div>
+    <div id="profileArea" class="text-center mb-6">
+      <div class="relative inline-block">
+        <img id="avatar" src="/app/assets/avatar-sample.jpg" alt="avatar" class="w-24 h-24 rounded-full border-2 border-primary"/>
+        <button aria-label="프로필 사진 변경" id="avatarEdit" class="absolute -right-2 -bottom-2 bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center"> <span class="material-symbols-outlined">edit</span></button>
+      </div>
+      <h2 id="displayName" class="text-xl font-bold mt-3">—</h2>
+      <p id="displayBio" class="text-on-surface-variant">—</p>
+    </div>
+
+    <div id="statsRow" class="grid grid-cols-3 gap-3 mb-6">
+      <div class="bg-surface-container-lowest p-4 rounded-lg text-center">
+        <div id="statSessions" class="font-bold">0</div>
+        <div class="text-sm text-on-surface-variant">완료 세션</div>
+      </div>
+      <div class="bg-surface-container-lowest p-4 rounded-lg text-center">
+        <div id="statTime" class="font-bold">0시간</div>
+        <div class="text-sm text-on-surface-variant">총 집중</div>
+      </div>
+      <div class="bg-surface-container-lowest p-4 rounded-lg text-center">
+        <div id="statWeek" class="font-bold">0/0</div>
+        <div class="text-sm text-on-surface-variant">이번 주</div>
+      </div>
+    </div>
+
+    <section class="mb-6">
+      <h3 class="font-semibold mb-3">단골 파트너</h3>
+      <div id="partners" class="flex gap-3 overflow-auto">
+      </div>
+    </section>
+
+    <section>
+      <h3 class="font-semibold mb-3">설정</h3>
+      <div id="settingsList" class="space-y-2">
+        <button data-action="notifications" class="w-full text-left p-3 rounded bg-surface-container-lowest">알림 설정</button>
+        <button data-action="prefs" class="w-full text-left p-3 rounded bg-surface-container-lowest">매칭 선호도</button>
+        <button data-action="subscription" class="w-full text-left p-3 rounded bg-surface-container-lowest">구독 관리</button>
+        <button id="logout" class="w-full text-left p-3 rounded bg-surface-container-lowest text-danger">로그아웃</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app/js/api.js"></script>
+  <script>
+    (function(){
+      const params = new URLSearchParams(location.search);
+      let editing = params.get('edit') === '1';
+
+      const avatarEl = document.getElementById('avatar');
+      const nameEl = document.getElementById('displayName');
+      const bioEl = document.getElementById('displayBio');
+      const profileArea = document.getElementById('profileArea');
+      const editBtn = document.getElementById('edit');
+
+      async function fetchAndRender(){
+        try{
+          const res = await FTApi.request('/api/users/me');
+          if (res.ok && res.body){
+            const u = res.body;
+            avatarEl.src = u.avatarUrl || '/app/assets/avatar-sample.jpg';
+            nameEl.textContent = u.nickname || (u.email || '').split('@')[0];
+            bioEl.textContent = u.bio || '';
+            // stats placeholders
+            document.getElementById('statSessions').textContent = u.completedSessions || '0';
+            document.getElementById('statTime').textContent = u.totalFocused || '0시간';
+            document.getElementById('statWeek').textContent = u.weekProgress || '0/0';
+            if (editing) enterEditMode(u);
+          } else {
+            console.error('profile load failed', res);
+          }
+        }catch(e){ console.error(e); }
+      }
+
+      function enterEditMode(user){
+        editing = true;
+        editBtn.textContent = '저장';
+        profileArea.innerHTML = '';
+        const form = document.createElement('form');
+        form.className = 'space-y-3';
+        form.innerHTML = `
+          <div class="flex flex-col items-center gap-3">
+            <img id="editAvatarPreview" src="${user.avatarUrl||'/app/assets/avatar-sample.jpg'}" class="w-24 h-24 rounded-full border-2 border-primary"/>
+            <input id="avatarUrlInput" placeholder="아바타 이미지 URL" class="w-full p-2 rounded bg-surface-container-low" value="${user.avatarUrl||''}" />
+          </div>
+          <div>
+            <label class="block text-sm mb-1">닉네임</label>
+            <input id="nicknameInput" class="w-full p-2 rounded bg-surface-container-low" value="${(user.nickname||'').replace(/"/g,'')}">
+          </div>
+          <div>
+            <label class="block text-sm mb-1">한줄 소개</label>
+            <input id="bioInput" class="w-full p-2 rounded bg-surface-container-low" value="${(user.bio||'').replace(/"/g,'')}">
+          </div>
+          <div class="flex gap-2 justify-center">
+            <button id="saveProfile" type="button" class="px-4 py-2 bg-primary text-white rounded">저장</button>
+            <button id="cancelEdit" type="button" class="px-4 py-2 border rounded">취소</button>
+          </div>
+        `;
+        profileArea.appendChild(form);
+
+        document.getElementById('avatarUrlInput').addEventListener('input', (e)=>{ document.getElementById('editAvatarPreview').src = e.target.value || '/app/assets/avatar-sample.jpg'; });
+        document.getElementById('cancelEdit').addEventListener('click', ()=>{ editing=false; editBtn.textContent='편집'; fetchAndRender(); });
+        document.getElementById('saveProfile').addEventListener('click', async ()=>{
+          const btn = document.getElementById('saveProfile');
+          btn.disabled = true; btn.setAttribute('aria-busy','true');
+          const payload = {
+            nickname: document.getElementById('nicknameInput').value.trim(),
+            bio: document.getElementById('bioInput').value.trim(),
+            avatarUrl: document.getElementById('avatarUrlInput').value.trim() || null
+          };
+          function showToast(msg, ms = 2500){ const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(t._hideTimer); t._hideTimer = setTimeout(()=>{ t.style.display = 'none'; }, ms); }
+          try{
+            const r = await FTApi.request('/api/users/me', { method: 'PATCH', body: payload });
+            if (r.ok){ editing=false; editBtn.textContent='편집'; fetchAndRender(); showToast('저장되었습니다'); }
+            else { console.error(r); showToast('저장 실패'); }
+          }catch(e){ console.error(e); showToast('서버 오류'); }
+          finally{ btn.disabled = false; btn.removeAttribute('aria-busy'); }
+        });
+      }
+
+      editBtn.addEventListener('click', ()=>{
+        if (!editing) enterEditMode({});
+        else {
+          // if in edit mode, clicking '저장' is handled by the save button in form
+        }
+      });
+
+      // avatar edit button routes to profile edit (useful from signup)
+      const avatarEditBtn = document.getElementById('avatarEdit');
+      if (avatarEditBtn) avatarEditBtn.addEventListener('click', ()=>{ window.location.href = '/app/profile.html?edit=1'; });
+
+      // profile back button: prefer history.back(), then document.referrer, then dashboard
+      const profileBack = document.getElementById('profileBack');
+      if (profileBack) profileBack.addEventListener('click', ()=>{
+        if (history.length > 1) { history.back(); return; }
+        try{
+          if (document.referrer && new URL(document.referrer).origin === location.origin) { window.location.href = document.referrer; return; }
+        }catch(e){}
+        window.location.href = '/app/home_dashboard.html';
+      });
+
+      // logout
+      document.getElementById('logout').addEventListener('click', ()=>{ FTApi.setToken(null); window.location.href='/app/login.html'; });
+
+      fetchAndRender();
+    })();
+  </script>
+</body>
+</html>
