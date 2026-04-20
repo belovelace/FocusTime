@@ -27,6 +27,7 @@
         </div>
       </div>
       <div class="flex items-center gap-3">
+        <button id="cancelBtn" class="text-sm text-gray-600" style="display:none">세션 취소</button>
         <button id="leaveBtn" class="text-sm text-red-600">세션 종료</button>
       </div>
     </div>
@@ -37,25 +38,15 @@
       <!-- Left: Video + Timer (span 2 on desktop) -->
       <section class="md:col-span-2 space-y-6">
         <div class="w-full bg-black rounded-lg overflow-hidden aspect-video">
-          <!-- Local video player -->
-          <video id="localVideo" class="w-full h-full object-cover" controls playsinline preload="metadata" poster="/images/video/video-placeholder.png">해당 브라우저에서 비디오를 재생할 수 없습니다.</video>
-<!-- fallback poster if video missing -->
-<noscript><img src="/app/assets/video-placeholder.png" alt="video placeholder"/></noscript>
+          <video id="localVideo" class="w-full h-full object-cover" controls autoplay muted loop playsinline preload="auto">
+            <source src="/images/video/video_placeholde.mov" type="video/mp4">
+            <source src="/images/video/video_placeholde.mov" type="video/quicktime">
+          </video>
 <script>
-  // If the demo video resource is missing, show the placeholder poster
   (function(){
     const vid = document.getElementById('localVideo');
-    vid.addEventListener('error', ()=>{ try{ // fallback to frontWorkspace asset if project-level images path fails
-        vid.poster = '/images/video/video-placeholder.png';
-        // also try app asset path as a last resort
-        setTimeout(()=>{ try{ if (!vid.poster) vid.poster = '/app/assets/video-placeholder.png'; }catch(e){} }, 100);
-      }catch(e){} });
-    // allow tap-to-play fallback when autoplay is blocked
-    vid.addEventListener('click', async ()=>{
-      try{
-        if (vid.paused) await vid.play();
-      }catch(e){ console.error('play failed', e); }
-    });
+    vid.addEventListener('click', async ()=>{ try{ if (vid.paused) await vid.play(); }catch(e){} });
+    vid.play().catch(()=>{});
   })();
 </script>
         </div>
@@ -217,32 +208,103 @@
     // Load session, messages, goals
     async function loadAll(){
       try{
-        const [sRes, mRes] = await Promise.all([FTApi.getSession(sessionId), FTApi.getMessages(sessionId)]);
-        if (sRes && sRes.ok && sRes.body){
-          const s = sRes.body;
-          hostName.textContent = s.hostId || '—';
-          sessionStatus.textContent = s.status || '—';
-          sessionBadge.textContent = (s.durationMin ? s.durationMin + '분' : '--분');
-          // compute timer start/end using startsAt + duration
-          if (s.startsAt && s.durationMin){
-            const start = new Date(s.startsAt).getTime();
-            const end = start + (s.durationMin*60000);
-            // start timer with both start and end so pre-start countdown is shown
-            startTimer(start, end);
-          }
-          if (s.goalText) goalText.textContent = '나의 목표: ' + s.goalText;
+        // Avoid calling server if sessionId is non-numeric (server expects numeric IDs)
+        const isNumeric = /^\d+$/.test(String(sessionId));
+        if (!isNumeric) {
+          // show fallback UI so timer and cancel remain visible for local/demo sessions
+          try{
+            const timerElLocal = document.getElementById('timer');
+            const timerLabelLocal = document.getElementById('timerLabel');
+            if (timerElLocal) timerElLocal.textContent = '--:--:--';
+            if (timerLabelLocal) timerLabelLocal.textContent = '세션 정보 없음 (로컬)';
+            const cancelBtnLocal = document.getElementById('cancelBtn');
+            if (cancelBtnLocal){ cancelBtnLocal.style.display = 'inline-block'; cancelBtnLocal.disabled = true; cancelBtnLocal.title = '서버 미연동 데모 세션입니다'; }
+          }catch(e){}
+          return;
+        }
 
-          // reset chat sub greeting per session
-          const chatSubEl = document.getElementById('chatSub');
-          if (chatSubEl) {
-            chatSubEl.textContent = '안녕하세요! 이번 세션 함께 집중해볼까요?';
+        const [sRes, mRes] = await Promise.all([FTApi.getSession(sessionId), FTApi.getMessages(sessionId)]);
+        console.log('getSession', sRes);
+        console.log('getMessages', mRes);
+
+        if (sRes) {
+          if (sRes.ok && sRes.body) {
+            const s = sRes.body;
+            hostName.textContent = s.hostId || '—';
+            sessionStatus.textContent = s.status || '—';
+            sessionBadge.textContent = (s.durationMin ? s.durationMin + '분' : '--분');
+
+            // compute timer start/end using startsAt + duration
+            if (s.startsAt && s.durationMin){
+              let start = new Date(s.startsAt).getTime();
+              let end = start + (s.durationMin * 60000);
+              // if session already ended, treat as starting now
+              if (Date.now() > end) {
+                start = Date.now();
+                end = start + (s.durationMin * 60000);
+              }
+              startTimer(start, end);
+            }
+            if (s.goalText) goalText.textContent = '나의 목표: ' + s.goalText;
+
+            // show cancel button for host before cancel deadline
+            try{
+              const cancelBtn = document.getElementById('cancelBtn');
+              if (String(s.hostId) === String(meId)){
+                const starts = new Date(s.startsAt).getTime();
+                const cancelDeadline = starts - (15 * 60 * 1000);
+                if (Date.now() < cancelDeadline){
+                  cancelBtn.style.display = 'inline-block';
+                  cancelBtn.onclick = async function(){
+                    if (!confirm('정말 이 세션을 취소하시겠습니까?')) return;
+                    try{
+                      const res = await FTApi.request('/api/sessions/' + encodeURIComponent(sessionId), { method: 'DELETE' });
+                      if (res && res.ok){ alert('세션이 취소되었습니다.'); window.location.href = '/app/home_dashboard.html'; }
+                      else if (res && res.status === 400 && res.body && res.body.error === 'too_late_to_cancel') { alert(res.body.message || '세션은 시작 15분 전까지만 취소 가능합니다.'); }
+                      else if (res && res.status === 403) { alert('이 세션을 취소할 권한이 없습니다.'); }
+                      else { alert('취소에 실패했습니다.'); }
+                    }catch(err){ console.error(err); alert('서버 오류'); }
+                  };
+                } else {
+                  cancelBtn.style.display = 'none';
+                }
+              } else {
+                cancelBtn.style.display = 'none';
+              }
+            }catch(e){}
+
+            const chatSubEl = document.getElementById('chatSub');
+            if (chatSubEl) chatSubEl.textContent = '안녕하세요! 이번 세션 함께 집중해볼까요?';
+
+          } else {
+            console.warn('getSession failed', sRes && sRes.status, sRes && sRes.body);
+            hostName.textContent = '—';
+            sessionStatus.textContent = '불러오기 실패';
+            sessionBadge.textContent = '--분';
+            try{
+              // keep timer visible and show fallback label
+              const timerElLocal = document.getElementById('timer');
+              const timerLabelLocal = document.getElementById('timerLabel');
+              if (timerElLocal) timerElLocal.textContent = '--:--:--';
+              if (timerLabelLocal) timerLabelLocal.textContent = '정보 없음';
+              // show cancel button but disable it so user sees the control
+              const cancelBtnLocal = document.getElementById('cancelBtn');
+              if (cancelBtnLocal){ cancelBtnLocal.style.display = 'inline-block'; cancelBtnLocal.disabled = true; cancelBtnLocal.title = '세션 정보를 불러오지 못해 현재 취소할 수 없습니다.'; }
+            }catch(e){}
+            alert('세션 정보를 불러오지 못했습니다 (' + (sRes && sRes.status) + ')');
           }
         }
-        if (mRes && mRes.ok){
-          if (sessionChanged) { messagesEl.innerHTML = ''; sessionChanged = false; }
-          await renderMessages(mRes.body);
+
+        if (mRes) {
+          if (mRes.ok){
+            if (sessionChanged) { messagesEl.innerHTML = ''; sessionChanged = false; }
+            await renderMessages(mRes.body);
+          } else {
+            console.warn('getMessages failed', mRes && mRes.status, mRes && mRes.body);
+          }
         }
-      }catch(e){ if (e.message === 'unauthenticated') return; console.error(e); }
+
+      }catch(e){ if (e.message === 'unauthenticated') return; console.error(e); alert('서버 오류'); }
     }
 
     // send message with join-on-403 fallback
