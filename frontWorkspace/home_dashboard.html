@@ -881,14 +881,15 @@
       try {
         const s = sessionsFindById(id);
         if (!s) { showToast('세션 정보를 불러오지 못했습니다.'); return; }
-        if (s.partnerId) { showToast('이미 매칭되었습니다.'); return; }
-        const starts = new Date(s.startsAt).getTime();
-        const allowedFrom = starts - (15 * 60 * 1000);
-        const now = Date.now();
-        if (now < allowedFrom) {
-          alert('예약 시간과 불일치 합니다.');
+        const myId = String(document.getElementById('userAvatar')?.dataset.userId || '');
+        const isHost = myId && myId === String(s.hostId);
+        const isPartner = myId && myId === String(s.partnerId);
+        // host or partner: navigate directly without join API
+        if (isHost || isPartner) {
+          window.location.href = '/app/session.html?id=' + encodeURIComponent(id) + '&autoplay=1';
           return;
         }
+        if (s.partnerId) { showToast('이미 매칭되었습니다.'); return; }
         const res = await FTApi.joinSession(id);
         if (res && res.ok) {
           // Try to prime autoplay permission using Web Audio API (user gesture)
@@ -987,7 +988,7 @@
       if (!route) return;
       switch(route){
         case 'home': window.location.href = '/app/home_dashboard.html'; break;
-        case 'explore': window.location.href = '/app/home.html'; break; // placeholder
+        case 'explore': window.location.href = 'http://localhost:4000/app/sessions/browse.html'; break;
         case 'history': window.location.href = '/app/history.html'; break;
         case 'profile': window.location.href = '/app/profile.html'; break;
       }

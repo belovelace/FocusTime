@@ -77,13 +77,7 @@ router.post('/:id/join', auth, async (req, res) => {
     const id = parseInt(req.params.id,10);
     const session = await prisma.session.findUnique({ where: { id } });
     if (!session) return res.status(404).json({ error: 'not found' });
-    // allow join only within 15 minutes before start or later
-    const starts = new Date(session.startsAt).getTime();
-    const durationMs = (Number(session.durationMin || 25) * 60 * 1000);
-    const allowedFrom = starts - durationMs; // allow joining as early as one full session length before start
-    const ends = starts + durationMs;
-    const now = Date.now();
-    if (now < allowedFrom || now > ends) return res.status(400).json({ error: 'too_early_or_finished', message: '참가 가능한 시간이 아닙니다.' });
+    // no time restriction for joining
 
     // atomic update: only set partnerId if currently null
     const updateResult = await prisma.session.updateMany({ where: { id, partnerId: null }, data: { partnerId: req.userId, status: 'matched' } });
