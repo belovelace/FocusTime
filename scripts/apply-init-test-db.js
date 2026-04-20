@@ -1,5 +1,6 @@
 const fs = require('fs');
 const mysql = require('mysql2/promise');
+
 (async () => {
   try {
     const sql = fs.readFileSync('db/migrations/init.sql', 'utf8');
