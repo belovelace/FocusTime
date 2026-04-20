@@ -42,6 +42,7 @@ app.use('/api/users/me/favorites', favoritesRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/privacy', privacyRoutes);
+app.use('/api/matching', require('./routes/matching'));
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 

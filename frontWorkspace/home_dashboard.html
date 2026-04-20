@@ -83,167 +83,182 @@
   }
   ::-webkit-scrollbar { display: none; }
 
-  /* ── CTA Button ── */
+  /* Transitions */
   .btn-cta {
     background: linear-gradient(135deg, #1a40c2 0%, #3b5bdb 100%);
     transition: opacity 150ms ease-in-out, transform 100ms ease-in-out;
-    box-shadow: 0 4px 16px rgba(58,91,219,0.22);
   }
-  .btn-cta:hover { opacity: 0.93; }
-  .btn-cta:active { transform: scale(0.97); opacity: 0.88; }
+  .btn-cta:active { transform: scale(0.98); opacity: 0.92; }
 
-  /* ── Duration pills ── */
   .duration-pill {
-    transition: background 140ms ease-in-out, color 140ms ease-in-out, box-shadow 140ms ease-in-out;
-    border: 1.5px solid transparent;
+    transition: background 150ms ease-in-out, color 150ms ease-in-out, box-shadow 150ms ease-in-out;
   }
   .duration-pill.active {
     background: #3b5bdb;
     color: #e2e5ff;
-    box-shadow: 0 3px 14px rgba(58,90,219,0.22);
-    border-color: transparent;
+    box-shadow: 0 2px 12px rgba(58, 90, 219, 0.18);
   }
   .duration-pill:not(.active) {
-    background: #ffffff;
+    background: transparent;
     color: #747686;
-    border-color: rgba(196,197,214,0.6);
   }
-  .duration-pill:not(.active):hover { background: #f3f4f5; }
 
-  /* ── Focus mode pills ── */
-  .focus-mode-pill { transition: background 140ms ease, color 140ms ease, transform 100ms ease; }
-  .focus-mode-pill:active { transform: scale(0.96); }
-
-  /* ── Date chips ── */
-  .date-chip { transition: background 140ms ease-in-out, color 140ms ease-in-out, box-shadow 140ms ease; }
+  .date-chip {
+    transition: background 150ms ease-in-out, color 150ms ease-in-out;
+  }
   .date-chip.active {
     background: #1a40c2;
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(26,64,194,0.22);
   }
-  .date-chip:not(.active) { background: #ffffff; color: #444654; }
-  .date-chip:not(.active):hover { background: #f3f4f5; }
+  .date-chip:not(.active) {
+    background: #ffffff;
+    color: #444654;
+  }
 
-  /* ── Favorites ── */
-  .fav-card { transition: transform 150ms ease-in-out; cursor: pointer; }
-  .fav-card:active { transform: scale(0.94); }
+  .fav-card {
+    transition: transform 150ms ease-in-out;
+  }
+  .fav-card:active { transform: scale(0.96); }
 
-  /* ── Session cards ── */
-  .session-card { transition: box-shadow 160ms ease, transform 160ms ease; }
-  .session-card:hover { box-shadow: 0 6px 24px rgba(25,28,29,0.08) !important; transform: translateY(-1px); }
-
-  /* ── Nav ── */
+  /* nav active */
   .nav-item.active { color: #1a40c2; background: rgba(58,91,219,0.09); border-radius: 0.75rem; }
   .nav-item { transition: color 150ms ease-in-out, background 150ms ease-in-out; }
 
-  /* ── Input fields ── */
-  input[type="time"], input[type="text"] {
-    transition: background 120ms ease, box-shadow 120ms ease;
-    outline: none;
-  }
-  input[type="time"]:focus, input[type="text"]:focus {
-    background: #ffffff !important;
-    box-shadow: 0 0 0 2px rgba(26,64,194,0.18);
-  }
+  /* ghost border rule: accessibility-only, nearly invisible */
+  .ghost-border { border: 1px solid rgba(196, 197, 214, 0.15); }
 
-  /* ── Progress bar ── */
+  /* Progress bar animation */
   @keyframes progressIn {
     from { width: 0%; }
-    to { width: var(--progress-width, 50%); }
+    to { width: 50%; }
   }
-  .progress-bar { animation: progressIn 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both; }
+  .progress-bar { animation: progressIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both; }
 
-  /* ── Stagger fade-up ── */
+  /* Stagger fade-in */
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  .fade-up   { animation: fadeUp 0.42s cubic-bezier(.22,1,.36,1) both; }
-  .fade-up-1 { animation-delay: 0.04s; }
-  .fade-up-2 { animation-delay: 0.10s; }
-  .fade-up-3 { animation-delay: 0.17s; }
-  .fade-up-4 { animation-delay: 0.24s; }
-  .fade-up-5 { animation-delay: 0.31s; }
+  .fade-up { animation: fadeUp 0.4s ease both; }
+  .fade-up-1 { animation-delay: 0.05s; }
+  .fade-up-2 { animation-delay: 0.12s; }
+  .fade-up-3 { animation-delay: 0.20s; }
+  .fade-up-4 { animation-delay: 0.28s; }
+  .fade-up-5 { animation-delay: 0.36s; }
+
+  /* ── Stats card: white convex emboss ── */
+  @keyframes progressIn {
+    from { width: 0%; }
+    to   { width: 50%; }
+  }
+  .progress-bar { animation: progressIn 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.2s both; }
+
+  @keyframes convexShine {
+    0%        { opacity:0; transform: translateX(-160%) skewX(-22deg); }
+    20%, 42%  { opacity:1; }
+    58%       { opacity:0; transform: translateX(260%) skewX(-22deg); }
+    100%      { opacity:0; }
+  }
+
+  .stats-metal { position:absolute; inset:0; overflow:hidden; pointer-events:none; border-radius:inherit; }
+
+  /* convex dome: bright center fading to shadowed edges */
+  .metal-base {
+    position:absolute; inset:0;
+    background: radial-gradient(
+      ellipse 90% 70% at 40% 35%,
+      rgba(255,255,255,0.72) 0%,
+      rgba(255,255,255,0.38) 35%,
+      rgba(255,255,255,0.08) 65%,
+      rgba(200,210,230,0.0)  100%
+    );
+  }
+  /* top highlight band — light hitting the raised surface */
+  .metal-corner {
+    position:absolute; top:0; left:0; right:0; height:44%;
+    background: linear-gradient(
+      180deg,
+      rgba(255,255,255,0.55) 0%,
+      rgba(255,255,255,0.18) 50%,
+      transparent 100%
+    );
+    border-radius: inherit;
+  }
+  /* bottom shadow — concave shadow beneath the dome */
+  .metal-corner2 {
+    position:absolute; bottom:0; left:0; right:0; height:30%;
+    background: linear-gradient(
+      0deg,
+      rgba(180,192,210,0.32) 0%,
+      transparent 100%
+    );
+    border-radius: inherit;
+  }
+  /* side vignette — left/right edges darker = sphere curvature */
+  .metal-vignette {
+    position:absolute; inset:0;
+    background:
+      linear-gradient(90deg,  rgba(160,175,200,0.28) 0%, transparent 28%, transparent 72%, rgba(160,175,200,0.28) 100%),
+      linear-gradient(180deg, transparent 0%, rgba(180,192,215,0.10) 100%);
+  }
+  /* micro surface texture */
+  .metal-brush {
+    position:absolute; inset:0;
+    background: repeating-linear-gradient(
+      125deg,
+      transparent               0px,
+      transparent               3px,
+      rgba(255,255,255,0.018)   3px,
+      rgba(255,255,255,0.018)   3.5px
+    );
+  }
+  /* hover shine */
+  .metal-shine { display:none; }
+  .metal-shine-hover {
+    position:absolute; top:0; bottom:0; width:110px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.65) 50%, transparent);
+    opacity:0; pointer-events:none;
+  }
+  .metal-spark { display:none; }
+
+  #statsCard {
+    transition: box-shadow .22s ease, transform .18s ease;
+  }
+  #statsCard:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 12px 40px rgba(160,175,210,0.38),
+      inset 0 2px 0 rgba(255,255,255,0.90),
+      inset 0 -2px 0 rgba(180,195,220,0.45) !important;
+  }
+  #statsCard:hover .metal-shine-hover {
+    opacity:1;
+    animation: convexShine .5s ease-out forwards;
+  }
 
   /* ── Toast ── */
   #toast {
-    position: fixed; bottom: 96px; left: 50%;
-    transform: translateX(-50%) translateY(12px);
-    background: #191c1d; color: #f0f1f2;
-    padding: 10px 20px; border-radius: 9999px;
-    font-size: 13px; font-weight: 500;
+    position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #191c1d; color: #f0f1f2; padding: 10px 20px;
+    border-radius: 9999px; font-size: 13px; font-weight: 500;
     opacity: 0; transition: opacity 200ms ease, transform 200ms ease;
     pointer-events: none; white-space: nowrap; z-index: 200;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.18);
   }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* ── Section label ── */
   .section-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #747686;
+    font-size:10px; font-weight:700; letter-spacing:0.08em;
+    text-transform:uppercase; color:#747686;
   }
 
-  /* ── Divider ── */
-  .subtle-divider { height: 1px; background: rgba(196,197,214,0.18); }
+  /* ── Duration pill border fix ── */
+  .duration-pill { border: 1.5px solid transparent; }
+  .duration-pill:not(.active) { background:#ffffff; color:#747686; border-color:rgba(196,197,214,0.6); }
+  .duration-pill:not(.active):hover { background:#f3f4f5; }
 
-  /* ── ghost-border ── */
-  .ghost-border { border: 1px solid rgba(196,197,214,0.15); }
-
-  /* ── Stats card: aurora + bubbles ── */
-  @keyframes aurora1 {
-    0%,100% { transform: translate(0,0) scale(1); opacity:.28; }
-    33%      { transform: translate(18px,-12px) scale(1.12); opacity:.38; }
-    66%      { transform: translate(-10px,16px) scale(0.92); opacity:.22; }
-  }
-  @keyframes aurora2 {
-    0%,100% { transform: translate(0,0) scale(1); opacity:.20; }
-    40%      { transform: translate(-20px,10px) scale(1.18); opacity:.32; }
-    75%      { transform: translate(14px,-18px) scale(0.88); opacity:.16; }
-  }
-  @keyframes aurora3 {
-    0%,100% { transform: translate(0,0) scale(1); opacity:.14; }
-    50%      { transform: translate(22px,8px) scale(1.1); opacity:.24; }
-  }
-  @keyframes bubbleRise {
-    0%   { transform: translateY(0) scale(1); opacity:.55; }
-    80%  { opacity:.30; }
-    100% { transform: translateY(-110px) scale(.7); opacity:0; }
-  }
-  .stats-aurora { position:absolute; inset:0; overflow:hidden; pointer-events:none; border-radius:inherit; }
-  .aurora-blob {
-    position:absolute; border-radius:50%; filter:blur(32px);
-    will-change: transform;
-  }
-  .aurora-blob-1 {
-    width:160px; height:100px; background:rgba(139,250,148,0.30);
-    top:-20px; right:-20px;
-    animation: aurora1 7s ease-in-out infinite;
-  }
-  .aurora-blob-2 {
-    width:130px; height:130px; background:rgba(184,195,255,0.22);
-    bottom:-30px; left:-10px;
-    animation: aurora2 9s ease-in-out infinite;
-  }
-  .aurora-blob-3 {
-    width:100px; height:80px; background:rgba(91,150,255,0.18);
-    top:30%; right:20%;
-    animation: aurora3 11s ease-in-out infinite;
-  }
-  .bubble {
-    position:absolute; border-radius:50%;
-    background:rgba(255,255,255,0.18);
-    will-change:transform,opacity;
-    animation: bubbleRise linear infinite;
-  }
-
-  /* ── iOS-style drum-roll picker ── */
-  .drum-col {
-    height:180px; overflow:hidden; position:relative; flex:1;
-  }
+  /* ── iOS drum-roll picker ── */
+  .drum-col { height:180px; overflow:hidden; position:relative; flex:1; }
   .drum-col::before, .drum-col::after {
     content:''; position:absolute; left:0; right:0; z-index:2; pointer-events:none;
   }
@@ -265,8 +280,7 @@
   .drum-item {
     height:36px; display:flex; align-items:center; justify-content:center;
     font-size:16px; font-weight:500; color:#747686;
-    transition: color .15s, font-size .15s, font-weight .15s;
-    width:100%;
+    transition:color .15s, font-size .15s, font-weight .15s; width:100%;
   }
   .drum-item.selected { color:#191c1d; font-size:18px; font-weight:700; }
   .drum-selector-line {
@@ -279,26 +293,23 @@
 <body class="bg-background text-on-surface min-h-screen pb-28">
 
 <!-- ───────────────── HEADER ───────────────── -->
-<header id="topHeader" class="fixed top-0 w-full z-50 flex justify-between items-center px-5 py-3"
-        style="background:rgba(248,249,250,0.90);backdrop-filter:blur(18px);border-bottom:0.5px solid rgba(196,197,214,0.20)">
+<header id="topHeader" class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-md flex justify-between items-center px-5 py-3">
   <div class="flex items-center gap-3">
     <a id="profileLink" href="/app/profile.html" aria-label="프로필 페이지로 이동">
-      <div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container"
-           style="box-shadow:0 0 0 2.5px #fff,0 0 0 4px rgba(59,91,219,0.20)">
+      <div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container ring-2 ring-primary-fixed/60">
         <img id="userAvatar" data-user-id="" alt="내 프로필" class="w-full h-full object-cover"
              src="https://lh3.googleusercontent.com/aida-public/AB6AXuD22PMScl9TpfdkwzZUXRnMigQrsBV2auCoiE5Xq1v3Y5vIc5ZnvYSjUKss0fSqzBDtqjfDporZXg5uTTG9Q426-KQFq2HobtfmPpGZxR7-sCoMvpv31-09bsYy31TbVOKNbfeL6ajJg7Iiw_HAa5WT_8LSuy6T6_h4wcLG3Lvi3IgL6FGSAXiuspdOIMb0kzN4tq1KZMdX4iT6sq9RE_imtQdpLBEpwnrse5JAnxGfpfEZ4yc8P178tYGbNZ_9mo6k1HnJGWjBeco"/>
       </div>
     </a>
     <div id="greeting" class="flex flex-col leading-tight">
       <span class="text-[11px] text-on-surface-variant font-medium tracking-wide">안녕하세요, <span id="userName">은지</span>님 👋</span>
-      <span class="text-[17px] font-extrabold text-on-surface tracking-tight">FocusTime</span>
+      <span class="text-[17px] font-bold text-on-surface tracking-tight">FocusTime</span>
     </div>
   </div>
   <div class="relative">
     <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors" aria-label="알림">
       <span class="material-symbols-outlined text-on-surface-variant text-[22px]">notifications</span>
-      <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full"
-            style="box-shadow:0 0 0 2px #f8f9fa"></span>
+      <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
     </button>
   </div>
 </header>
@@ -308,52 +319,57 @@
 
   <!-- Weekly Stats -->
   <section id="weeklyStats" class="fade-up fade-up-1">
-    <div class="rounded-2xl p-6 text-on-primary-container overflow-hidden relative"
-         style="background:linear-gradient(135deg,#1a40c2 0%,#3b5bdb 100%);box-shadow:0 6px 32px rgba(26,64,194,0.22)">
+    <div id="statsCard" class="rounded-2xl p-6 overflow-hidden relative cursor-default"
+         style="background:linear-gradient(160deg,#f0f4ff 0%,#e8edf8 30%,#dde4f2 60%,#e4eaf6 80%,#eef1fa 100%);box-shadow:0 8px 36px rgba(160,175,220,0.30),inset 0 2px 0 rgba(255,255,255,0.92),inset 0 -2px 0 rgba(180,195,225,0.40),inset 2px 0 0 rgba(255,255,255,0.60),inset -2px 0 0 rgba(180,195,225,0.30)">
 
-      <!-- Aurora + bubble layer -->
-      <div class="stats-aurora">
-        <div class="aurora-blob aurora-blob-1"></div>
-        <div class="aurora-blob aurora-blob-2"></div>
-        <div class="aurora-blob aurora-blob-3"></div>
-        <div class="bubble" style="width:6px;height:6px;left:15%;bottom:10%;animation-duration:4.2s;animation-delay:0s"></div>
-        <div class="bubble" style="width:4px;height:4px;left:28%;bottom:5%;animation-duration:5.8s;animation-delay:1.1s"></div>
-        <div class="bubble" style="width:8px;height:8px;left:42%;bottom:8%;animation-duration:3.9s;animation-delay:0.4s"></div>
-        <div class="bubble" style="width:5px;height:5px;left:58%;bottom:12%;animation-duration:6.3s;animation-delay:2.0s"></div>
-        <div class="bubble" style="width:7px;height:7px;left:70%;bottom:6%;animation-duration:4.7s;animation-delay:0.7s"></div>
-        <div class="bubble" style="width:4px;height:4px;left:82%;bottom:15%;animation-duration:5.1s;animation-delay:1.5s"></div>
-        <div class="bubble" style="width:6px;height:6px;left:90%;bottom:4%;animation-duration:3.6s;animation-delay:0.9s"></div>
-        <div class="bubble" style="width:3px;height:3px;left:50%;bottom:20%;animation-duration:7.0s;animation-delay:3.2s"></div>
+      <!-- Metallic layers -->
+      <div class="stats-metal">
+        <div class="metal-base"></div>
+        <div class="metal-brush"></div>
+        <div class="metal-corner"></div>
+        <div class="metal-corner2"></div>
+        <div class="metal-shine"></div>
+        <div class="metal-shine-hover"></div>
+        <!-- sparkle dots scattered across card -->
+        <div class="metal-spark" style="top:18%;left:22%"></div>
+        <div class="metal-spark" style="top:55%;left:48%"></div>
+        <div class="metal-spark" style="top:30%;left:72%"></div>
+        <div class="metal-spark" style="top:72%;left:85%"></div>
+        <div class="metal-spark" style="top:12%;left:60%"></div>
+        <div class="metal-vignette"></div>
       </div>
 
       <div class="relative z-10">
-        <p class="text-[10px] font-bold uppercase tracking-[0.10em] opacity-70 mb-3">이번 주 집중 시간</p>
-        <div class="flex justify-between items-end mb-4">
-          <div class="text-[34px] font-extrabold tracking-tighter leading-none"
-               data-key="focusedWeek" aria-live="polite">2시간 30분</div>
-          <div class="text-[12px] font-semibold mb-0.5"
-               data-key="weekGoal" style="color:#ffffff;opacity:1">목표 5시간</div>
+        <p class="text-[10px] font-semibold uppercase tracking-[0.10em] mb-3"
+           style="color:rgba(60,75,120,0.55)">이번 주 집중 시간</p>
+        <div class="flex justify-between items-end mb-5">
+          <div class="text-[32px] font-extrabold tracking-tighter leading-none"
+               data-key="focusedWeek" aria-live="polite"
+               style="color:#1a2a5e;text-shadow:0 1px 0 rgba(255,255,255,0.8)">2시간 30분</div>
+          <div class="text-xs font-semibold mb-1"
+               data-key="weekGoal" style="color:rgba(60,75,120,0.60)">목표 5시간</div>
         </div>
-        <!-- Progress bar -->
-        <div class="h-[6px] w-full rounded-full overflow-hidden mb-1" style="background:rgba(255,255,255,0.16)">
-          <div class="progress-bar h-full rounded-full" style="width:50%;background:#8dfa94;box-shadow:0 0 4px #8dfa94,0 0 12px #8dfa94,0 0 28px rgba(141,250,148,0.9),0 0 56px rgba(141,250,148,0.6),0 0 80px rgba(141,250,148,0.25)"></div>
+        <!-- Progress -->
+        <div class="h-2 w-full rounded-full overflow-hidden"
+             style="background:rgba(160,175,220,0.22);box-shadow:inset 0 1px 3px rgba(140,155,200,0.30)">
+          <div class="progress-bar h-full rounded-full"
+               style="width:50%;background:linear-gradient(90deg,#6ee89e,#8dfa94);box-shadow:0 0 4px #8dfa94,0 0 12px #8dfa94,0 0 28px rgba(141,250,148,0.9),0 0 56px rgba(141,250,148,0.6),0 0 80px rgba(141,250,148,0.25)"></div>
         </div>
-        <p class="text-[10px] opacity-50 mb-5">50% 달성</p>
-        <!-- Mini stats -->
-        <div class="flex gap-5 pt-4" style="border-top:1px solid rgba(255,255,255,0.12)">
+        <!-- Mini stats row -->
+        <div class="flex gap-4 mt-4 pt-4" style="border-top:1px solid rgba(160,175,220,0.25)">
           <div data-key="completedSessions">
-            <p class="text-[9px] uppercase tracking-widest opacity-55 mb-1">완료 세션</p>
-            <p class="text-[15px] font-bold">5회</p>
+            <p class="text-[10px] uppercase tracking-wider mb-0.5" style="color:rgba(60,75,120,0.50)">완료 세션</p>
+            <p class="text-base font-bold" style="color:#1a2a5e">5회</p>
           </div>
-          <div style="width:1px;background:rgba(255,255,255,0.12)"></div>
+          <div style="width:1px;background:rgba(160,175,220,0.25)"></div>
           <div>
-            <p class="text-[9px] uppercase tracking-widest opacity-55 mb-1">연속 일수</p>
-            <p class="text-[15px] font-bold">3일 🔥</p>
+            <p class="text-[10px] uppercase tracking-wider mb-0.5" style="color:rgba(60,75,120,0.50)">연속 일수</p>
+            <p class="text-base font-bold" style="color:#1a2a5e">3일 🔥</p>
           </div>
-          <div style="width:1px;background:rgba(255,255,255,0.12)"></div>
+          <div style="width:1px;background:rgba(160,175,220,0.25)"></div>
           <div>
-            <p class="text-[9px] uppercase tracking-widest opacity-55 mb-1">달성률</p>
-            <p class="text-[15px] font-bold">50%</p>
+            <p class="text-[10px] uppercase tracking-wider mb-0.5" style="color:rgba(60,75,120,0.50)">달성률</p>
+            <p class="text-base font-bold" style="color:#1a2a5e">50%</p>
           </div>
         </div>
       </div>
@@ -363,8 +379,8 @@
   <!-- Favorites Row -->
   <section class="fade-up fade-up-2">
     <div class="flex justify-between items-center mb-3">
-      <h3 class="text-[14px] font-bold text-on-surface tracking-tight">즐겨찾기</h3>
-      <button class="text-[12px] font-semibold text-primary px-2 py-1 rounded-lg hover:bg-surface-container-low transition-colors">편집</button>
+      <h3 class="text-[15px] font-bold text-on-surface tracking-tight">즐겨찾기</h3>
+      <button class="text-[13px] font-semibold text-primary">편집</button>
     </div>
     <div id="favoritesRow" role="list" class="flex gap-3 overflow-x-auto pb-1">
       <!-- fav cards populated by JS -->
@@ -374,29 +390,28 @@
   <!-- Upcoming Sessions -->
   <section id="upcoming" class="fade-up fade-up-3 space-y-3">
     <div class="flex justify-between items-center">
-      <h3 class="text-[14px] font-bold text-on-surface tracking-tight">예정된 세션</h3>
-      <button class="text-[12px] font-semibold text-primary px-2 py-1 rounded-lg hover:bg-surface-container-low transition-colors">모두 보기</button>
+      <h3 class="text-[15px] font-bold text-on-surface tracking-tight">예정된 세션</h3>
+      <button class="text-[13px] font-semibold text-primary">모두 보기</button>
     </div>
 
-    <!-- Session card container (populated by JS) -->
+    <!-- Session card container (populated) -->
     <div role="list">
       <div class="session-card bg-surface-container-lowest rounded-2xl p-5 space-y-3" data-session-id="s-001" role="listitem"
-           style="box-shadow:0 2px 20px rgba(25,28,29,0.05)">
+           style="box-shadow: 0 2px 16px rgba(25,28,29,0.04)">
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[14px] text-on-surface-variant">calendar_today</span>
+            <span class="material-symbols-outlined text-[15px] text-on-surface-variant">calendar_today</span>
             <span class="session-start text-[12px] font-semibold text-on-surface-variant">10월 24일 오후 3:00</span>
           </div>
-          <div class="flex items-center gap-1.5">
-            <span class="session-duration px-2.5 py-0.5 rounded-full text-[10px] font-bold"
-                  style="background:rgba(0,110,36,0.10);color:#006e24">25분</span>
-            <span class="session-status px-2.5 py-0.5 rounded-full text-[10px] font-bold"
-                  style="background:rgba(58,91,219,0.10);color:#1a40c2">예정</span>
+          <div class="flex items-center gap-2">
+            <span class="session-duration px-2.5 py-0.5 rounded-full text-[11px] font-bold"
+                  style="background:rgba(0,110,36,0.10); color:#006e24">25분</span>
+            <span class="session-status px-2.5 py-0.5 rounded-full text-[11px] font-bold"
+                  style="background:rgba(58,91,219,0.10); color:#1a40c2">예정</span>
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-full overflow-hidden bg-surface-container-high flex-shrink-0"
-               style="box-shadow:0 0 0 2px #fff,0 0 0 3.5px rgba(59,91,219,0.12)">
+          <div class="w-11 h-11 rounded-full overflow-hidden bg-surface-container-high flex-shrink-0">
             <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaHRHbvlMIsE6LBazuyEjnQbEcPCGQOugpOShKXYSqioEQtrEdhpc5vNAF6Cuxx2b3Hy7rDqzsIqVr9-UAOGWD0yLgjmvN_nzm4yeXzhoVjnzfACNavp0ETiTjmnXFSzwyfR-6xcvE23vX_SGLV6Y8hWM3fpo405LPzIRvf1wjuIaMgrScvhz-4ASvboC1vbVp3nZKi2rvpVBLvEWoG5l_QfZtvU_l1fDXDRU6Bxs-KfhMe6qzr9VmDfbkHWZ80PSL-AZ-DvUWJNI"
                  class="w-full h-full object-cover" alt="파트너"/>
           </div>
@@ -446,7 +461,7 @@
       </div>
     </div>
 
-    <!-- Date strip — 가운데 정렬 -->
+    <!-- Date strip (가운데 정렬) -->
     <div>
       <p class="section-label mb-2">날짜</p>
       <div class="flex justify-center gap-3 overflow-x-auto pb-1" id="dateStrip" aria-label="날짜 선택"></div>
@@ -461,21 +476,17 @@
         <div class="rounded-xl overflow-hidden relative" style="background:#edeeef">
           <div class="drum-selector-line"></div>
           <div class="flex px-1 py-1">
-            <!-- Hour column -->
             <div class="drum-col" id="drumHour">
               <ul class="drum-list" id="drumHourList"></ul>
             </div>
-            <!-- separator -->
             <div class="flex items-center justify-center w-5 z-10 relative">
               <span class="text-[17px] font-bold text-on-surface" style="line-height:1">:</span>
             </div>
-            <!-- Minute column -->
             <div class="drum-col" id="drumMinute">
               <ul class="drum-list" id="drumMinuteList"></ul>
             </div>
           </div>
         </div>
-        <!-- hidden real input kept for JS compatibility -->
         <input type="time" id="startTimeInput" step="900" class="sr-only" aria-hidden="true"/>
       </div>
 
@@ -483,9 +494,9 @@
       <div>
         <p class="section-label mb-2">나의 목표</p>
         <textarea id="sessionGoalInput"
-               class="w-full p-3 rounded-xl text-[13px] leading-relaxed"
-               style="background:#edeeef;border:none;color:#191c1d;height:180px;resize:none;outline:none;font-family:inherit"
-               placeholder="예: 논문 2장&#10;초안 작성" maxlength="100"></textarea>
+                  class="w-full p-3 rounded-xl text-[13px] leading-relaxed"
+                  style="background:#edeeef;border:none;color:#191c1d;height:180px;resize:none;outline:none;font-family:inherit"
+                  placeholder="예: 논문 2장&#10;초안 작성" maxlength="100"></textarea>
       </div>
 
     </div>
@@ -502,7 +513,7 @@
 <!-- ───────────────── BOTTOM NAV ───────────────── -->
 <nav id="bottomNav" role="navigation" aria-label="주요 탐색"
      class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-3 pb-6 pt-2.5 rounded-t-2xl"
-     style="background:rgba(255,255,255,0.88);backdrop-filter:blur(20px);border-top:0.5px solid rgba(196,197,214,0.22);box-shadow:0 -4px 24px rgba(25,28,29,0.05)">
+     style="background: rgba(248,249,250,0.88); backdrop-filter: blur(20px); border-top: 0.5px solid rgba(196,197,214,0.25)">
   <a href="#" data-route="home" aria-label="홈"
      class="nav-item active flex flex-col items-center px-4 py-1.5">
     <span class="material-symbols-outlined text-[22px]" style="font-variation-settings:'FILL' 1">home</span>
@@ -531,135 +542,59 @@
 <!-- ───────────────── SCRIPTS ───────────────── -->
 <script src="/app/js/api.js"></script>
 
-<!-- iOS drum-roll picker init -->
+<!-- iOS drum-roll picker -->
 <script>
-(function() {
-  const ITEM_H = 36;
-  const PADDING = 2; // top/bottom padding items (blank)
-
-  function buildDrum(listEl, items, initialIndex) {
-    listEl.innerHTML = '';
-    // pad blank items top & bottom so selected sits in center
-    for (let i = 0; i < PADDING; i++) {
-      const li = document.createElement('li');
-      li.className = 'drum-item';
-      li.style.height = ITEM_H + 'px';
-      listEl.appendChild(li);
-    }
-    items.forEach((v, i) => {
-      const li = document.createElement('li');
-      li.className = 'drum-item' + (i === initialIndex ? ' selected' : '');
-      li.textContent = v;
-      li.style.height = ITEM_H + 'px';
-      listEl.appendChild(li);
-    });
-    for (let i = 0; i < PADDING; i++) {
-      const li = document.createElement('li');
-      li.className = 'drum-item';
-      li.style.height = ITEM_H + 'px';
-      listEl.appendChild(li);
-    }
-    setIndex(listEl, initialIndex, false);
+(function(){
+  const ITEM_H = 36, PAD = 2;
+  function buildDrum(listEl, items, initIdx){
+    listEl.innerHTML='';
+    for(let i=0;i<PAD;i++){const li=document.createElement('li');li.className='drum-item';li.style.height=ITEM_H+'px';listEl.appendChild(li);}
+    items.forEach((v,i)=>{const li=document.createElement('li');li.className='drum-item'+(i===initIdx?' selected':'');li.textContent=v;li.style.height=ITEM_H+'px';listEl.appendChild(li);});
+    for(let i=0;i<PAD;i++){const li=document.createElement('li');li.className='drum-item';li.style.height=ITEM_H+'px';listEl.appendChild(li);}
+    setIdx(listEl,initIdx,false);
   }
-
-  function setIndex(listEl, idx, animate) {
-    const offset = -(idx * ITEM_H);
-    if (!animate) listEl.classList.add('grabbing');
-    listEl.style.transform = 'translateY(' + offset + 'px)';
-    if (!animate) requestAnimationFrame(() => listEl.classList.remove('grabbing'));
-
-    // highlight selected
-    const allItems = listEl.querySelectorAll('.drum-item');
-    allItems.forEach((li, i) => {
-      const realI = i - PADDING;
-      li.classList.toggle('selected', realI === idx);
-    });
+  function setIdx(listEl,idx,anim){
+    if(!anim) listEl.classList.add('grabbing');
+    listEl.style.transform='translateY('+(-(idx*ITEM_H))+'px)';
+    if(!anim) requestAnimationFrame(()=>listEl.classList.remove('grabbing'));
+    listEl.querySelectorAll('.drum-item').forEach((li,i)=>li.classList.toggle('selected',i-PAD===idx));
   }
-
-  function getIndex(listEl) {
-    const t = listEl.style.transform;
-    const m = t.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
-    if (!m) return 0;
-    return Math.round(-parseFloat(m[1]) / ITEM_H);
+  function getIdx(listEl){const m=(listEl.style.transform||'').match(/translateY\((-?[\d.]+)px\)/);return m?Math.round(-parseFloat(m[1])/ITEM_H):0;}
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function draggable(listEl,count,onChange){
+    let sY=0,sOff=0,drag=false;
+    function start(y){drag=true;sY=y;sOff=getIdx(listEl)*ITEM_H;listEl.classList.add('grabbing');}
+    function move(y){if(!drag)return;setIdx(listEl,clamp(Math.round((sOff+(sY-y))/ITEM_H),0,count-1),false);}
+    function end(){if(!drag)return;drag=false;listEl.classList.remove('grabbing');const i=clamp(getIdx(listEl),0,count-1);setIdx(listEl,i,true);onChange(i);}
+    listEl.addEventListener('mousedown',e=>start(e.clientY));
+    window.addEventListener('mousemove',e=>{if(drag)move(e.clientY);});
+    window.addEventListener('mouseup',end);
+    listEl.addEventListener('touchstart',e=>{e.preventDefault();start(e.touches[0].clientY);},{passive:false});
+    listEl.addEventListener('touchmove',e=>{e.preventDefault();move(e.touches[0].clientY);},{passive:false});
+    listEl.addEventListener('touchend',end);
+    listEl.parentElement.addEventListener('wheel',e=>{e.preventDefault();const i=clamp(getIdx(listEl)+(e.deltaY>0?1:-1),0,count-1);setIdx(listEl,i,true);onChange(i);},{passive:false});
   }
-
-  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
-
-  function makeDraggable(listEl, count, onChange) {
-    let startY = 0, startOffset = 0, isDragging = false;
-
-    function onStart(y) {
-      isDragging = true;
-      startY = y;
-      startOffset = getIndex(listEl) * ITEM_H;
-      listEl.classList.add('grabbing');
-    }
-    function onMove(y) {
-      if (!isDragging) return;
-      const delta = startY - y;
-      const raw = Math.round((startOffset + delta) / ITEM_H);
-      const idx = clamp(raw, 0, count - 1);
-      setIndex(listEl, idx, false);
-    }
-    function onEnd() {
-      if (!isDragging) return;
-      isDragging = false;
-      listEl.classList.remove('grabbing');
-      const idx = getIndex(listEl);
-      const clamped = clamp(idx, 0, count - 1);
-      setIndex(listEl, clamped, true);
-      onChange(clamped);
-    }
-
-    listEl.addEventListener('mousedown',  e => onStart(e.clientY));
-    window.addEventListener('mousemove',  e => { if (isDragging) onMove(e.clientY); });
-    window.addEventListener('mouseup',    () => onEnd());
-
-    listEl.addEventListener('touchstart', e => { e.preventDefault(); onStart(e.touches[0].clientY); }, { passive:false });
-    listEl.addEventListener('touchmove',  e => { e.preventDefault(); onMove(e.touches[0].clientY); }, { passive:false });
-    listEl.addEventListener('touchend',   () => onEnd());
-
-    // scroll wheel
-    listEl.parentElement.addEventListener('wheel', e => {
-      e.preventDefault();
-      const idx = clamp(getIndex(listEl) + (e.deltaY > 0 ? 1 : -1), 0, count - 1);
-      setIndex(listEl, idx, true);
-      onChange(idx);
-    }, { passive: false });
+  function sync(){
+    const hi=getIdx(document.getElementById('drumHourList'));
+    const mi=getIdx(document.getElementById('drumMinuteList'));
+    const el=document.getElementById('startTimeInput');
+    if(el) el.value=String(hi).padStart(2,'0')+':'+(['00','15','30','45'][mi]||'00');
   }
-
-  function syncToTimeInput() {
-    const hi = getIndex(document.getElementById('drumHourList'));
-    const mi = getIndex(document.getElementById('drumMinuteList'));
-    const h = String(hi).padStart(2, '0');
-    const m = ['00','15','30','45'][mi] || '00';
-    const el = document.getElementById('startTimeInput');
-    if (el) el.value = h + ':' + m;
-  }
-
-  // Build hours 0–23
-  const hours = Array.from({length:24}, (_, i) => String(i).padStart(2,'0') + '시');
-  const mins  = ['00분', '15분', '30분', '45분'];
-
-  // Default: nearest future 15-min
-  const now = new Date();
-  let defH = now.getHours();
-  let defM = Math.ceil(now.getMinutes() / 15);
-  if (defM >= 4) { defM = 0; defH = (defH + 1) % 24; }
-
-  buildDrum(document.getElementById('drumHourList'), hours, defH);
-  buildDrum(document.getElementById('drumMinuteList'), mins, defM);
-  syncToTimeInput();
-
-  makeDraggable(document.getElementById('drumHourList'), hours.length, () => syncToTimeInput());
-  makeDraggable(document.getElementById('drumMinuteList'), mins.length, () => syncToTimeInput());
-
-  // expose helper for the main script's roundToQuarter override
-  window._drumSetTime = function(h, m) {
-    const mi = ['00','15','30','45'].indexOf(String(m).padStart(2,'0'));
-    setIndex(document.getElementById('drumHourList'), clamp(h, 0, 23), true);
-    setIndex(document.getElementById('drumMinuteList'), clamp(mi < 0 ? 0 : mi, 0, 3), true);
-    syncToTimeInput();
+  const hours=Array.from({length:24},(_,i)=>String(i).padStart(2,'0')+'시');
+  const mins=['00분','15분','30분','45분'];
+  const now=new Date();
+  let dH=now.getHours(), dM=Math.ceil(now.getMinutes()/15);
+  if(dM>=4){dM=0;dH=(dH+1)%24;}
+  buildDrum(document.getElementById('drumHourList'),hours,dH);
+  buildDrum(document.getElementById('drumMinuteList'),mins,dM);
+  sync();
+  draggable(document.getElementById('drumHourList'),hours.length,sync);
+  draggable(document.getElementById('drumMinuteList'),mins.length,sync);
+  window._drumSetTime=function(h,m){
+    const mi=['00','15','30','45'].indexOf(String(m).padStart(2,'0'));
+    setIdx(document.getElementById('drumHourList'),clamp(h,0,23),true);
+    setIdx(document.getElementById('drumMinuteList'),clamp(mi<0?0:mi,0,3),true);
+    sync();
   };
 })();
 </script>
@@ -679,9 +614,9 @@
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     const btn = document.createElement('button');
-    btn.className = 'date-chip flex-shrink-0 w-[60px] py-3.5 rounded-2xl flex flex-col items-center gap-1 transition-all duration-150' + (i === 0 ? ' active' : '');
+    btn.className = 'date-chip flex-shrink-0 w-14 py-3 rounded-2xl flex flex-col items-center gap-0.5 transition-all duration-150' + (i === 0 ? ' active' : '');
     btn.dataset.date = d.toISOString();
-    btn.innerHTML = `<span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;opacity:.7">${i === 0 ? '오늘' : days[d.getDay()]}</span><span style="font-size:20px;font-weight:800;line-height:1.1">${d.getDate()}</span>`;
+    btn.innerHTML = `<span style="font-size:10px;font-weight:500;text-transform:uppercase;opacity:.7">${i === 0 ? '오늘' : days[d.getDay()]}</span><span style="font-size:18px;font-weight:700">${d.getDate()}</span>`;
     btn.addEventListener('click', () => {
       document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active'));
       btn.classList.add('active');
@@ -820,11 +755,10 @@
         el.setAttribute('role','listitem');
         el.innerHTML = `
           <div class="relative">
-            <div class="w-14 h-14 rounded-full overflow-hidden bg-surface-container-high flex items-center justify-center"
-                 style="box-shadow:0 0 0 2px #fff,0 0 0 3.5px rgba(59,91,219,0.14)">
+            <div class="w-14 h-14 rounded-full overflow-hidden bg-surface-container-high flex items-center justify-center">
               <img src="${p.avatarUrl||''}" class="w-full h-full object-cover fav-avatar" alt="${p.nickname||p.email}"/>
             </div>
-            <button class="fav-remove absolute -top-0.5 -right-0.5 w-5 h-5 bg-white rounded-full flex items-center justify-center text-[10px] font-bold transition-colors hover:bg-error hover:text-white" data-id="${p.id}" aria-label="즐겨찾기 제거" style="color:#ba1a1a;box-shadow:0 1px 6px rgba(0,0,0,0.12)">✕</button>
+            <button class="fav-remove absolute -top-1 -right-1 bg-white text-danger border rounded-full p-1" data-id="${p.id}" aria-label="즐겨찾기 제거">✕</button>
           </div>
           <span class="fav-name text-[11px] font-medium text-on-surface-variant">${p.nickname||p.email}</span>
         `;
@@ -911,29 +845,28 @@
       card.innerHTML = `
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[14px] text-on-surface-variant">calendar_today</span>
+            <span class="material-symbols-outlined text-[15px] text-on-surface-variant">calendar_today</span>
             <span class="session-start text-[12px] font-semibold text-on-surface-variant">${new Intl.DateTimeFormat('ko-KR',{dateStyle:'medium',timeStyle:'short'}).format(starts)}</span>
           </div>
-          <div class="flex items-center gap-1.5">
-            <span class="session-duration px-2.5 py-0.5 rounded-full text-[10px] font-bold" style="background:rgba(0,110,36,0.10); color:#006e24">${s.durationMin}분</span>
-            <span class="session-status px-2.5 py-0.5 rounded-full text-[10px] font-bold" style="background:rgba(58,91,219,0.10); color:#1a40c2">예정</span>
+          <div class="flex items-center gap-2">
+            <span class="session-duration px-2.5 py-0.5 rounded-full text-[11px] font-bold" style="background:rgba(0,110,36,0.10); color:#006e24">${s.durationMin}분</span>
+            <span class="session-status px-2.5 py-0.5 rounded-full text-[11px] font-bold" style="background:rgba(58,91,219,0.10); color:#1a40c2">예정</span>
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-full overflow-hidden bg-surface-container-high flex-shrink-0"
-               style="box-shadow:0 0 0 2px #fff,0 0 0 3.5px rgba(59,91,219,0.12)">
+          <div class="w-11 h-11 rounded-full overflow-hidden bg-surface-container-high flex-shrink-0">
             <img src="${s.partnerAvatar||''}" class="w-full h-full object-cover partner-avatar" alt="파트너"/>
           </div>
           <div class="flex-1 min-w-0">
             <p class="partner-name text-[14px] font-bold text-on-surface">${s.partnerName||s.nickname||'파트너'}</p>
-            <p class="text-[12px] text-on-surface-variant truncate">${s.notes||s.goalText||''}</p>
+            <p class="text-[12px] text-on-surface-variant truncate">${s.notes||''}</p>
           </div>
-          <div class="flex flex-col items-end gap-1.5">
-            <div class="flex items-center gap-1.5">
+          <div class="flex flex-col items-end">
+            <div class="flex items-center gap-2">
               <button class="btn-cta join-session text-white text-[12px] font-bold px-4 py-2 rounded-xl" data-id="${s.id}">${s.partnerId ? '매칭 완료' : (String(document.getElementById('userAvatar')?.dataset.userId||'') === String(s.hostId) ? '세션 보기' : '참가')}</button>
-              ${ (new Date(s.startsAt).getTime() > Date.now() && String(document.getElementById('userAvatar')?.dataset.userId||'') === String(s.hostId)) ? '<button class="cancel-session text-[11px] font-semibold px-3 py-1.5 rounded-xl transition-colors hover:bg-surface-container" style="color:#ba1a1a">취소</button>' : '' }
+              ${ (new Date(s.startsAt).getTime() > Date.now() && String(document.getElementById('userAvatar')?.dataset.userId||'') === String(s.hostId)) ? '<button class="cancel-session text-sm px-3 py-1 rounded border border-transparent text-danger bg-white">취소</button>' : '' }
             </div>
-            <div class="text-[11px] text-on-surface-variant session-timer" data-session-id="${s.id}"></div>
+            <div class="text-xs text-on-surface-variant mt-2 session-timer" data-session-id="${s.id}"></div>
           </div>
         </div>
       `;
@@ -950,8 +883,7 @@
         if (!s) { showToast('세션 정보를 불러오지 못했습니다.'); return; }
         if (s.partnerId) { showToast('이미 매칭되었습니다.'); return; }
         const starts = new Date(s.startsAt).getTime();
-        const durationMs = (Number(s.durationMin || 25) * 60 * 1000);
-                                const allowedFrom = starts - durationMs; // allow joining as early as one full session length before start
+        const allowedFrom = starts - (15 * 60 * 1000);
         const now = Date.now();
         if (now < allowedFrom) {
           alert('예약 시간과 불일치 합니다.');
@@ -1006,7 +938,7 @@
           renderSessionCards(_renderedSessions);
           showToast('세션이 취소되었습니다.');
         } else if (res && res.status === 400 && res.body && res.body.error === 'too_late_to_cancel') {
-          alert(res.body.message || '세션은 시작 15분 전까지만 취소 가능합니다.');
+          alert(res.body.message || '세션은 시작 10분 전까지만 취소 가능합니다.');
         } else if (res && res.status === 403) {
           alert('이 세션을 취소할 권한이 없습니다.');
         } else {
