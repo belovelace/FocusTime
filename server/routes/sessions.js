@@ -40,7 +40,11 @@ router.get('/', auth, async (req, res) => {
     }
 
     const take = 20; const skip = (page-1)*take;
-    const items = await prisma.session.findMany({ where, skip, take, orderBy });
+    const userSelect = { select: { id: true, nickname: true, avatarUrl: true } };
+    const items = await prisma.session.findMany({
+      where, skip, take, orderBy,
+      include: { host: userSelect, partner: userSelect }
+    });
     const total = await prisma.session.count({ where });
     res.json({ total, items });
   } catch (err) { console.error(err); res.status(500).json({ error: 'server error' }); }
