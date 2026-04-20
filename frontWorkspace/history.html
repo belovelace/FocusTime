@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <title>세션 이력 — FocusTime</title>
+</head>
+<body class="bg-background text-on-surface min-h-screen">
+  <header class="fixed top-0 w-full bg-white z-40">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button id="backBtn" aria-label="뒤로" class="p-2 rounded-lg">◀</button>
+        <div class="font-bold">세션 이력</div>
+      </div>
+      <div></div>
+    </div>
+  </header>
+
+  <main class="pt-20 max-w-5xl mx-auto px-4 space-y-6">
+    <section class="bg-white rounded-xl p-6 shadow">
+      <h2 class="text-lg font-bold mb-3">지난 세션</h2>
+      <div id="historyList" class="space-y-3">로딩 중...</div>
+    </section>
+  </main>
+
+  <script src="/app/js/api.js"></script>
+  <script>
+  (async function(){
+    document.getElementById('backBtn').addEventListener('click', ()=>{ if (history.length>1) history.back(); else window.location.href='/app/home_dashboard.html'; });
+    const listEl = document.getElementById('historyList');
+    try{
+      if (!FTApi) { listEl.textContent = 'API 없음'; return; }
+      // request server for past sessions explicitly
+      const res = await FTApi.request('/api/sessions?past=1');
+      if (!res || !res.ok || !res.body) { listEl.textContent = '불러오기 실패'; return; }
+      const past = (res.body.items || []).sort((a,b)=> new Date(b.startsAt) - new Date(a.startsAt));
+      if (!past.length) { listEl.textContent = '지난 세션이 없습니다.'; return; }
+      listEl.innerHTML = '';
+
+      // get current user id to find my goal entries
+      let meId = null;
+      try{ const meRes = await FTApi.request('/api/users/me'); if (meRes && meRes.ok && meRes.body) meId = String(meRes.body.id); }catch(e){}
+
+      for (const s of past){
+        const el = document.createElement('div');
+        el.className = 'p-3 bg-surface-container-lowest rounded-lg';
+        const starts = new Date(s.startsAt);
+        // fetch goals and pick my goal
+        let myGoalText = '';
+        try{
+          const gRes = await FTApi.getGoals(s.id);
+          if (gRes && gRes.ok && Array.isArray(gRes.body)){
+            const g = gRes.body.find(x => String(x.userId) === String(meId));
+            if (g) myGoalText = g.goalText || g.resultText || '';
+          }
+        }catch(e){}
+
+        el.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="font-bold">${s.durationMin}분</div>
+              <div class="text-sm text-on-surface-variant">${new Intl.DateTimeFormat('ko-KR',{dateStyle:'medium', timeStyle:'short'}).format(starts)}</div>
+              ${ myGoalText ? `<div class="text-sm text-on-surface-variant mt-2">나의 목표: ${myGoalText.replace(/</g,'&lt;')}</div>` : '' }
+            </div>
+            <div class="text-sm text-on-surface-variant">상태: ${s.status}</div>
+          </div>
+        `;
+        listEl.appendChild(el);
+      }
+
+    }catch(e){ console.error(e); listEl.textContent = '서버 오류'; }
+  })();
+  </script>
+</body>
+</html>

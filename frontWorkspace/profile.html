@@ -23,24 +23,25 @@
     <div id="toast" aria-live="polite" style="position:fixed;left:50%;transform:translateX(-50%);top:18px;display:none;padding:8px 12px;border-radius:6px;background:rgba(0,0,0,0.75);color:#fff;z-index:60;font-size:14px;"></div>
     <div id="profileArea" class="text-center mb-6">
       <div class="relative inline-block">
-        <img id="avatar" src="/app/assets/avatar-sample.jpg" alt="avatar" class="w-24 h-24 rounded-full border-2 border-primary"/>
+        <img id="avatar" src="/app/assets/avatar-sample.jpg" alt="avatar" class="w-24 md:w-24 lg:w-24 xl:w-24 rounded-full border-2 border-primary" style="width:96px;height:96px;"/>
         <button aria-label="프로필 사진 변경" id="avatarEdit" class="absolute -right-2 -bottom-2 bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center"> <span class="material-symbols-outlined">edit</span></button>
       </div>
       <h2 id="displayName" class="text-xl font-bold mt-3">—</h2>
       <p id="displayBio" class="text-on-surface-variant">—</p>
+      <div id="interestTags" class="flex gap-2 justify-center mt-3"></div>
     </div>
 
     <div id="statsRow" class="grid grid-cols-3 gap-3 mb-6">
-      <div class="bg-surface-container-lowest p-4 rounded-lg text-center">
-        <div id="statSessions" class="font-bold">0</div>
+      <div class="p-4 rounded-lg text-center bg-surface-container-lowest">
+        <div id="statSessions" class="text-lg font-bold">0회</div>
         <div class="text-sm text-on-surface-variant">완료 세션</div>
       </div>
-      <div class="bg-surface-container-lowest p-4 rounded-lg text-center">
-        <div id="statTime" class="font-bold">0시간</div>
+      <div class="p-4 rounded-lg text-center bg-surface-container-lowest">
+        <div id="statTime" class="text-lg font-bold">0시간</div>
         <div class="text-sm text-on-surface-variant">총 집중</div>
       </div>
-      <div class="bg-surface-container-lowest p-4 rounded-lg text-center">
-        <div id="statWeek" class="font-bold">0/0</div>
+      <div class="p-4 rounded-lg text-center bg-surface-container-lowest">
+        <div id="statWeek" class="text-lg font-bold">0/0</div>
         <div class="text-sm text-on-surface-variant">이번 주</div>
       </div>
     </div>
@@ -49,6 +50,11 @@
       <h3 class="font-semibold mb-3">단골 파트너</h3>
       <div id="partners" class="flex gap-3 overflow-auto">
       </div>
+
+      <section class="mt-4">
+        <h3 class="font-semibold mb-3">예정된 세션 (내가 호스트한 것)</h3>
+        <div id="mySessions" class="space-y-3"></div>
+      </section>
     </section>
 
     <section>
@@ -83,9 +89,14 @@
             nameEl.textContent = u.nickname || (u.email || '').split('@')[0];
             bioEl.textContent = u.bio || '';
             // stats placeholders
-            document.getElementById('statSessions').textContent = u.completedSessions || '0';
+            document.getElementById('statSessions').textContent = (u.completedSessions || 0) + '회';
             document.getElementById('statTime').textContent = u.totalFocused || '0시간';
             document.getElementById('statWeek').textContent = u.weekProgress || '0/0';
+            // interest tags (if present)
+            const tagsEl = document.getElementById('interestTags');
+            tagsEl.innerHTML = '';
+            const tags = u.interests || u.tags || ['공부','글쓰기','코딩'];
+            tags.slice(0,8).forEach(t=>{ const b = document.createElement('div'); b.className='px-3 py-1 rounded-full bg-primary-container text-on-primary-container text-sm'; b.textContent = t; tagsEl.appendChild(b); });
             if (editing) enterEditMode(u);
           } else {
             console.error('profile load failed', res);
@@ -145,6 +156,53 @@
           // if in edit mode, clicking '저장' is handled by the save button in form
         }
       });
+
+      // load my upcoming sessions so the profile page is more useful
+      async function loadMySessions(){
+        const el = document.getElementById('mySessions');
+        if (!el) return;
+        el.innerHTML = '<div class="text-sm text-on-surface-variant">불러오는 중…</div>';
+        try{
+          // request sessions where hostId = me
+          const res = await FTApi.request('/api/sessions?host=me');
+          if (res && res.ok && res.body && res.body.items){
+            const items = res.body.items;
+            el.innerHTML = '';
+            items.forEach(s => {
+              const row = document.createElement('div');
+              row.className = 'p-3 rounded-lg bg-surface-container-lowest flex items-center justify-between';
+              row.innerHTML = `
+                <div>
+                  <div class="text-sm font-medium">${new Intl.DateTimeFormat('ko-KR',{dateStyle:'short',timeStyle:'short'}).format(new Date(s.startsAt))}</div>
+                  <div class="text-xs text-on-surface-variant">${s.durationMin}분 · ${s.goalText||''}</div>
+                </div>
+                <div>
+                  <button class="btn-cta view-session text-white text-[12px] font-bold px-3 py-1 rounded" data-id="${s.id}">보기</button>
+                  <button class="text-sm ml-2 text-danger cancel-my-session" data-id="${s.id}">취소</button>
+                </div>
+              `;
+              el.appendChild(row);
+            });
+            // wire handlers
+            el.querySelectorAll('.view-session').forEach(b => b.addEventListener('click', (e)=>{ const id = e.currentTarget.dataset.id; window.location.href = '/app/session.html?id=' + encodeURIComponent(id); }));
+            el.querySelectorAll('.cancel-my-session').forEach(b => b.addEventListener('click', async (e)=>{
+              if (!confirm('정말 이 세션을 취소하시겠습니까?')) return;
+              const id = e.currentTarget.dataset.id;
+              try{
+                const r = await FTApi.request('/api/sessions/' + encodeURIComponent(id), { method: 'DELETE' });
+                if (r && r.ok){ showToast('세션이 취소되었습니다.'); loadMySessions(); }
+                else showToast('취소 실패');
+              }catch(err){ console.error(err); showToast('서버 오류'); }
+            }));
+          } else {
+            el.innerHTML = '<div class="text-sm text-on-surface-variant">예정된 세션이 없습니다.</div>';
+          }
+        }catch(e){ console.error(e); el.innerHTML = '<div class="text-sm text-on-surface-variant">불러오기 실패</div>'; }
+      }
+
+      // call after initial fetch
+      fetchAndRender();
+      loadMySessions();
 
       // avatar edit button routes to profile edit (useful from signup)
       const avatarEditBtn = document.getElementById('avatarEdit');

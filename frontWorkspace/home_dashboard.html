@@ -1,181 +1,764 @@
-<!doctype html>
-<html lang="ko">
+<!DOCTYPE html>
+<html class="light" lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
-  <title>홈 대시보드 — FocusTime</title>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "surface-bright":              "#f8f9fa",
+          "surface-container-lowest":    "#ffffff",
+          "on-primary-fixed-variant":    "#0736ba",
+          "secondary":                   "#006e24",
+          "on-secondary":                "#ffffff",
+          "surface-variant":             "#e1e3e4",
+          "on-secondary-fixed":          "#002106",
+          "primary-fixed-dim":           "#b8c3ff",
+          "on-background":               "#191c1d",
+          "surface-tint":                "#3052d2",
+          "secondary-fixed":             "#8dfa94",
+          "on-secondary-fixed-variant":  "#005319",
+          "surface":                     "#f8f9fa",
+          "on-secondary-container":      "#007326",
+          "on-primary-fixed":            "#001355",
+          "error-container":             "#ffdad6",
+          "tertiary-fixed-dim":          "#91cdff",
+          "outline-variant":             "#c4c5d6",
+          "on-primary":                  "#ffffff",
+          "primary":                     "#1a40c2",
+          "inverse-primary":             "#b8c3ff",
+          "on-error-container":          "#93000a",
+          "error":                       "#ba1a1a",
+          "inverse-surface":             "#2e3132",
+          "on-tertiary-fixed-variant":   "#004b72",
+          "surface-dim":                 "#d9dadb",
+          "on-tertiary-fixed":           "#001e31",
+          "on-tertiary":                 "#ffffff",
+          "inverse-on-surface":          "#f0f1f2",
+          "outline":                     "#747686",
+          "background":                  "#f8f9fa",
+          "secondary-container":         "#8af791",
+          "on-tertiary-container":       "#d4e9ff",
+          "on-surface-variant":          "#444654",
+          "tertiary-container":          "#006da4",
+          "surface-container-low":       "#f3f4f5",
+          "secondary-fixed-dim":         "#71dd7a",
+          "on-error":                    "#ffffff",
+          "tertiary-fixed":              "#cce5ff",
+          "surface-container":           "#edeeef",
+          "tertiary":                    "#00547f",
+          "primary-container":           "#3b5bdb",
+          "on-primary-container":        "#e2e5ff",
+          "primary-fixed":               "#dde1ff",
+          "on-surface":                  "#191c1d",
+          "surface-container-highest":   "#e1e3e4"
+        },
+        borderRadius: {
+          DEFAULT: "0.375rem",
+          lg: "0.75rem",
+          xl: "1rem",
+          "2xl": "1.25rem",
+          full: "9999px"
+        },
+        fontFamily: {
+          headline: ["Pretendard", "sans-serif"],
+          body:     ["Pretendard", "sans-serif"],
+          label:    ["Pretendard", "sans-serif"]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  * { font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  ::-webkit-scrollbar { display: none; }
+
+  /* Transitions */
+  .btn-cta {
+    background: linear-gradient(135deg, #1a40c2 0%, #3b5bdb 100%);
+    transition: opacity 150ms ease-in-out, transform 100ms ease-in-out;
+  }
+  .btn-cta:active { transform: scale(0.98); opacity: 0.92; }
+
+  .duration-pill {
+    transition: background 150ms ease-in-out, color 150ms ease-in-out, box-shadow 150ms ease-in-out;
+  }
+  .duration-pill.active {
+    background: #3b5bdb;
+    color: #e2e5ff;
+    box-shadow: 0 2px 12px rgba(58, 90, 219, 0.18);
+  }
+  .duration-pill:not(.active) {
+    background: transparent;
+    color: #747686;
+  }
+
+  .date-chip {
+    transition: background 150ms ease-in-out, color 150ms ease-in-out;
+  }
+  .date-chip.active {
+    background: #1a40c2;
+    color: #ffffff;
+  }
+  .date-chip:not(.active) {
+    background: #ffffff;
+    color: #444654;
+  }
+
+  .fav-card {
+    transition: transform 150ms ease-in-out;
+  }
+  .fav-card:active { transform: scale(0.96); }
+
+  /* nav active */
+  .nav-item.active { color: #1a40c2; background: rgba(58,91,219,0.09); border-radius: 0.75rem; }
+  .nav-item { transition: color 150ms ease-in-out, background 150ms ease-in-out; }
+
+  /* ghost border rule: accessibility-only, nearly invisible */
+  .ghost-border { border: 1px solid rgba(196, 197, 214, 0.15); }
+
+  /* Progress bar animation */
+  @keyframes progressIn {
+    from { width: 0%; }
+    to { width: 50%; }
+  }
+  .progress-bar { animation: progressIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both; }
+
+  /* Stagger fade-in */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp 0.4s ease both; }
+  .fade-up-1 { animation-delay: 0.05s; }
+  .fade-up-2 { animation-delay: 0.12s; }
+  .fade-up-3 { animation-delay: 0.20s; }
+  .fade-up-4 { animation-delay: 0.28s; }
+  .fade-up-5 { animation-delay: 0.36s; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #191c1d; color: #f0f1f2; padding: 10px 20px;
+    border-radius: 9999px; font-size: 13px; font-weight: 500;
+    opacity: 0; transition: opacity 200ms ease, transform 200ms ease;
+    pointer-events: none; white-space: nowrap; z-index: 200;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
 </head>
-<body class="bg-background text-on-surface min-h-screen">
-  <header class="fixed top-0 w-full bg-white z-50">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-100"><img src="/app/assets/avatar-sample.jpg" alt="avatar" class="w-full h-full object-cover"></div>
-        <div>
-          <div class="text-sm text-gray-600">안녕하세요, 은지님 👋</div>
-          <div class="text-lg font-bold">FocusTime</div>
-        </div>
+
+<body class="bg-background text-on-surface min-h-screen pb-28">
+
+<!-- ───────────────── HEADER ───────────────── -->
+<header id="topHeader" class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-md flex justify-between items-center px-5 py-3">
+  <div class="flex items-center gap-3">
+    <a id="profileLink" href="/app/profile.html" aria-label="프로필 페이지로 이동">
+      <div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container ring-2 ring-primary-fixed/60">
+        <img id="userAvatar" data-user-id="" alt="내 프로필" class="w-full h-full object-cover"
+             src="https://lh3.googleusercontent.com/aida-public/AB6AXuD22PMScl9TpfdkwzZUXRnMigQrsBV2auCoiE5Xq1v3Y5vIc5ZnvYSjUKss0fSqzBDtqjfDporZXg5uTTG9Q426-KQFq2HobtfmPpGZxR7-sCoMvpv31-09bsYy31TbVOKNbfeL6ajJg7Iiw_HAa5WT_8LSuy6T6_h4wcLG3Lvi3IgL6FGSAXiuspdOIMb0kzN4tq1KZMdX4iT6sq9RE_imtQdpLBEpwnrse5JAnxGfpfEZ4yc8P178tYGbNZ_9mo6k1HnJGWjBeco"/>
       </div>
-      <div class="flex items-center gap-3">
-        <a href="/app/profile.html" class="text-sm text-primary">프로필</a>
+    </a>
+    <div id="greeting" class="flex flex-col leading-tight">
+      <span class="text-[11px] text-on-surface-variant font-medium tracking-wide">안녕하세요, <span id="userName">은지</span>님 👋</span>
+      <span class="text-[17px] font-bold text-on-surface tracking-tight">FocusTime</span>
+    </div>
+  </div>
+  <div class="relative">
+    <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors" aria-label="알림">
+      <span class="material-symbols-outlined text-on-surface-variant text-[22px]">notifications</span>
+      <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+    </button>
+  </div>
+</header>
+
+<!-- ───────────────── MAIN ───────────────── -->
+<main class="pt-[72px] px-5 space-y-7">
+
+  <!-- Weekly Stats -->
+  <section id="weeklyStats" class="fade-up fade-up-1">
+    <div class="bg-primary-container rounded-2xl p-6 text-on-primary-container overflow-hidden relative"
+         style="box-shadow: 0 4px 32px rgba(26,64,194,0.10)">
+      <!-- ambient glow — subtle, large blur -->
+      <div class="absolute -right-10 -top-10 w-40 h-40 rounded-full"
+           style="background: rgba(255,255,255,0.07); filter: blur(40px); pointer-events:none"></div>
+      <div class="relative z-10">
+        <p class="text-[10px] font-semibold uppercase tracking-[0.08em] opacity-75 mb-3">이번 주 집중 시간</p>
+        <div class="flex justify-between items-end mb-5">
+          <div class="text-[32px] font-extrabold tracking-tighter leading-none"
+               data-key="focusedWeek" aria-live="polite">2시간 30분</div>
+          <div class="text-xs font-medium opacity-70 mb-1"
+               data-key="weekGoal">목표 5시간</div>
+        </div>
+        <!-- Progress -->
+        <div class="h-2 w-full rounded-full overflow-hidden" style="background: rgba(255,255,255,0.18)">
+          <div class="progress-bar h-full rounded-full" style="width:50%; background:#8dfa94"></div>
+        </div>
+        <!-- Mini stats row -->
+        <div class="flex gap-4 mt-4 pt-4" style="border-top: 1px solid rgba(255,255,255,0.12)">
+          <div data-key="completedSessions">
+            <p class="text-[10px] uppercase tracking-wider opacity-60 mb-0.5">완료 세션</p>
+            <p class="text-base font-bold">5회</p>
+          </div>
+          <div style="width:1px;background:rgba(255,255,255,0.12)"></div>
+          <div>
+            <p class="text-[10px] uppercase tracking-wider opacity-60 mb-0.5">연속 일수</p>
+            <p class="text-base font-bold">3일 🔥</p>
+          </div>
+          <div style="width:1px;background:rgba(255,255,255,0.12)"></div>
+          <div>
+            <p class="text-[10px] uppercase tracking-wider opacity-60 mb-0.5">달성률</p>
+            <p class="text-base font-bold">50%</p>
+          </div>
+        </div>
       </div>
     </div>
-  </header>
+  </section>
 
-  <main class="pt-20 max-w-5xl mx-auto px-4 space-y-6">
-    <section class="bg-white rounded-xl p-6 shadow">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold">대시보드</h2>
-        <div class="text-sm text-gray-500">환영합니다</div>
+  <!-- Favorites Row -->
+  <section class="fade-up fade-up-2">
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="text-[15px] font-bold text-on-surface tracking-tight">즐겨찾기</h3>
+      <button class="text-[13px] font-semibold text-primary">편집</button>
+    </div>
+    <div id="favoritesRow" role="list" class="flex gap-3 overflow-x-auto pb-1">
+      <!-- fav cards populated by JS -->
+    </div>
+  </section>
+
+  <!-- Upcoming Sessions -->
+  <section id="upcoming" class="fade-up fade-up-3 space-y-3">
+    <div class="flex justify-between items-center">
+      <h3 class="text-[15px] font-bold text-on-surface tracking-tight">예정된 세션</h3>
+      <button class="text-[13px] font-semibold text-primary">모두 보기</button>
+    </div>
+
+    <!-- Session card container (populated) -->
+    <div role="list">
+      <div class="session-card bg-surface-container-lowest rounded-2xl p-5 space-y-3" data-session-id="s-001" role="listitem"
+           style="box-shadow: 0 2px 16px rgba(25,28,29,0.04)">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[15px] text-on-surface-variant">calendar_today</span>
+            <span class="session-start text-[12px] font-semibold text-on-surface-variant">10월 24일 오후 3:00</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="session-duration px-2.5 py-0.5 rounded-full text-[11px] font-bold"
+                  style="background:rgba(0,110,36,0.10); color:#006e24">25분</span>
+            <span class="session-status px-2.5 py-0.5 rounded-full text-[11px] font-bold"
+                  style="background:rgba(58,91,219,0.10); color:#1a40c2">예정</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-full overflow-hidden bg-surface-container-high flex-shrink-0">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaHRHbvlMIsE6LBazuyEjnQbEcPCGQOugpOShKXYSqioEQtrEdhpc5vNAF6Cuxx2b3Hy7rDqzsIqVr9-UAOGWD0yLgjmvN_nzm4yeXzhoVjnzfACNavp0ETiTjmnXFSzwyfR-6xcvE23vX_SGLV6Y8hWM3fpo405LPzIRvf1wjuIaMgrScvhz-4ASvboC1vbVp3nZKi2rvpVBLvEWoG5l_QfZtvU_l1fDXDRU6Bxs-KfhMe6qzr9VmDfbkHWZ80PSL-AZ-DvUWJNI"
+                 class="w-full h-full object-cover" alt="파트너"/>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="partner-name text-[14px] font-bold text-on-surface">김철수</p>
+            <p class="text-[12px] text-on-surface-variant truncate">기말고사 공부</p>
+          </div>
+          <button class="btn-cta text-white text-[12px] font-bold px-4 py-2 rounded-xl" aria-label="세션 참가">
+            참가
+          </button>
+        </div>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="p-4 bg-primary-container text-on-primary-container rounded-lg">
-          <div class="text-sm">이번 주 집중</div>
-          <div class="text-2xl font-bold mt-2">2시간 30분</div>
-        </div>
-        <div class="p-4 bg-surface-container-lowest rounded-lg">
-          <div class="text-sm text-gray-600">완료 세션</div>
-          <div class="text-2xl font-bold mt-2">128</div>
-        </div>
-        <div class="p-4 bg-surface-container-lowest rounded-lg">
-          <div class="text-sm text-gray-600">이번 주 목표</div>
-          <div class="text-2xl font-bold mt-2">5시간</div>
-        </div>
-      </div>
-    </section>
-    <section class="bg-white rounded-xl p-6 shadow">
-      <h2 class="text-lg font-bold mb-3">즐겨찾기 파트너</h2>
-      <div id="favoritesRow" class="flex gap-3 overflow-x-auto pb-2"></div>
-    </section>
+    </div>
 
-    <section class="bg-white rounded-xl p-6 shadow">
-      <h2 class="text-lg font-bold mb-3">예정된 세션</h2>
-      <div id="upcoming" class="space-y-3"></div>
-    </section>
-  </main>
+  </section>
 
-  <script src="/app/js/api.js"></script>
-  <script>
-    (async function(){
-      const favRow = document.getElementById('favoritesRow');
-      async function loadFavorites(){
-        try{
-          const res = await FTApi.getFavorites();
-          const list = res && res.ok ? (res.body || res) : [];
-          favRow.innerHTML = '';
-          if (!list.length) { favRow.innerHTML = '<div class="text-sm text-gray-500">즐겨찾기가 없습니다.</div>'; return; }
-          list.forEach(p=>{
-            const el = document.createElement('div');
-            el.className = 'w-36 p-3 bg-surface-container-lowest rounded-lg flex flex-col items-center gap-2';
-            el.innerHTML = `
-              <img src="${p.avatarUrl||'/app/assets/avatar-sample.jpg'}" class="w-12 h-12 rounded-full object-cover"/>
-              <div class="text-sm font-medium">${p.nickname||p.email}</div>
-              <button class="text-xs text-primary add-unfav" data-id="${p.id}">제거</button>
-            `;
-            favRow.appendChild(el);
-          });
-          document.querySelectorAll('.add-unfav').forEach(b=> b.addEventListener('click', async ()=>{
-            const id = b.getAttribute('data-id');
-            try{ const r = await FTApi.removeFavorite(id); if (r && r.ok){ loadFavorites(); } else alert('제거 실패'); }catch(e){ console.error(e); alert('서버 오류'); }
-          }));
-        }catch(e){ console.error(e); }
+  <!-- Quick Create -->
+  <section id="quickCreateCard" class="fade-up fade-up-4 space-y-5 pb-2">
+    <h3 class="text-[15px] font-bold text-on-surface tracking-tight">빠른 세션 만들기</h3>
+
+    <!-- Duration pills -->
+    <div class="flex gap-2" role="group" aria-label="세션 시간 선택">
+      <button class="duration-pill active flex-1 py-2.5 rounded-full text-[13px] font-bold" data-min="25" id="dur-25">25분</button>
+      <button class="duration-pill flex-1 py-2.5 rounded-full text-[13px] font-bold" data-min="50" id="dur-50">50분</button>
+      <button class="duration-pill flex-1 py-2.5 rounded-full text-[13px] font-bold" data-min="75" id="dur-75">75분</button>
+    </div>
+
+    <!-- Focus mode (from spec) -->
+    <div class="flex gap-2" role="group" aria-label="집중 모드 선택">
+      <button class="focus-mode-pill active flex-1 py-2 rounded-xl text-[12px] font-semibold transition-all duration-150"
+              data-mode="desk"
+              style="background:#f3f4f5; color:#444654">
+        <span class="block text-[16px] mb-0.5">🎯</span>딥 포커스
+      </button>
+      <button class="focus-mode-pill flex-1 py-2 rounded-xl text-[12px] font-semibold transition-all duration-150"
+              data-mode="any"
+              style="background:#f3f4f5; color:#444654">
+        <span class="block text-[16px] mb-0.5">📚</span>공부
+      </button>
+      <button class="focus-mode-pill flex-1 py-2 rounded-xl text-[12px] font-semibold transition-all duration-150"
+              data-mode="moving"
+              style="background:#f3f4f5; color:#444654">
+        <span class="block text-[16px] mb-0.5">💼</span>업무
+      </button>
+    </div>
+
+    <!-- Date strip -->
+    <div class="flex gap-2 overflow-x-auto pb-1" id="dateStrip" aria-label="날짜 선택">
+      <!-- Generated by JS below; static fallback: -->
+    </div>
+
+    <!-- Time picker (hour:minute) -->
+    <div class="flex items-center gap-3 mt-3">
+      <label class="text-sm font-medium">시간</label>
+      <input type="time" id="startTimeInput" step="900" class="p-3 rounded-lg bg-surface-container-high" />
+      <div class="text-sm text-on-surface-variant">(15분 단위)</div>
+    </div>
+
+    <!-- Goal input -->
+    <div>
+      <label class="block text-sm mb-1">나의 목표</label>
+      <input id="sessionGoalInput" class="w-full p-3 rounded-lg bg-surface-container-high" placeholder="예: 논문 2장 초안 작성" maxlength="100" />
+    </div>
+    <!-- CTA -->
+    <button id="createBtn" class="btn-cta w-full py-4 text-white rounded-xl font-bold text-[15px]"
+            aria-label="create-session">
+      세션 만들기
+    </button>
+  </section>
+
+</main>
+
+<!-- ───────────────── BOTTOM NAV ───────────────── -->
+<nav id="bottomNav" role="navigation" aria-label="주요 탐색"
+     class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-3 pb-6 pt-2.5 rounded-t-2xl"
+     style="background: rgba(248,249,250,0.88); backdrop-filter: blur(20px); border-top: 0.5px solid rgba(196,197,214,0.25)">
+  <a href="#" data-route="home" aria-label="홈"
+     class="nav-item active flex flex-col items-center px-4 py-1.5">
+    <span class="material-symbols-outlined text-[22px]" style="font-variation-settings:'FILL' 1">home</span>
+    <span class="text-[10px] font-semibold uppercase tracking-wider mt-0.5">홈</span>
+  </a>
+  <a href="#" data-route="explore" aria-label="탐색"
+     class="nav-item flex flex-col items-center px-4 py-1.5 text-on-surface-variant">
+    <span class="material-symbols-outlined text-[22px]">search</span>
+    <span class="text-[10px] font-medium uppercase tracking-wider mt-0.5">탐색</span>
+  </a>
+  <a href="#" data-route="history" aria-label="이력"
+     class="nav-item flex flex-col items-center px-4 py-1.5 text-on-surface-variant">
+    <span class="material-symbols-outlined text-[22px]">event_note</span>
+    <span class="text-[10px] font-medium uppercase tracking-wider mt-0.5">이력</span>
+  </a>
+  <a href="/app/profile.html" data-route="profile" aria-label="프로필"
+     class="nav-item flex flex-col items-center px-4 py-1.5 text-on-surface-variant">
+    <span class="material-symbols-outlined text-[22px]">person</span>
+    <span class="text-[10px] font-medium uppercase tracking-wider mt-0.5">프로필</span>
+  </a>
+</nav>
+
+<!-- Toast -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- ───────────────── SCRIPTS ───────────────── -->
+<script src="/app/js/api.js"></script>
+<script>
+(async function () {
+  /* small helpers */
+  function showToast(msg) { const t = document.getElementById('toast'); if(!t) return; t.textContent = msg; t.classList.add('show'); clearTimeout(t._timer); t._timer = setTimeout(()=> t.classList.remove('show'), 2500); }
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function roundToQuarter(d){ const copy = new Date(d); copy.setSeconds(0,0); const m = copy.getMinutes(); const rounded = Math.ceil(m/15)*15; if (rounded === 60) { copy.setHours(copy.getHours()+1); copy.setMinutes(0); } else { copy.setMinutes(rounded); } return copy; }
+
+  /* ── Date strip ── */
+  const strip = document.getElementById('dateStrip');
+  const days = ['일','월','화','수','목','금','토'];
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const btn = document.createElement('button');
+    btn.className = 'date-chip flex-shrink-0 w-14 py-3 rounded-2xl flex flex-col items-center gap-0.5 transition-all duration-150' + (i === 0 ? ' active' : '');
+    btn.dataset.date = d.toISOString();
+    btn.innerHTML = `<span style="font-size:10px;font-weight:500;text-transform:uppercase;opacity:.7">${i === 0 ? '오늘' : days[d.getDay()]}</span><span style="font-size:18px;font-weight:700">${d.getDate()}</span>`;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      // if selected date is today, ensure time input is not in the past
+      try{
+        const selectedDateYMD = btn.dataset.date.split('T')[0];
+        const todayYMD = (new Date()).toISOString().split('T')[0];
+        const timeInput = document.getElementById('startTimeInput');
+        if (selectedDateYMD === todayYMD && timeInput) {
+          const nowNearest = roundToQuarter(new Date());
+          const ti = pad2(nowNearest.getHours()) + ':' + pad2(nowNearest.getMinutes());
+          if (!timeInput.value || timeInput.value < ti) timeInput.value = ti;
+        }
+      }catch(e){}
+      // load sessions for selected date
+      loadUpcomingForDate(d.toISOString());
+    });
+    strip.appendChild(btn);
+  }
+
+  /* set default time to nearest future 15-minute */
+  const timeInput = document.getElementById('startTimeInput');
+  if (timeInput) {
+    const defaultTimeDate = roundToQuarter(new Date());
+    timeInput.value = pad2(defaultTimeDate.getHours()) + ':' + pad2(defaultTimeDate.getMinutes());
+  }
+
+  /* ── Duration pills ── */
+  let selectedDuration = 25;
+  document.querySelectorAll('.duration-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.duration-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedDuration = parseInt(btn.dataset.min, 10);
+    });
+  });
+
+  /* ── Focus mode pills ── */
+  let selectedMode = 'desk';
+  document.querySelectorAll('.focus-mode-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.focus-mode-pill').forEach(b => {
+        b.style.background = '#f3f4f5';
+        b.style.color = '#444654';
+      });
+      btn.style.background = '#dde1ff';
+      btn.style.color = '#1a40c2';
+      selectedMode = btn.dataset.mode;
+    });
+  });
+  // init first (guarded)
+  const _initialFocusBtn = document.querySelector(`.focus-mode-pill[data-mode="${selectedMode}"]`);
+  if (_initialFocusBtn) { _initialFocusBtn.style.background = '#dde1ff'; _initialFocusBtn.style.color = '#1a40c2'; }
+
+  // small placeholder avatar data URL (SVG)
+  function placeholderAvatarDataUrl(initial) {
+    const color = '#c4c5d6';
+    const txt = encodeURIComponent(initial || 'U');
+    return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'><rect width='100%' height='100%' fill='${color}'/><text x='50%' y='54%' font-size='64' text-anchor='middle' fill='%23ffffff' font-family='Arial,Helvetica,sans-serif'>${txt}</text></svg>`;
+  }
+
+  /* ── Create session ── */
+  const createBtn = document.getElementById('createBtn');
+  createBtn.addEventListener('click', async () => {
+    const activeDateChip = document.querySelector('.date-chip.active');
+    const dateYmd = activeDateChip ? activeDateChip.dataset.date.split('T')[0] : (new Date()).toISOString().split('T')[0];
+    const timeVal = document.getElementById('startTimeInput')?.value || '00:00';
+    const [hh, mm] = timeVal.split(':').map(v => parseInt(v,10));
+    const [year, month, day] = dateYmd.split('-').map(v => parseInt(v,10));
+    const startsDate = new Date(year, month - 1, day, hh || 0, mm || 0, 0, 0);
+    const startsAt = startsDate.toISOString();
+
+    createBtn.disabled = true;
+    createBtn.textContent = '예약 중…';
+
+    try {
+      if (typeof FTApi === 'undefined') throw new Error('no-api');
+      if (!FTApi.getToken()) {
+        window.location.href = '/app/login.html?next=' + encodeURIComponent(window.location.pathname);
+        return;
       }
-      await loadFavorites();
+      const goalText = (document.getElementById('sessionGoalInput')?.value || '').trim();
+      const payload = { startsAt, durationMin: selectedDuration, focusMode: selectedMode };
+      if (goalText) payload.goalText = goalText;
+      const res = await FTApi.createSession(payload);
+      if (res && res.ok && res.body) {
+        // attach goalText locally so the newly created session shows it immediately
+        const sess = Object.assign({}, res.body, { goalText });
+        _renderedSessions.unshift(sess);
+        renderSessionCards(_renderedSessions);
+        showToast('세션이 예약되었습니다. 예정된 세션에서 참가할 수 있습니다.');
+      } else {
+        showToast('세션 생성에 실패했어요. 다시 시도해 주세요.');
+      }
+    } catch (e) {
+      console.error(e);
+      showToast('세션 생성에 실패했어요.');
+    } finally {
+      createBtn.disabled = false;
+      createBtn.textContent = '세션 만들기';
+    }
+  });
 
-      // upcoming sessions implementation
-      const upcomingEl = document.getElementById('upcoming');
-      let upcomingSessions = [];
-      function renderUpcoming(){
-        if (!upcomingSessions || !upcomingSessions.length) { upcomingEl.innerHTML = '<div class="text-sm text-gray-500">예정된 세션이 없습니다.</div>'; return; }
-        upcomingEl.innerHTML = '';
-        upcomingSessions.forEach(s => {
-          const starts = new Date(s.startsAt);
-          const ends = new Date(starts.getTime() + (s.durationMin||25)*60000);
-          const now = new Date();
-          let status = '예정';
-          if (now >= starts && now < ends) status = '진행중';
-          else if (now >= ends) status = '완료';
-          const el = document.createElement('div');
-          el.className = 'p-4 bg-surface-container-lowest rounded-lg mb-3 flex items-center justify-between';
-          el.innerHTML = `
-            <div>
-              <div class="text-sm text-on-surface-variant">${new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }).format(starts)}</div>
-              <div class="text-base font-medium">${s.hostId === Number(FTApi.getToken()?FTApi.getToken():0) ? '나의 세션' : (s.partnerName || '파트너와의 세션')}</div>
+  /* ── Load user info ── */
+  async function loadUser() {
+    try {
+      if (typeof FTApi === 'undefined') return;
+      const res = await FTApi.request('/api/users/me');
+      if (res.ok) {
+        const u = res.body;
+        document.getElementById('userName').textContent = u.nickname || '사용자';
+        if (u.avatarUrl) document.getElementById('userAvatar').src = u.avatarUrl;
+        const ua = document.getElementById('userAvatar');
+        ua.dataset.userId = u.id;
+        ua.onerror = function(){ this.onerror=null; this.src = placeholderAvatarDataUrl((u.nickname||'')[0]); };
+        // fill weekly stats if present
+        function fmtMinutes(v){ if (v == null) return null; if (typeof v === 'number') { const h = Math.floor(v/60); const m = v%60; return (h? h + '시간 ':'') + (m? m + '분':'') || '0분'; } return String(v); }
+        if (u.totalFocused != null) document.querySelector('[data-key="focusedWeek"]').textContent = fmtMinutes(u.totalFocused);
+        if (u.completedSessions !== undefined) { const el = document.querySelector('[data-key="completedSessions"]'); const target = el ? el.querySelector('p.text-base') : null; if (target) target.textContent = String(u.completedSessions) + '회'; }
+        if (u.weekGoal) document.querySelector('[data-key="weekGoal"]').textContent = '목표 ' + u.weekGoal;
+      }
+    } catch (_) {}
+  }
+  await loadUser();
+  // load favorites
+  async function loadFavorites(){
+    const favRow = document.getElementById('favoritesRow');
+    try{
+      const res = await FTApi.getFavorites();
+      const list = res && res.ok ? (res.body || res) : [];
+      favRow.innerHTML = '';
+      if (!list.length) { favRow.innerHTML = '<div class="text-sm text-gray-500">즐겨찾기가 없습니다.</div>'; return; }
+      list.forEach(p=>{
+        const el = document.createElement('div');
+        el.className = 'fav-card flex-shrink-0 flex flex-col items-center gap-1.5';
+        el.setAttribute('role','listitem');
+        el.innerHTML = `
+          <div class="relative">
+            <div class="w-14 h-14 rounded-full overflow-hidden bg-surface-container-high flex items-center justify-center">
+              <img src="${p.avatarUrl||''}" class="w-full h-full object-cover fav-avatar" alt="${p.nickname||p.email}"/>
             </div>
-            <div class="text-right">
-              <div class="text-sm text-on-surface-variant">${s.durationMin}분</div>
-              <div class="text-sm font-medium session-status" data-session-id="${s.id}">${status}</div>
-              <div class="text-xs text-on-surface-variant session-timer" data-session-id="${s.id}"></div>
-            </div>
-          `;
-          upcomingEl.appendChild(el);
-        });
+            <button class="fav-remove absolute -top-1 -right-1 bg-white text-danger border rounded-full p-1" data-id="${p.id}" aria-label="즐겨찾기 제거">✕</button>
+          </div>
+          <span class="fav-name text-[11px] font-medium text-on-surface-variant">${p.nickname||p.email}</span>
+        `;
+        favRow.appendChild(el);
+      });
+      // avatar fallbacks
+      document.querySelectorAll('.fav-avatar').forEach(img=> img.onerror = function(){ this.onerror=null; this.src = placeholderAvatarDataUrl((this.alt||'')[0]); });
+    }catch(e){ console.error(e); favRow.innerHTML = '<div class="text-sm text-gray-500">불러오기 실패</div>'; }
+  }
+  await loadFavorites();
+  // load today's upcoming sessions
+  const firstChip = document.querySelector('.date-chip.active');
+  if (firstChip) loadUpcomingForDate(firstChip.dataset.date);
+
+  /* ── Favorites remove ── */
+  document.querySelectorAll('.fav-remove').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const card = btn.closest('.fav-card');
+      const id = btn.dataset.id;
+      card.style.opacity = '0.4';
+      try {
+        const res = await FTApi.removeFavorite(id);
+        if (res.ok) {
+          card.remove();
+        } else {
+          card.style.opacity = '1';
+          showToast('제거에 실패했어요.');
+        }
+      } catch (_) {
+        card.style.opacity = '1';
       }
+    });
+  });
 
-      async function loadUpcoming(){
-        try{
-          const res = await FTApi.request('/api/sessions?date=' + (new Date()).toISOString().slice(0,10));
-          if (res && res.ok && res.body && res.body.items){ upcomingSessions = res.body.items; renderUpcoming(); }
-          else { upcomingEl.innerHTML = '<div class="text-sm text-gray-500">예정된 세션을 불러오지 못했습니다.</div>'; }
-        }catch(e){ console.error(e); upcomingEl.innerHTML = '<div class="text-sm text-gray-500">서버 오류</div>'; }
-      }
+  // load upcoming for first chip if present (already invoked above)
 
-      // update timers for active sessions
-      function updateTimers(){
-        const now = new Date();
-        upcomingSessions.forEach(s=>{
-          const starts = new Date(s.startsAt);
-          const ends = new Date(starts.getTime() + (s.durationMin||25)*60000);
-          const statusEl = document.querySelector(`.session-status[data-session-id="${s.id}"]`);
-          const timerEl = document.querySelector(`.session-timer[data-session-id="${s.id}"]`);
-          if (!statusEl || !timerEl) return;
-          if (now < starts){ statusEl.textContent = '예정'; const delta = Math.max(0, Math.floor((starts - now)/1000)); timerEl.textContent = '시작까지 ' + formatDuration(delta); }
-          else if (now >= starts && now < ends){ statusEl.textContent = '진행중'; const delta = Math.max(0, Math.floor((ends - now)/1000)); timerEl.textContent = '남은 시간 ' + formatDuration(delta); }
-          else { statusEl.textContent = '완료'; timerEl.textContent = ''; }
-        });
-      }
-
-      function formatDuration(sec){ if (sec <= 0) return '0초'; const m = Math.floor(sec/60); const s = sec%60; return (m? m + '분 ':'') + s + '초'; }
-
-      // quick create session integration
-      const createBtn = document.querySelector('button:contains("세션 만들기")') || document.querySelector('button');
-      if (createBtn){
-        createBtn.addEventListener('click', async (e)=>{
-          e.preventDefault();
-          const durationSelect = document.getElementById('duration') || { value: '25' };
-          const modeSelect = document.getElementById('focusMode') || { value: 'any' };
-          const duration = Number(durationSelect.value);
-          const mode = modeSelect.value;
-          if (!FTApi.getToken()){
-            const next = `/app/home.html?create=1&duration=${encodeURIComponent(duration)}&mode=${encodeURIComponent(mode)}`;
-            window.location.href = `/app/login.html?next=${encodeURIComponent(next)}`;
-            return;
-          }
-          createBtn.disabled = true;
+  /* ── Upcoming sessions: load & render for selected date ── */
+  const upcomingList = document.querySelector('#upcoming > [role="list"]') || document.querySelector('#upcoming');
+  async function loadUpcomingForDate(dateIso) {
+    try {
+      const day = (new Date(dateIso)).toISOString().slice(0,10);
+      const res = await FTApi.request('/api/sessions?date=' + encodeURIComponent(day));
+      if (res && res.ok && res.body && res.body.items) {
+        const sessions = res.body.items;
+        // enrich each session with user's goal (if any)
+        const meId = document.getElementById('userAvatar')?.dataset.userId || null;
+        await Promise.all(sessions.map(async (s) => {
           try{
-            const res = await FTApi.createSession({ startsAt: new Date().toISOString(), durationMin: duration, focusMode: mode });
-            if (res && res.ok && res.body && res.body.id){ const id = res.body.id; FTApi.setSessionId(String(id)); // prepend to upcoming
-              upcomingSessions.unshift(res.body); renderUpcoming(); updateTimers(); showCreateToast('세션이 생성되었습니다');
-              // navigate to session page
-              window.location.href = `/app/session.html?id=${encodeURIComponent(String(id))}`;
-            } else if (res && res.status === 401){ const next = `/app/home.html?create=1&duration=${encodeURIComponent(duration)}&mode=${encodeURIComponent(mode)}`; window.location.href = `/app/login.html?next=${encodeURIComponent(next)}`; }
-            else { alert('세션 생성 실패'); }
-          }catch(e){ console.error(e); alert('서버 오류'); }
-          finally{ createBtn.disabled = false; }
-        });
+            const gRes = await FTApi.getGoals(s.id);
+            if (gRes && gRes.ok && Array.isArray(gRes.body)){
+              const myGoal = gRes.body.find(g => String(g.userId) === String(meId));
+              if (myGoal) s.goalText = myGoal.goalText || myGoal.resultText || '';
+            }
+          }catch(e){ /* ignore per-item goal load errors */ }
+        }));
+        // show only sessions that haven't fully ended (end time > now) in Upcoming
+        const now = Date.now();
+        const futureSessions = sessions.filter(s => { const starts = new Date(s.startsAt).getTime(); const ends = starts + ((s.durationMin||25) * 60000); return ends > now; });
+        renderSessionCards(futureSessions);
+      } else {
+        upcomingList.innerHTML = '<div class="text-sm text-gray-500">예정된 세션을 불러오지 못했습니다.</div>';
       }
+    } catch (e) {
+      console.error(e);
+      upcomingList.innerHTML = '<div class="text-sm text-gray-500">서버 오류</div>';
+    }
+  }
 
-      function showCreateToast(msg){ const t = document.getElementById('createToast') || (function(){ const el=document.createElement('div'); el.id='createToast'; el.style.position='fixed'; el.style.right='16px'; el.style.top='80px'; el.style.background='rgba(0,0,0,0.75)'; el.style.color='#fff'; el.style.padding='8px 12px'; el.style.borderRadius='6px'; el.style.zIndex='60'; document.body.appendChild(el); return el; })();
-        t.textContent = msg; t.style.display='block'; clearTimeout(t._hide); t._hide = setTimeout(()=> t.style.display='none',2500);
+  let _renderedSessions = [];
+  function renderSessionCards(sessions) {
+    _renderedSessions = Array.isArray(sessions) ? sessions.slice() : [];
+    if (!Array.isArray(sessions) || sessions.length === 0) {
+      upcomingList.innerHTML = '<div class="text-sm text-gray-500">예정된 세션이 없습니다.</div>';
+      return;
+    }
+    const list = document.createElement('div');
+    sessions.forEach(s => {
+      const starts = new Date(s.startsAt);
+      const ends = new Date(starts.getTime() + (s.durationMin||25)*60000);
+      const card = document.createElement('div');
+      card.className = 'session-card bg-surface-container-lowest rounded-2xl p-5 space-y-3 mb-3';
+      card.dataset.sessionId = s.id;
+      card.innerHTML = `
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[15px] text-on-surface-variant">calendar_today</span>
+            <span class="session-start text-[12px] font-semibold text-on-surface-variant">${new Intl.DateTimeFormat('ko-KR',{dateStyle:'medium',timeStyle:'short'}).format(starts)}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="session-duration px-2.5 py-0.5 rounded-full text-[11px] font-bold" style="background:rgba(0,110,36,0.10); color:#006e24">${s.durationMin}분</span>
+            <span class="session-status px-2.5 py-0.5 rounded-full text-[11px] font-bold" style="background:rgba(58,91,219,0.10); color:#1a40c2">예정</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-full overflow-hidden bg-surface-container-high flex-shrink-0">
+            <img src="${s.partnerAvatar||''}" class="w-full h-full object-cover partner-avatar" alt="파트너"/>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="partner-name text-[14px] font-bold text-on-surface">${s.partnerName||s.nickname||'파트너'}</p>
+            <p class="text-[12px] text-on-surface-variant truncate">${s.notes||''}</p>
+          </div>
+          <div class="flex flex-col items-end">
+            <div class="flex items-center gap-2">
+              <button class="btn-cta join-session text-white text-[12px] font-bold px-4 py-2 rounded-xl" data-id="${s.id}">${s.partnerId ? '매칭 완료' : (String(document.getElementById('userAvatar')?.dataset.userId||'') === String(s.hostId) ? '세션 보기' : '참가')}</button>
+              ${ (new Date(s.startsAt).getTime() > Date.now() && String(document.getElementById('userAvatar')?.dataset.userId||'') === String(s.hostId)) ? '<button class="cancel-session text-sm px-3 py-1 rounded border border-transparent text-danger bg-white">취소</button>' : '' }
+            </div>
+            <div class="text-xs text-on-surface-variant mt-2 session-timer" data-session-id="${s.id}"></div>
+          </div>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+    upcomingList.innerHTML = '';
+    upcomingList.appendChild(list);
+
+    // wire join buttons
+    document.querySelectorAll('.join-session').forEach(b => b.addEventListener('click', async (e) => {
+      const id = b.dataset.id;
+      try {
+        const s = sessionsFindById(id);
+        if (!s) { showToast('세션 정보를 불러오지 못했습니다.'); return; }
+        if (s.partnerId) { showToast('이미 매칭되었습니다.'); return; }
+        const starts = new Date(s.startsAt).getTime();
+        const allowedFrom = starts - (15 * 60 * 1000);
+        const now = Date.now();
+        if (now < allowedFrom) {
+          alert('예약 시간과 불일치 합니다.');
+          return;
+        }
+        const res = await FTApi.joinSession(id);
+        if (res && res.ok) {
+          // Try to prime autoplay permission using Web Audio API (user gesture)
+          try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+              const ctx = new AudioCtx();
+              if (ctx.state === 'suspended') await ctx.resume();
+              const o = ctx.createOscillator();
+              const g = ctx.createGain();
+              g.gain.value = 0;
+              o.connect(g);
+              g.connect(ctx.destination);
+              o.start(0);
+              o.stop(0);
+            }
+          } catch (err) { /* ignore */ }
+
+          // navigate to session and request autoplay
+          window.location.href = '/app/session.html?id=' + encodeURIComponent(id) + '&autoplay=1';
+        } else if (res && res.status === 409) {
+          showToast('이미 매칭되었습니다.');
+        } else if (res && res.status === 400 && res.body && res.body.error === 'too_early') {
+          alert(res.body.message || '예약 시간과 불일치 합니다.');
+        } else {
+          showToast('참가 실패');
+        }
+      } catch (err) { console.error(err); showToast('서버 오류'); }
+    }));
+
+    // set avatar fallbacks for partner avatars we just rendered
+    document.querySelectorAll('.partner-avatar').forEach(img => {
+      img.onerror = function(){ try{ const name = (img.closest('.session-card')?.querySelector('.partner-name')?.textContent||'P').trim(); this.onerror=null; this.src = placeholderAvatarDataUrl(name[0]); }catch(e){ this.src = placeholderAvatarDataUrl('P'); } };
+    });
+
+    // wire cancel buttons
+    document.querySelectorAll('.cancel-session').forEach(btn => btn.addEventListener('click', async (e) => {
+      const card = btn.closest('.session-card');
+      const id = card && card.dataset ? card.dataset.sessionId : null;
+      if (!id) return;
+      if (!confirm('정말 이 예정된 세션을 취소하시겠습니까?')) return;
+      try{
+        const res = await FTApi.request('/api/sessions/' + encodeURIComponent(id), { method: 'DELETE' });
+        if (res && res.ok){
+          // remove from rendered sessions and rerender
+          _renderedSessions = _renderedSessions.filter(x=> String(x.id) !== String(id));
+          renderSessionCards(_renderedSessions);
+          showToast('세션이 취소되었습니다.');
+        } else if (res && res.status === 400 && res.body && res.body.error === 'too_late_to_cancel') {
+          alert(res.body.message || '세션은 시작 10분 전까지만 취소 가능합니다.');
+        } else if (res && res.status === 403) {
+          alert('이 세션을 취소할 권한이 없습니다.');
+        } else {
+          showToast('취소에 실패했습니다.');
+        }
+      }catch(e){ console.error(e); showToast('서버 오류'); }
+    }));
+
+    // start timers
+    startSessionTimer();
+  }
+
+  // timers
+  let timerInterval = null;
+  function startSessionTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      document.querySelectorAll('.session-card').forEach(card => {
+        const id = card.dataset.sessionId;
+        const statusEl = card.querySelector('.session-status');
+        const timerEl = card.querySelector('.session-timer');
+        const startText = card.querySelector('.session-start').textContent;
+        const s = sessionsFindById(id);
+        if (!s) return;
+        const starts = new Date(s.startsAt);
+        const ends = new Date(starts.getTime() + (s.durationMin||25)*60000);
+        const now = new Date();
+        if (now < starts) { statusEl.textContent = '예정'; if (timerEl) timerEl.textContent = '시작까지 ' + formatDuration(Math.floor((starts-now)/1000)); }
+        else if (now >= starts && now < ends) { statusEl.textContent = '진행중'; if (timerEl) timerEl.textContent = '남은 시간 ' + formatDuration(Math.floor((ends-now)/1000)); }
+        else { statusEl.textContent = '완료'; if (timerEl) timerEl.textContent = ''; }
+      });
+    }, 1000);
+  }
+
+  function sessionsFindById(id) { return _renderedSessions.find(s => String(s.id) === String(id)) || null; }
+
+  function formatDuration(sec) { if (sec <= 0) return '0초'; const m = Math.floor(sec/60); const s = sec%60; return (m? m + '분 ':'') + s + '초'; }
+
+  /* ── Nav active state and routing ── */
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      const route = (e.currentTarget && e.currentTarget.dataset && e.currentTarget.dataset.route) ? e.currentTarget.dataset.route : null;
+      if (!route) return;
+      switch(route){
+        case 'home': window.location.href = '/app/home_dashboard.html'; break;
+        case 'explore': window.location.href = '/app/home.html'; break; // placeholder
+        case 'history': window.location.href = '/app/history.html'; break;
+        case 'profile': window.location.href = '/app/profile.html'; break;
       }
-
-      await loadUpcoming();
-      renderUpcoming();
-      updateTimers();
-      setInterval(updateTimers, 1000);
-
-    })();
-  </script>
+    });
+  });
+})();
+</script>
 </body>
 </html>
