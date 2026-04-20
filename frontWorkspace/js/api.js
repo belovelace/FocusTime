@@ -14,8 +14,16 @@
     const token = getToken();
     if (token) opts.headers['Authorization'] = `Bearer ${token}`;
     if (opts.body && opts.headers['Content-Type'] === 'application/json' && typeof opts.body !== 'string') opts.body = JSON.stringify(opts.body);
+    // avoid cached responses
+    opts.cache = opts.cache || 'no-store';
     const res = await fetch(API_BASE + path, opts);
-    if (res.status === 401){ setToken(null); window.location.href = '/app/login.html'; throw new Error('unauthenticated'); }
+    if (res.status === 401){
+      setToken(null);
+      // preserve return URL so login redirects back
+      const next = `${location.pathname}${location.search}`;
+      window.location.href = `/app/login.html?next=${encodeURIComponent(next)}`;
+      throw new Error('unauthenticated');
+    }
     let json = null;
     try{ json = await res.json(); }catch(e){}
     return { ok: res.ok, status: res.status, body: json };
@@ -31,7 +39,15 @@
   async function postMessage(sessionId, body){ return request(`/api/sessions/${sessionId}/messages`, { method: 'POST', body: { body } }); }
   async function getMessages(sessionId){ return request(`/api/sessions/${sessionId}/messages`); }
 
-  async function postGoal(sessionId, goalText){ return request(`/api/sessions/${sessionId}/goals`, { method: 'POST', body: { goalText } }); }
+  async function postGoal(sessionId, data){
+    const body = (typeof data === 'string' || data === null) ? { goalText: data } : data;
+    return request(`/api/sessions/${sessionId}/goals`, { method: 'POST', body });
+  }
+
+  // Favorites API for user
+  async function getFavorites(){ return request('/api/users/me/favorites'); }
+  async function addFavorite(partnerId){ return request(`/api/users/me/favorites/${partnerId}`, { method: 'POST' }); }
+  async function removeFavorite(partnerId){ return request(`/api/users/me/favorites/${partnerId}`, { method: 'DELETE' }); }
   async function getGoals(sessionId){ return request(`/api/sessions/${sessionId}/goals`); }
 
   async function postVideo(sessionId, youtubeUrl){ return request(`/api/sessions/${sessionId}/video`, { method: 'POST', body: { youtubeUrl } }); }
@@ -42,6 +58,7 @@
   global.FTApi = {
     getToken, setToken, getSessionId, setSessionId,
     request, login, signup, createSession, getSession, joinSession,
-    postMessage, getMessages, postGoal, getGoals, postVideo, extractYouTubeId
+    postMessage, getMessages, postGoal, getGoals, postVideo, extractYouTubeId,
+    getFavorites, addFavorite, removeFavorite
   };
 })(window);

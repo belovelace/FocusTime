@@ -7,26 +7,7 @@
   <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <script id="tailwind-config">
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#3B5BDB',
-            'primary-500': '#4C6EF5',
-            background: '#F8F9FA',
-            surface: '#FFFFFF',
-            'surface-container-high': '#e7e8e9',
-            'surface-container-lowest': '#ffffff',
-            'surface-variant': '#E1E3E4',
-            'on-surface': '#212529',
-            'on-surface-variant':'#6C757D',
-            danger: '#FA5252'
-          },
-          borderRadius: { DEFAULT: '0.5rem', xl: '0.75rem', full: '9999px' },
-          fontFamily: { body: ['Pretendard','sans-serif'] }
-        }
-      }
-    }
+    tailwind.config = { theme: { extend: { colors: { primary: '#3B5BDB', 'background': '#F8F9FA', surface: '#FFFFFF', 'on-surface': '#212529', 'on-surface-variant':'#6C757D' }, borderRadius: { DEFAULT: '0.5rem' }, fontFamily: { body: ['Pretendard','sans-serif'] } } } }
   </script>
   <style>body{font-family:'Pretendard',sans-serif;min-height:100dvh}</style>
   <title>로그인 — FocusTime</title>
@@ -101,6 +82,10 @@
   <script src="/app/js/api.js"></script>
   <script>
   (function(){
+    // Back button fallback
+    const backBtn = document.querySelector('button[aria-label="뒤로"]');
+    if (backBtn) backBtn.addEventListener('click', ()=>{ if (history.length > 1) history.back(); else window.location.href = '/app/home.html'; });
+
     const email = document.getElementById('email');
     const password = document.getElementById('password');
     const loginBtn = document.getElementById('loginBtn');
@@ -121,7 +106,11 @@
         const res = await FTApi.login(em, pw);
         if (res && res.ok && res.body && res.body.accessToken) {
           FTApi.setToken(res.body.accessToken);
-          window.location.href = '/app/home.html';
+          // if caller passed a `next` param, redirect there
+          const params = new URLSearchParams(location.search);
+          const next = params.get('next');
+          // default to dashboard after login
+          window.location.href = next ? next : '/app/home_dashboard.html';
           return;
         }
         alert('로그인 실패');

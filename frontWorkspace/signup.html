@@ -10,19 +10,8 @@
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
-            primary: '#3B5BDB',
-            'primary-500': '#4C6EF5',
-            background: '#F8F9FA',
-            surface: '#FFFFFF',
-            'surface-container-high': '#e7e8e9',
-            'surface-container-lowest': '#ffffff',
-            'surface-variant': '#E1E3E4',
-            'on-surface': '#212529',
-            'on-surface-variant':'#6C757D',
-            danger: '#FA5252'
-          },
-          borderRadius: { DEFAULT: '0.5rem', xl: '0.75rem', full: '9999px' },
+          colors: { primary: '#3B5BDB', background: '#F8F9FA', surface: '#FFFFFF' },
+          borderRadius: { DEFAULT: '0.5rem' },
           fontFamily: { body: ['Pretendard','sans-serif'] }
         }
       }
@@ -33,7 +22,7 @@
 </head>
 <body class="bg-background text-on-surface antialiased">
   <header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 py-3 bg-background">
-    <button aria-label="뒤로" class="p-2 rounded-lg">
+    <button aria-label="뒤로" id="backBtn" class="p-2 rounded-lg">
       <span class="material-symbols-outlined">arrow_back</span>
     </button>
     <h1 class="text-xl font-black text-primary">포커스타임</h1>
@@ -52,7 +41,7 @@
           <div class="w-24 h-24 rounded-full bg-surface-container-lowest flex items-center justify-center text-on-surface-variant border-2 border-dashed border-surface-variant">
             <span class="material-symbols-outlined text-3xl">person</span>
           </div>
-          <button type="button" aria-label="프로필 사진 변경" class="absolute -right-2 -bottom-2 bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm">
+          <button id="editAvatarBtn" type="button" aria-label="프로필 사진 변경" class="absolute -right-2 -bottom-2 bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm">
             <span class="material-symbols-outlined text-sm">edit</span>
           </button>
         </div>
@@ -81,7 +70,7 @@
                class="w-full h-14 px-4 bg-surface-container-high rounded-xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest outline-none text-on-surface" />
       </div>
 
-      <button id="signupBtn" type="button" class="w-full h-14 mt-2 bg-gradient-to-r from-[#1a40c2] to-[#3b5bdb] text-white font-bold rounded-xl shadow-lg active:scale-[0.98]">시작하기</button>
+      <button id="signupBtn" type="button" class="w-full h-14 mt-2" style="background:#3B5BDB;color:#fff;font-weight:600;border-radius:0.5rem;">시작하기</button>
 
       <div class="my-6 flex items-center gap-4">
         <div class="h-[1px] flex-1 bg-surface-variant/50"></div>
@@ -137,6 +126,13 @@
     });
 
     document.getElementById('kakaoBtn').addEventListener('click', ()=>{ window.location.href = '/auth/kakao'; });
+
+    // back button
+    const back = document.getElementById('backBtn'); if (back) back.addEventListener('click', ()=>{ if (history.length > 1) history.back(); else window.location.href = '/app/home.html'; });
+
+    // avatar edit => open profile editor
+    const avatarBtn = document.getElementById('editAvatarBtn');
+    if (avatarBtn) avatarBtn.addEventListener('click', ()=>{ window.location.href = '/app/profile.html?edit=1'; });
   })();
   </script>
 </body>

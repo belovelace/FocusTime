@@ -29,11 +29,15 @@ const path = require('path');
 
 // Serve frontWorkspace static files under /app
 app.use('/app', express.static(path.join(__dirname, '..', 'frontWorkspace')));
+// Serve project-level images under /images so front-end can load assets outside frontWorkspace
+app.use('/images', express.static(path.join(__dirname, '..', 'images')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/notifications', notificationRoutes);
+const favoritesRoutes = require('./routes/favorites');
+app.use('/api/users/me/favorites', favoritesRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/webhooks', webhookRoutes);
 
