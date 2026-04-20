@@ -614,8 +614,15 @@
               const r = await FTApi.request('/api/sessions/' + encodeURIComponent(id) + '/status', {
                 method: 'PATCH', body: { status: 'cancelled' }
               });
-              if (r && r.ok) { showToast('세션이 취소되었습니다.'); loadMySessions(); }
-              else showToast('취소 실패');
+              if (r && r.ok) {
+                showToast('세션이 취소되었습니다.');
+                loadMySessions();
+              } else if (r && r.body && r.body.message) {
+                // surface server-provided message when available
+                alert(r.body.message);
+              } else {
+                showToast('취소 실패');
+              }
             } catch (err) { console.error(err); showToast('서버 오류'); }
           });
         });

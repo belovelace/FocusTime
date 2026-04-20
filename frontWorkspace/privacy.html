@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>개인정보처리방침 — FocusTime</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "background":               "#f8f9fa",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low":    "#f3f4f5",
+            "surface-container":        "#edeeef",
+            "on-surface":               "#191c1d",
+            "on-surface-variant":       "#444654",
+            "primary":                  "#1a40c2",
+            "primary-container":        "#3b5bdb",
+            "on-primary-container":     "#e2e5ff",
+            "outline-variant":          "#c4c5d6",
+            "secondary":                "#006e24",
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    *, body { font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #c4c5d6; border-radius: 2px; }
+
+    /* TOC sidebar active */
+    .toc-link { transition: color 120ms ease, background 120ms ease; }
+    .toc-link.active { color: #1a40c2; background: rgba(58,91,219,0.07); }
+
+    /* Section reveal */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(10px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .section-block { animation: fadeUp 0.35s ease both; }
+
+    /* Highlight box */
+    .info-box {
+      background: rgba(58,91,219,0.06);
+      border-left: 3px solid #3b5bdb;
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* Table */
+    .policy-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .policy-table th {
+      background: #edeeef; color: #444654;
+      font-weight: 600; padding: 10px 14px; text-align: left;
+      border-bottom: 1px solid #c4c5d6;
+    }
+    .policy-table td {
+      padding: 10px 14px; color: #191c1d;
+      border-bottom: 1px solid rgba(196,197,214,0.3);
+      vertical-align: top; line-height: 1.6;
+    }
+    .policy-table tr:last-child td { border-bottom: none; }
+    .policy-table tr:hover td { background: rgba(58,91,219,0.02); }
+
+    /* Back button */
+    .back-btn { transition: background 120ms ease; }
+    .back-btn:hover { background: #edeeef; }
+
+    /* Badge */
+    .version-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      background: rgba(0,110,36,0.10); color: #006e24;
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 9999px; letter-spacing: 0.02em;
+    }
+
+    /* Print */
+    @media print {
+      aside, header, .back-btn { display: none !important; }
+      main { max-width: 100% !important; padding: 0 !important; }
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-surface min-h-screen">
+
+  <!-- ── Header ── -->
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md"
+          style="border-bottom:0.5px solid rgba(196,197,214,0.3)">
+    <div class="max-w-5xl mx-auto px-5 h-14 flex items-center gap-3">
+      <button id="backBtn" aria-label="뒤로가기"
+              class="back-btn w-9 h-9 flex items-center justify-center rounded-full">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="#1a40c2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+      </button>
+      <h1 class="text-[16px] font-bold tracking-tight text-on-surface">개인정보처리방침</h1>
+      <div class="ml-auto version-badge">
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="4"/></svg>
+        시행 2025. 01. 01.
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-5xl mx-auto px-5 py-8 flex gap-10">
+
+    <!-- ── TOC Sidebar (desktop) ── -->
+    <aside class="hidden lg:block w-56 flex-shrink-0">
+      <div class="sticky top-20">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-3">목차</p>
+        <nav class="space-y-0.5">
+          <a href="#s1"  class="toc-link block text-[13px] px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-primary">1. 수집하는 개인정보</a>
+          <a href="#s2"  class="toc-link block text-[13px] px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-primary">2. 수집 및 이용 목적</a>
+          <a href="#s3"  class="toc-link block text-[13px] px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-primary">3. 보유 및 이용기간</a>
+          <a href="#s4"  class="toc-link block text-[13px] px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-primary">4. 파기 절차 및 방법</a>
+          <a href="#s5"  class="toc-link block text-[13px] px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-primary">5. 제3자 제공</a>
+          <a href="#s6"  class="toc-link block text-[13px] px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-primary">6. 처리 위탁</a>
+          <a href="#s7"  class="toc-link block text-[13px] px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-primary">7. 정보주체의 권리</a>
+          <a href="#s8"  class="toc-link block text-[13px] px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-primary">8. 안전성 확보 조치</a>
+          <a href="#s9"  class="toc-link block text-[13px] px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-primary">9. 쿠키 및 자동수집</a>
+          <a href="#s10" class="toc-link block text-[13px] px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-primary">10. 개인정보 보호책임자</a>
+          <a href="#s11" class="toc-link block text-[13px] px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-primary">11. 권익침해 구제 방법</a>
+          <a href="#s12" class="toc-link block text-[13px] px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-primary">12. 방침 변경 안내</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- ── Main content ── -->
+    <main class="flex-1 min-w-0 space-y-10">
+
+      <!-- Intro -->
+      <div class="info-box px-5 py-4 section-block">
+        <p class="text-[14px] leading-relaxed text-on-surface">
+          <strong>FocusTime</strong>(이하 "회사")은 「개인정보 보호법」 제30조에 따라 정보주체의 개인정보를 보호하고
+          이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 다음과 같이 개인정보 처리방침을 수립·공개합니다.
+        </p>
+      </div>
+
+      <!-- 1. 수집하는 개인정보 -->
+      <section id="s1" class="section-block">
+        <h2 class="text-[17px] font-bold mb-4 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0"
+                style="background:#3b5bdb">1</span>
+          수집하는 개인정보의 항목 및 수집 방법
+        </h2>
+        <p class="text-[14px] text-on-surface-variant mb-4 leading-relaxed">
+          회사는 서비스 제공을 위해 최소한의 개인정보만을 수집합니다.
+        </p>
+        <div class="overflow-x-auto rounded-xl" style="border:0.5px solid rgba(196,197,214,0.5)">
+          <table class="policy-table">
+            <thead>
+              <tr>
+                <th>수집 시점</th>
+                <th>수집 항목</th>
+                <th>수집 방법</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-medium">회원가입 (필수)</td>
+                <td>이메일 주소, 비밀번호(암호화 저장), 닉네임</td>
+                <td>서비스 내 회원가입 양식</td>
+              </tr>
+              <tr>
+                <td class="font-medium">소셜 로그인 (선택)</td>
+                <td>이메일 주소, 프로필 이름, 프로필 사진 URL (OAuth 제공자 제공 정보)</td>
+                <td>OAuth 2.0 연동 (Google 등)</td>
+              </tr>
+              <tr>
+                <td class="font-medium">프로필 설정 (선택)</td>
+                <td>닉네임, 한줄 소개, 프로필 사진 URL, 타임존</td>
+                <td>서비스 내 프로필 편집</td>
+              </tr>
+              <tr>
+                <td class="font-medium">세션 이용</td>
+                <td>세션 참여 이력, 집중 시간, 목표 텍스트, 회고 내용, 별점</td>
+                <td>서비스 이용 과정에서 자동 생성</td>
+              </tr>
+              <tr>
+                <td class="font-medium">결제 (Plus 구독)</td>
+                <td>결제 수단 정보(PG사 토큰), 결제 이력</td>
+                <td>결제 처리 시 PG사 연동</td>
+              </tr>
+              <tr>
+                <td class="font-medium">서비스 이용 시 자동 수집</td>
+                <td>접속 IP, 기기 정보(OS, 브라우저), 서비스 이용 로그, 쿠키</td>
+                <td>시스템 자동 수집</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-[12px] text-on-surface-variant mt-3 leading-relaxed">
+          ※ 만 14세 미만 아동의 개인정보는 수집하지 않습니다. 회원가입 시 만 14세 이상임을 확인합니다.
+        </p>
+      </section>
+
+      <!-- 2. 수집 및 이용 목적 -->
+      <section id="s2" class="section-block">
+        <h2 class="text-[17px] font-bold mb-4 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0"
+                style="background:#3b5bdb">2</span>
+          개인정보의 수집 및 이용 목적
+        </h2>
+        <div class="overflow-x-auto rounded-xl" style="border:0.5px solid rgba(196,197,214,0.5)">
+          <table class="policy-table">
+            <thead>
+              <tr>
+                <th>이용 목적</th>
+                <th>수집 항목</th>
+                <th>법적 근거</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-medium">회원 가입·관리 및 본인 확인</td>
+                <td>이메일, 비밀번호, 닉네임</td>
+                <td>개인정보보호법 제15조 제1항 제4호 (계약 이행)</td>
+              </tr>
+              <tr>
+                <td class="font-medium">집중 세션 서비스 제공</td>
+                <td>세션 이력, 목표, 파트너 정보</td>
+                <td>개인정보보호법 제15조 제1항 제4호 (계약 이행)</td>
+              </tr>
+              <tr>
+                <td class="font-medium">개인화된 통계·리포트 제공</td>
+                <td>세션 참여 이력, 집중 시간</td>
+                <td>개인정보보호법 제15조 제1항 제4호 (계약 이행)</td>
+              </tr>
+              <tr>
+                <td class="font-medium">결제 처리 및 환불</td>
+                <td>결제 정보, 구독 이력</td>
+                <td>개인정보보호법 제15조 제1항 제4호 (계약 이행)</td>
+              </tr>
+              <tr>
+                <td class="font-medium">서비스 개선 및 부정 이용 방지</td>
+                <td>접속 로그, IP, 기기 정보</td>
+                <td>개인정보보호법 제15조 제1항 제6호 (정당한 이익)</td>
+              </tr>
+              <tr>
+                <td class="font-medium">공지사항 및 서비스 알림 발송</td>
+                <td>이메일</td>
+                <td>개인정보보호법 제15조 제1항 제4호 (계약 이행)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3. 보유 및 이용기간 -->
+      <section id="s3" class="section-block">
+        <h2 class="text-[17px] font-bold mb-4 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0"
+                style="background:#3b5bdb">3</span>
+          개인정보의 보유 및 이용기간
+        </h2>
+        <p class="text-[14px] text-on-surface-variant mb-4 leading-relaxed">
+          회사는 원칙적으로 개인정보 수집 및 이용 목적이 달성되면 지체 없이 파기합니다.
+          단, 관계 법령에 따라 다음과 같이 일정 기간 보존합니다.
+        </p>
+        <div class="overflow-x-auto rounded-xl mb-4" style="border:0.5px solid rgba(196,197,214,0.5)">
+          <table class="policy-table">
+            <thead>
+              <tr>
+                <th>보존 항목</th>
+                <th>보존 기간</th>
+                <th>근거 법령</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-medium">회원 기본정보</td>
+                <td>회원 탈퇴 시까지</td>
+                <td>— (서비스 이용 계약)</td>
+              </tr>
+              <tr>
+                <td class="font-medium">계약·청약철회 기록</td>
+                <td>5년</td>
+                <td>전자상거래법 제6조</td>
+              </tr>
+              <tr>
+                <td class="font-medium">대금 결제·공급 기록</td>
+                <td>5년</td>
+                <td>전자상거래법 제6조</td>
+              </tr>
+              <tr>
+                <td class="font-medium">소비자 불만·분쟁 처리 기록</td>
+                <td>3년</td>
+                <td>전자상거래법 제6조</td>
+              </tr>
+              <tr>
+                <td class="font-medium">서비스 이용 로그</td>
+                <td>3개월</td>
+                <td>통신비밀보호법 제15조의2</td>
+              </tr>
+              <tr>
+                <td class="font-medium">부정 이용 방지 기록</td>
+                <td>1년</td>
+                <td>개인정보보호법 제15조 제1항 제6호 (정당한 이익)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 4. 파기 절차 및 방법 -->
+      <section id="s4" class="section-block">
+        <h2 class="text-[17px] font-bold mb-4 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0"
+                style="background:#3b5bdb">4</span>
+          개인정보의 파기 절차 및 방법
+        </h2>
+        <div class="space-y-3 text-[14px] leading-relaxed text-on-surface">
+          <p>회사는 보유기간이 경과하거나 처리 목적이 달성된 개인정보를 지체 없이 파기합니다.</p>
+          <div class="rounded-xl p-4 space-y-2" style="background:#f3f4f5">
+            <p><strong>전자적 파일</strong> — 복원이 불가능한 방법으로 영구 삭제합니다. (DB DELETE + 백업 파일 덮어쓰기)</p>
+            <p><strong>종이 문서</strong> — 해당하는 경우 분쇄기로 파쇄하거나 소각합니다.</p>
+            <p><strong>파기 절차</strong> — 파기 사유 발생 시 개인정보 보호책임자의 승인 후 파기하며, 파기 결과를 기록합니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. 제3자 제공 -->
+      <section id="s5" class="section-block">
+        <h2 class="text-[17px] font-bold mb-4 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0"
+                style="background:#3b5bdb">5</span>
+          개인정보의 제3자 제공
+        </h2>
+        <div class="info-box px-4 py-3 mb-4">
+          <p class="text-[14px] leading-relaxed">
+            회사는 원칙적으로 이용자의 개인정보를 제3자에게 제공하지 않습니다.
+            다만, 아래의 경우에는 예외로 합니다.
+          </p>
+        </div>
+        <ul class="text-[14px] space-y-2 text-on-surface leading-relaxed list-disc list-inside">
+          <li>이용자가 사전에 동의한 경우</li>
+          <li>법령의 규정에 의거하거나 수사 목적으로 수사기관이 적법한 절차에 따라 요청한 경우</li>
+          <li>세션 파트너 매칭 서비스 특성상 상대방에게 닉네임·프로필 사진이 공개됩니다 (이용자가 직접 설정한 공개 정보에 한함)</li>
+        </ul>
+      </section>
+
+      <!-- 6. 처리 위탁 -->
+      <section id="s6" class="section-block">
+        <h2 class="text-[17px] font-bold mb-4 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0"
+                style="background:#3b5bdb">6</span>
+          개인정보 처리 업무의 위탁
+        </h2>
+        <p class="text-[14px] text-on-surface-variant mb-4 leading-relaxed">
+          회사는 원활한 서비스 운영을 위해 다음과 같이 개인정보 처리 업무를 위탁합니다.
+          위탁 계약 시 개인정보보호법 제26조에 따른 사항을 계약서에 명시합니다.
+        </p>
+        <div class="overflow-x-auto rounded-xl" style="border:0.5px solid rgba(196,197,214,0.5)">
+          <table class="policy-table">
+            <thead>
+              <tr>
+                <th>수탁 업체</th>
+                <th>위탁 업무</th>
+                <th>보유 기간</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-medium">Amazon Web Services (AWS)</td>
+                <td>서버 인프라 운영 및 데이터 저장 (서울 리전 ap-northeast-2)</td>
+                <td>위탁 계약 종료 시까지</td>
+              </tr>
+              <tr>
+                <td class="font-medium">토스페이먼츠 (주)</td>
+                <td>결제 처리 및 결제 정보 관리</td>
+                <td>위탁 계약 종료 시까지</td>
+              </tr>
+              <tr>
+                <td class="font-medium">Google LLC</td>
+                <td>OAuth 소셜 로그인 인증</td>
+                <td>인증 처리 완료 즉시</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 7. 정보주체의 권리 -->
+      <section id="s7" class="section-block">
+        <h2 class="text-[17px] font-bold mb-4 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0"
+                style="background:#3b5bdb">7</span>
+          정보주체의 권리·의무 및 행사 방법
+        </h2>
+        <p class="text-[14px] text-on-surface-variant mb-4 leading-relaxed">
+          이용자는 언제든지 다음의 권리를 행사할 수 있습니다.
+        </p>
+        <div class="grid sm:grid-cols-2 gap-3 mb-4">
+          <div class="rounded-xl p-4" style="background:#f3f4f5">
+            <p class="font-bold text-[13px] mb-1">📋 열람 요구권</p>
+            <p class="text-[13px] text-on-surface-variant leading-relaxed">자신의 개인정보 처리 현황 및 내용을 확인할 수 있습니다.</p>
+          </div>
+          <div class="rounded-xl p-4" style="background:#f3f4f5">
+            <p class="font-bold text-[13px] mb-1">✏️ 정정·삭제 요구권</p>
+            <p class="text-[13px] text-on-surface-variant leading-relaxed">잘못된 정보를 수정하거나 삭제를 요구할 수 있습니다.</p>
+          </div>
+          <div class="rounded-xl p-4" style="background:#f3f4f5">
+            <p class="font-bold text-[13px] mb-1">⏸️ 처리 정지 요구권</p>
+            <p class="text-[13px] text-on-surface-variant leading-relaxed">개인정보 처리의 일시 정지를 요구할 수 있습니다.</p>
+          </div>
+          <div class="rounded-xl p-4" style="background:#f3f4f5">
+            <p class="font-bold text-[13px] mb-1">📤 이동·전송 요구권</p>
+            <p class="text-[13px] text-on-surface-variant leading-relaxed">자동화 방법으로 처리되는 개인정보의 이동을 요구할 수 있습니다.</p>
+          </div>
+        </div>
+        <p class="text-[14px] leading-relaxed">
+          권리 행사는 앱 내 <strong>프로필 &gt; 설정</strong> 또는 아래 개인정보 보호책임자에게 서면·이메일로 요청하시면
+          지체 없이 처리합니다 (최대 10일 이내).
+          단, 개인정보보호법 제35조 제5항, 제37조 제2항에 따라 권리가 제한될 수 있습니다.
+        </p>
+      </section>
+
+      <!-- 8. 안전성 확보 조치 -->
+      <section id="s8" class="section-block">
+        <h2 class="text-[17px] font-bold mb-4 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0"
+                style="background:#3b5bdb">8</span>
+          개인정보의 안전성 확보 조치
+        </h2>
+        <p class="text-[14px] text-on-surface-variant mb-4 leading-relaxed">
+          회사는 개인정보보호법 제29조 및 시행령 제30조에 따라 다음과 같은 안전성 확보 조치를 시행합니다.
+        </p>
+        <ul class="text-[14px] space-y-2 text-on-surface leading-relaxed">
+          <li class="flex gap-2"><span class="text-primary font-bold flex-shrink-0">•</span><span><strong>관리적 조치</strong> — 내부관리계획 수립·시행, 개인정보취급자 최소화 및 정기 교육 실시</span></li>
+          <li class="flex gap-2"><span class="text-primary font-bold flex-shrink-0">•</span><span><strong>기술적 조치</strong> — 비밀번호 bcrypt 해시 저장, HTTPS/TLS 암호화 통신, 접근 권한 관리, 침입 탐지 시스템 운영</span></li>
+          <li class="flex gap-2"><span class="text-primary font-bold flex-shrink-0">•</span><span><strong>물리적 조치</strong> — AWS 서울 리전 데이터센터 운영(물리적 접근 통제), 불필요한 개인정보 정기 삭제</span></li>
+          <li class="flex gap-2"><span class="text-primary font-bold flex-shrink-0">•</span><span><strong>접근 통제</strong> — JWT 기반 인증, refresh token 보안 관리, 비정상 접근 탐지 및 차단</span></li>
+        </ul>
+      </section>
+
+      <!-- 9. 쿠키 및 자동수집 -->
+      <section id="s9" class="section-block">
+        <h2 class="text-[17px] font-bold mb-4 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0"
+                style="background:#3b5bdb">9</span>
+          쿠키(Cookie) 및 자동 수집 장치의 설치·운영 및 거부
+        </h2>
+        <div class="space-y-3 text-[14px] leading-relaxed">
+          <p>회사는 서비스 제공을 위해 다음의 쿠키 및 로컬스토리지를 사용합니다.</p>
+          <div class="overflow-x-auto rounded-xl" style="border:0.5px solid rgba(196,197,214,0.5)">
+            <table class="policy-table">
+              <thead><tr><th>구분</th><th>항목</th><th>목적</th><th>보유 기간</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>필수</td>
+                  <td>ft:token</td>
+                  <td>로그인 인증 토큰 유지</td>
+                  <td>로그아웃 시 삭제</td>
+                </tr>
+                <tr>
+                  <td>필수</td>
+                  <td>ft:sessionId</td>
+                  <td>현재 세션 식별</td>
+                  <td>세션 종료 시 삭제</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>브라우저 설정을 통해 쿠키를 거부할 수 있으나, 일부 서비스 이용이 제한될 수 있습니다.
+            (Chrome: 설정 &gt; 개인정보 및 보안 &gt; 쿠키 및 기타 사이트 데이터)</p>
+        </div>
+      </section>
+
+      <!-- 10. 개인정보 보호책임자 -->
+      <section id="s10" class="section-block">
+        <h2 class="text-[17px] font-bold mb-4 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0"
+                style="background:#3b5bdb">10</span>
+          개인정보 보호책임자
+        </h2>
+        <p class="text-[14px] text-on-surface-variant mb-4 leading-relaxed">
+          회사는 개인정보보호법 제31조에 따라 개인정보 처리에 관한 업무를 총괄하고 개인정보 침해에 대한
+          불만 처리 및 피해 구제를 위해 개인정보 보호책임자를 지정하고 있습니다.
+        </p>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="rounded-xl p-5" style="background:#f3f4f5">
+            <p class="text-[12px] font-bold uppercase tracking-wider text-on-surface-variant mb-3">개인정보 보호책임자 (CPO)</p>
+            <p class="text-[14px] font-bold mb-1">홍길동</p>
+            <p class="text-[13px] text-on-surface-variant mb-0.5">직책: 개인정보 보호책임자</p>
+            <a href="mailto:privacy@focustime.kr"
+               class="text-[13px] text-primary font-medium">privacy@focustime.kr</a>
+          </div>
+          <div class="rounded-xl p-5" style="background:#f3f4f5">
+            <p class="text-[12px] font-bold uppercase tracking-wider text-on-surface-variant mb-3">개인정보 보호 담당 부서</p>
+            <p class="text-[14px] font-bold mb-1">서비스 운영팀</p>
+            <p class="text-[13px] text-on-surface-variant mb-0.5">전화: 02-0000-0000</p>
+            <a href="mailto:privacy@focustime.kr"
+               class="text-[13px] text-primary font-medium">privacy@focustime.kr</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11. 권익침해 구제 방법 -->
+      <section id="s11" class="section-block">
+        <h2 class="text-[17px] font-bold mb-4 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0"
+                style="background:#3b5bdb">11</span>
+          개인정보 침해 신고 및 권익침해 구제 방법
+        </h2>
+        <p class="text-[14px] text-on-surface-variant mb-4 leading-relaxed">
+          개인정보 침해로 인한 피해를 구제받기 위해 아래 기관에 신고하거나 분쟁 해결을 신청할 수 있습니다.
+        </p>
+        <div class="space-y-3">
+          <div class="rounded-xl p-4 flex items-start gap-3" style="border:0.5px solid rgba(196,197,214,0.5)">
+            <span class="text-[20px] flex-shrink-0 mt-0.5">🏛️</span>
+            <div>
+              <p class="font-bold text-[14px]">개인정보 침해신고센터</p>
+              <p class="text-[13px] text-on-surface-variant">한국인터넷진흥원(KISA) 운영 · 전화: 118 · 
+                <a href="https://privacy.kisa.or.kr" target="_blank" rel="noopener" class="text-primary">privacy.kisa.or.kr</a>
+              </p>
+            </div>
+          </div>
+          <div class="rounded-xl p-4 flex items-start gap-3" style="border:0.5px solid rgba(196,197,214,0.5)">
+            <span class="text-[20px] flex-shrink-0 mt-0.5">⚖️</span>
+            <div>
+              <p class="font-bold text-[14px]">개인정보 분쟁조정위원회</p>
+              <p class="text-[13px] text-on-surface-variant">전화: 1833-6972 · 
+                <a href="https://www.kopico.go.kr" target="_blank" rel="noopener" class="text-primary">www.kopico.go.kr</a>
+              </p>
+            </div>
+          </div>
+          <div class="rounded-xl p-4 flex items-start gap-3" style="border:0.5px solid rgba(196,197,214,0.5)">
+            <span class="text-[20px] flex-shrink-0 mt-0.5">🔍</span>
+            <div>
+              <p class="font-bold text-[14px]">개인정보보호위원회</p>
+              <p class="text-[13px] text-on-surface-variant">전화: 02-2100-2499 · 
+                <a href="https://www.privacy.go.kr" target="_blank" rel="noopener" class="text-primary">www.privacy.go.kr</a>
+              </p>
+            </div>
+          </div>
+          <div class="rounded-xl p-4 flex items-start gap-3" style="border:0.5px solid rgba(196,197,214,0.5)">
+            <span class="text-[20px] flex-shrink-0 mt-0.5">👮</span>
+            <div>
+              <p class="font-bold text-[14px]">대검찰청 사이버수사과</p>
+              <p class="text-[13px] text-on-surface-variant">전화: 1301 · 
+                <a href="https://www.spo.go.kr" target="_blank" rel="noopener" class="text-primary">www.spo.go.kr</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 12. 방침 변경 안내 -->
+      <section id="s12" class="section-block">
+        <h2 class="text-[17px] font-bold mb-4 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0"
+                style="background:#3b5bdb">12</span>
+          개인정보 처리방침의 변경
+        </h2>
+        <div class="text-[14px] leading-relaxed space-y-2">
+          <p>
+            이 개인정보 처리방침은 <strong>2025년 1월 1일</strong>부터 적용됩니다.
+            법령·서비스 변경 등에 따라 내용이 변경될 경우, 시행 최소 <strong>7일 전</strong>에
+            앱 내 공지사항 또는 이메일을 통해 안내합니다.
+            중요한 변경(개인정보 수집 항목, 이용 목적 변경 등)은 <strong>30일 전</strong>에 사전 고지합니다.
+          </p>
+          <div class="rounded-xl p-4 mt-3" style="background:#f3f4f5">
+            <p class="text-[13px] font-semibold mb-2 text-on-surface-variant">이전 방침 이력</p>
+            <p class="text-[13px] text-on-surface-variant">· 해당 없음 (최초 제정)</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer note -->
+      <div class="text-center pt-4 pb-8">
+        <p class="text-[12px] text-on-surface-variant">
+          본 방침은 2025. 01. 01.부터 시행됩니다. · FocusTime
+        </p>
+        <button onclick="window.print()"
+                class="mt-3 text-[12px] text-primary font-medium px-4 py-1.5 rounded-lg hover:bg-surface-container-low transition-colors">
+          🖨️ 인쇄하기
+        </button>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Back to top button -->
+  <button id="topBtn"
+          class="fixed bottom-6 right-6 w-10 h-10 rounded-full text-white shadow-lg flex items-center justify-center opacity-0 pointer-events-none transition-all duration-200"
+          style="background:#3b5bdb"
+          onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+         stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+  </button>
+
+  <script>
+    /* Back button */
+    document.getElementById('backBtn').addEventListener('click', () => {
+      if (history.length > 1) history.back();
+      else window.location.href = '/app/profile.html';
+    });
+
+    /* Back to top visibility */
+    const topBtn = document.getElementById('topBtn');
+    window.addEventListener('scroll', () => {
+      const show = window.scrollY > 300;
+      topBtn.style.opacity = show ? '1' : '0';
+      topBtn.style.pointerEvents = show ? 'auto' : 'none';
+    });
+
+    /* TOC active highlight on scroll */
+    const sections = document.querySelectorAll('section[id]');
+    const tocLinks = document.querySelectorAll('.toc-link');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          tocLinks.forEach(l => l.classList.remove('active'));
+          const active = document.querySelector(`.toc-link[href="#${e.target.id}"]`);
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(s => observer.observe(s));
+
+    /* Smooth scroll for TOC links */
+    tocLinks.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  </script>
+</body>
+</html>

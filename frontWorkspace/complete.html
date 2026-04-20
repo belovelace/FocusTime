@@ -6,6 +6,27 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
   <title>세션 완료 — FocusTime</title>
+  <style>
+    /* Toast styling (small, reused pattern) */
+    #toast {
+      position: fixed;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: #191c1d;
+      color: #f0f1f2;
+      padding: 9px 18px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 180ms ease, transform 180ms ease;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 200;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
 </head>
 <body class="bg-background text-on-surface antialiased">
   <main class="max-w-md mx-auto pt-20 px-4">
@@ -18,7 +39,7 @@
     <div class="bg-surface rounded-xl p-4 mb-4">
       <label class="block text-sm font-semibold mb-2">오늘의 성취를 적어보세요</label>
       <textarea id="resultText" class="w-full h-24 p-3 rounded-lg bg-surface-container-high" placeholder="논문 2장 초안 완성!"></textarea>
-      <div class="text-right text-sm text-on-surface-variant mt-2">0 / 100</div>
+      <div id="resultCount" class="text-right text-sm text-on-surface-variant mt-2">0 / 100</div>
 
       <div class="mt-4">
         <label class="block text-sm font-semibold mb-2">파트너는 어땠나요?</label>
@@ -44,14 +65,28 @@
     </div>
 
     <div class="space-y-3">
+      <button id="saveComplete" class="w-full px-4 py-3 bg-primary text-white rounded-lg">저장</button>
       <button id="nextBtn" class="w-full px-4 py-3 bg-primary text-white rounded-lg">다음 세션 바로 예약하기</button>
       <button id="backBtn" class="w-full px-4 py-3 bg-surface-container-low rounded-lg">대시보드로 돌아가기</button>
     </div>
   </main>
 
+  <!-- Toast container -->
+  <div id="toast" aria-live="polite"></div>
+
   <script src="/app/js/api.js"></script>
   <script>
     (function(){
+      // Small toast helper used by this page
+      function showToast(msg, ms = 2500){
+        const t = document.getElementById('toast');
+        if (!t) return; // should always exist
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(t._timer);
+        t._timer = setTimeout(()=> t.classList.remove('show'), ms);
+      }
+
       // star rating interaction
       const stars = Array.from(document.querySelectorAll('#starRow .star'));
       let selectedRating = 0;
@@ -65,13 +100,44 @@
       }
       stars.forEach(s=> s.addEventListener('click', ()=>{ selectedRating = Number(s.getAttribute('data-value')); updateStars(selectedRating); }));
 
+      // update character count for result textarea
+      const resultEl = document.getElementById('resultText');
+      const resultCount = document.getElementById('resultCount');
+      if (resultEl && resultCount){
+        resultEl.addEventListener('input', ()=>{
+          const len = Math.min(100, resultEl.value.length);
+          resultCount.textContent = `${len} / 100`;
+          if (resultEl.value.length > 100) resultEl.value = resultEl.value.slice(0,100);
+        });
+      }
+
       document.getElementById('nextBtn').addEventListener('click', async ()=>{
         // submit result + rating if session present
         const sessionId = FTApi.getSessionId();
         const text = document.getElementById('resultText').value.trim();
         const payload = { resultText: text, rating: selectedRating || null };
-        if (sessionId){ try{ const res = await FTApi.postGoal(sessionId, payload); if (res && res.ok){ FTApi.setSessionId(null); window.location.href = '/app/home.html'; return; } else { console.error(res); alert('저장 실패'); } }catch(e){ console.error(e); alert('서버 오류'); } }
+        if (sessionId){
+          try{
+            const res = await FTApi.postGoal(sessionId, payload);
+            if (res && res.ok){ FTApi.setSessionId(null); window.location.href = '/app/home.html'; return; }
+            else { console.error(res); showToast('저장 실패'); }
+          }catch(e){ console.error(e); showToast('서버 오류'); }
+        }
         else { window.location.href = '/app/home.html'; }
+      });
+
+      // save button on page
+      const saveBtn = document.getElementById('saveComplete');
+      if (saveBtn) saveBtn.addEventListener('click', async ()=>{
+        const sessionId = FTApi.getSessionId();
+        const text = document.getElementById('resultText').value.trim();
+        const payload = { resultText: text, rating: selectedRating || null };
+        if (!sessionId){ showToast('세션 ID가 없습니다'); return; }
+        try{
+          const res = await FTApi.postGoal(sessionId, payload);
+          if (res && res.ok){ showToast('저장되었습니다'); }
+          else { showToast('저장 실패'); }
+        }catch(e){ console.error(e); showToast('서버 오류'); }
       });
 
       document.getElementById('backBtn').addEventListener('click', ()=>{ window.location.href = '/app/home_dashboard.html#'; });
@@ -95,15 +161,15 @@
           try{
             if (favBtn.dataset.favorited === '1'){
               const res = await FTApi.removeFavorite(partnerId);
-              if (res && res.ok){ favBtn.textContent = '즐겨찾기 추가 ☆'; favBtn.dataset.favorited = '0'; alert('즐겨찾기에서 제거되었습니다'); }
-              else alert('제거 실패');
+              if (res && res.ok){ favBtn.textContent = '즐겨찾기 추가 ☆'; favBtn.dataset.favorited = '0'; showToast('즐겨찾기에서 제거되었습니다'); }
+              else showToast('제거 실패');
             } else {
               const res = await FTApi.addFavorite(partnerId);
-              if (res && res.ok){ favBtn.textContent = '즐겨찾기 제거 ★'; favBtn.dataset.favorited = '1'; alert('즐겨찾기에 추가되었습니다'); }
-              else if (res && res.status === 409) alert('이미 즐겨찾기 되어 있습니다');
-              else alert('추가 실패');
+              if (res && res.ok){ favBtn.textContent = '즐겨찾기 제거 ★'; favBtn.dataset.favorited = '1'; showToast('즐겨찾기에 추가되었습니다'); }
+              else if (res && res.status === 409) showToast('이미 즐겨찾기 되어 있습니다');
+              else showToast('추가 실패');
             }
-          }catch(e){ console.error(e); alert('서버 오류'); }
+          }catch(e){ console.error(e); showToast('서버 오류'); }
         });
         // init
         refreshFavUI();

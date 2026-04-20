@@ -79,9 +79,11 @@ router.post('/:id/join', auth, async (req, res) => {
     if (!session) return res.status(404).json({ error: 'not found' });
     // allow join only within 15 minutes before start or later
     const starts = new Date(session.startsAt).getTime();
-    const allowedFrom = starts - (15 * 60 * 1000);
+    const durationMs = (Number(session.durationMin || 25) * 60 * 1000);
+    const allowedFrom = starts - durationMs; // allow joining as early as one full session length before start
+    const ends = starts + durationMs;
     const now = Date.now();
-    if (now < allowedFrom) return res.status(400).json({ error: 'too_early', message: '예약 시간과 불일치 합니다.' });
+    if (now < allowedFrom || now > ends) return res.status(400).json({ error: 'too_early_or_finished', message: '참가 가능한 시간이 아닙니다.' });
 
     // atomic update: only set partnerId if currently null
     const updateResult = await prisma.session.updateMany({ where: { id, partnerId: null }, data: { partnerId: req.userId, status: 'matched' } });
@@ -112,8 +114,8 @@ router.delete('/:id', auth, async (req, res) => {
     if (String(session.hostId) !== String(req.userId)) return res.status(403).json({ error: 'forbidden' });
     const starts = new Date(session.startsAt).getTime();
     // Disallow cancellation within 10 minutes of start
-    const cancelDeadline = starts - (10 * 60 * 1000);
-    if (Date.now() >= cancelDeadline) return res.status(400).json({ error: 'too_late_to_cancel', message: '세션은 시작 10분 전까지만 취소 가능합니다.' });
+    const cancelDeadline = starts - (15 * 60 * 1000);
+    if (Date.now() >= cancelDeadline) return res.status(400).json({ error: 'too_late_to_cancel', message: '세션은 시작 15분 전까지만 취소 가능합니다.' });
     const deleted = await prisma.session.update({ where: { id }, data: { status: 'cancelled' } });
     res.json({ ok: true, session: deleted });
   } catch (err) { console.error(err); res.status(500).json({ error: 'cancel failed' }); }
@@ -175,8 +177,8 @@ router.patch('/:id/status', auth, async (req, res) => {
     if (String(session.hostId) !== String(req.userId)) return res.status(403).json({ error: 'forbidden' });
     if (status === 'cancelled') {
       const starts = new Date(session.startsAt).getTime();
-      const cancelDeadline = starts - (10 * 60 * 1000);
-      if (Date.now() >= cancelDeadline) return res.status(400).json({ error: 'too_late_to_cancel', message: '세션은 시작 10분 전까지만 취소 가능합니다.' });
+      const cancelDeadline = starts - (15 * 60 * 1000);
+      if (Date.now() >= cancelDeadline) return res.status(400).json({ error: 'too_late_to_cancel', message: '세션은 시작 15분 전까지만 취소 가능합니다.' });
     }
     const updated = await prisma.session.update({ where: { id }, data: { status } });
     res.json(updated);
