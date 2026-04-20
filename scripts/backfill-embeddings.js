@@ -11,13 +11,12 @@ async function sleep(ms) {
 }
 
 async function main() {
-  const goals = await prisma.sessionGoal.findMany({
-    where: {
-      goalText: { not: null },
-      goalEmbedding: null,
-    },
-    select: { id: true, goalText: true },
-  });
+  const goals = await prisma.$queryRaw`
+    SELECT id, goal_text AS goalText
+    FROM session_goals
+    WHERE goal_text IS NOT NULL
+      AND goal_embedding IS NULL
+  `;
 
   if (goals.length === 0) {
     console.log('임베딩할 목표가 없습니다.');
