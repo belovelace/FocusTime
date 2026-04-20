@@ -882,14 +882,24 @@
         const s = sessionsFindById(id);
         if (!s) { showToast('세션 정보를 불러오지 못했습니다.'); return; }
         const myId = String(document.getElementById('userAvatar')?.dataset.userId || '');
+        const starts = new Date(s.startsAt).getTime();
+        const durationMs = (Number(s.durationMin || 25) * 60 * 1000);
+        const ends = starts + durationMs;
+        const now = Date.now();
         const isHost = myId && myId === String(s.hostId);
         const isPartner = myId && myId === String(s.partnerId);
-        // host or partner: navigate directly without join API
-        if (isHost || isPartner) {
+        const isFinished = now > ends;
+        // host/partner or completed session: navigate directly, no join API needed
+        if (isHost || isPartner || isFinished) {
           window.location.href = '/app/session.html?id=' + encodeURIComponent(id) + '&autoplay=1';
           return;
         }
         if (s.partnerId) { showToast('이미 매칭되었습니다.'); return; }
+        const allowedFrom = starts - (15 * 60 * 1000);
+        if (now < allowedFrom) {
+          alert('예약 시간과 불일치 합니다.');
+          return;
+        }
         const res = await FTApi.joinSession(id);
         if (res && res.ok) {
           // Try to prime autoplay permission using Web Audio API (user gesture)
