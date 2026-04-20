@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>세션 탐색 — FocusTime</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: #3B5BDB;
+      --primary-light: #EDF2FF;
+      --primary-mid: #74C0FC;
+      --secondary: #2F9E44;
+      --secondary-light: #EBFBEE;
+      --bg: #F8F9FA;
+      --surface: #FFFFFF;
+      --text: #212529;
+      --text-muted: #6C757D;
+      --border: #DEE2E6;
+      --danger: #FA5252;
+      --warning: #FCC419;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+    }
+    .back-btn {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      color: var(--text);
+      transition: background 0.15s;
+    }
+    .back-btn:hover { background: var(--bg); }
+    .header-title { font-size: 17px; font-weight: 700; }
+
+    /* Main */
+    .main { max-width: 640px; margin: 0 auto; padding: 20px 16px; }
+
+    /* AI 소개 박스 */
+    .ai-intro {
+      background: linear-gradient(135deg, #1e3a8a 0%, #3B5BDB 60%, #4C6EF5 100%);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .ai-intro::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+    .ai-intro::after {
+      content: '';
+      position: absolute;
+      bottom: -30px; right: 40px;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+    .ai-intro h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .ai-intro p {
+      font-size: 13px;
+      opacity: 0.82;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .algo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .algo-item {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .algo-item .algo-label {
+      font-size: 11px;
+      opacity: 0.75;
+      margin-bottom: 3px;
+    }
+    .algo-item .algo-value {
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .algo-bar {
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.2);
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .algo-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.7);
+    }
+
+    /* 섹션 카드 */
+    .section-card {
+      background: var(--surface);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .section-header {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg);
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+
+    /* 필터 */
+    .filter-area { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .filter-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .pill-group { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pill {
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pill:hover { border-color: var(--primary); color: var(--primary); }
+    .pill.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    /* 후보 리스트 */
+    .candidates-list { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+
+    /* 후보 카드 */
+    .candidate-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      transition: box-shadow 0.15s, transform 0.15s;
+      cursor: default;
+    }
+    .candidate-card:hover {
+      box-shadow: 0 4px 12px rgba(59,91,219,0.1);
+      transform: translateY(-1px);
+    }
+    .card-top { display: flex; align-items: center; gap: 12px; }
+    .avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+    .card-info { flex: 1; min-width: 0; }
+    .card-name {
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+
+    /* 점수 배지 */
+    .score-badge {
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      line-height: 1;
+    }
+    .score-high { background: var(--secondary-light); color: #1a7a2e; }
+    .score-mid { background: var(--primary-light); color: #1d3aa8; }
+    .score-low { background: #F1F3F5; color: var(--text-muted); }
+
+    .fav-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      padding: 2px;
+      color: var(--warning);
+      transition: transform 0.15s;
+    }
+    .fav-btn:hover { transform: scale(1.2); }
+
+    /* 완료율 바 */
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .progress-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+    .progress-bar {
+      flex: 1;
+      height: 4px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--secondary);
+      transition: width 0.4s ease;
+    }
+    .progress-val { font-size: 11px; font-weight: 700; color: var(--text-muted); white-space: nowrap; }
+
+    /* 카드 하단 */
+    .card-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .tag-row { display: flex; gap: 5px; flex-wrap: wrap; }
+    .tag {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .tag-ai { background: var(--primary-light); color: #1d3aa8; }
+    .tag-mode { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+
+    .invite-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .invite-btn:hover { background: #2f4abf; }
+    .invite-btn:active { transform: scale(0.97); }
+    .invite-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* Skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .skeleton-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .skeleton-line { height: 12px; border-radius: 6px; margin-bottom: 8px; }
+
+    /* 빈 결과 */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .empty-icon { font-size: 36px; margin-bottom: 10px; }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: #212529;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.18s, transform 0.18s;
+      z-index: 200;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <button id="backBtn" class="back-btn" aria-label="뒤로">←</button>
+  <img id="siteLogo" src="/images/img/focustime_logo_refined.png" alt="FocusTime" style="height:28px;object-fit:contain">
+  <span class="header-title" style="margin-left:8px">세션 탐색</span>
+</header>
+
+<main class="main">
+
+  <!-- AI 알고리즘 소개 박스 -->
+  <div class="ai-intro">
+    <div class="ai-badge">✦ AI POWERED</div>
+    <h2>어떻게 파트너를 추천할까요?</h2>
+    <p>세션 이력과 목표 텍스트를 분석해 나와 가장 잘 맞는 파트너를 찾아드려요. OpenAI 임베딩으로 목표 유사도를 측정하고, 4가지 지표를 종합해 100점 만점으로 채점합니다.</p>
+    <div class="algo-grid">
+      <div class="algo-item">
+        <div class="algo-label">목표 유사도 (AI)</div>
+        <div class="algo-value">20점</div>
+        <div class="algo-bar"><div class="algo-bar-fill" style="width:20%"></div></div>
+      </div>
+      <div class="algo-item">
+        <div class="algo-label">완료율 · 취소율</div>
+        <div class="algo-value">36점</div>
+        <div class="algo-bar"><div class="algo-bar-fill" style="width:36%"></div></div>
+      </div>
+      <div class="algo-item">
+        <div class="algo-label">평균 평점</div>
+        <div class="algo-value">20점</div>
+        <div class="algo-bar"><div class="algo-bar-fill" style="width:20%"></div></div>
+      </div>
+      <div class="algo-item">
+        <div class="algo-label">집중 모드 · 시간대</div>
+        <div class="algo-value">24점</div>
+        <div class="algo-bar"><div class="algo-bar-fill" style="width:24%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 추천 파트너 섹션 -->
+  <div class="section-card">
+    <div class="section-header">
+      <div>
+        <div class="section-title">
+          ✦ AI 추천 파트너
+        </div>
+        <div id="sessionHistory" class="filter-label" style="margin-top:6px;color:var(--text-muted);font-weight:600;font-size:12px">세션 이력 불러오는 중...</div>
+      <script>
+        // Populate session history summary under the AI recommendation header
+        (async function(){
+          try{
+            const r = await FTApi.request('/api/users/me/stats');
+            const el = document.getElementById('sessionHistory');
+            if (r && r.ok && r.body){
+              const b = r.body;
+              const sessions = b.completedSessionsWeek || 0;
+              const minutes = b.focusedMinutesWeek || 0;
+              // show latest completed session date if available
+              let latest = null;
+              const perDay = b.perDay || {};
+              const keys = Object.keys(perDay).sort().reverse();
+              for(const k of keys){ if(perDay[k] && perDay[k].sessions && perDay[k].sessions.length){ latest = k; break; } }
+              el.textContent = `이번 주 완료 세션 ${sessions}회 · 총 ${minutes}분` + (latest ? ` · 최근: ${latest}` : '');
+            }
+          }catch(e){ console.error(e); }
+        })();
+      </script>
+      </div>
+      <span class="section-count" id="countBadge">불러오는 중...</span>
+    </div>
+
+    <div class="filter-area">
+      <div class="filter-label">세션 길이</div>
+      <div class="pill-group" id="durationPills">
+        <button class="pill active" data-min="25">25분</button>
+        <button class="pill" data-min="50">50분</button>
+        <button class="pill" data-min="75">75분</button>
+      </div>
+      <div class="filter-label" style="margin-top:12px">집중 모드</div>
+      <div class="pill-group" id="modePills">
+        <button class="pill active" data-mode="desk">데스크</button>
+        <button class="pill" data-mode="moving">이동</button>
+        <button class="pill" data-mode="any">무관</button>
+      </div>
+    </div>
+
+    <div id="candidatesArea" class="candidates-list"></div>
+  </div>
+
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="/app/js/api.js"></script>
+<script>
+(function () {
+
+  let selectedDuration = 25;
+  let selectedMode = 'desk';
+
+  // Load saved prefs from localStorage (set by settings/prefs.html)
+  (function applyStoredPrefs() {
+    try {
+      const raw = localStorage.getItem('ft:prefs');
+      if (!raw) return;
+      const p = JSON.parse(raw);
+      if (p.preferredDuration) selectedDuration = Number(p.preferredDuration);
+      if (p.preferredMode) selectedMode = p.preferredMode;
+    } catch (e) {}
+  })();
+
+  function showToast(msg, ms = 2200) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), ms);
+  }
+
+  function getToken() {
+    return localStorage.getItem('ft:token') || localStorage.getItem('token') || '';
+  }
+
+  function avatarInitial(nickname) {
+    return (nickname || 'U')[0].toUpperCase();
+  }
+
+  function placeholderAvatarDataUrl(initial) {
+    const color = '#c4c5d6';
+    const txt = encodeURIComponent(initial || 'U');
+    return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'><rect width='100%' height='100%' fill='${color}'/><text x='50%' y='54%' font-size='64' text-anchor='middle' fill='%23ffffff' font-family='Arial,Helvetica,sans-serif'>${txt}</text></svg>`;
+  }
+
+  function scoreClass(score) {
+    if (score >= 80) return 'score-high';
+    if (score >= 60) return 'score-mid';
+    return 'score-low';
+  }
+
+  function modeLabel(mode) {
+    return { desk: '데스크', moving: '이동', any: '무관' }[mode] || mode;
+  }
+
+  function initPills() {
+    // Activate pills matching current selectedDuration / selectedMode (possibly from saved prefs)
+    document.querySelectorAll('#durationPills .pill').forEach(b => {
+      b.classList.toggle('active', Number(b.dataset.min) === selectedDuration);
+      b.addEventListener('click', () => {
+        document.querySelectorAll('#durationPills .pill').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        selectedDuration = Number(b.dataset.min);
+        fetchCandidates();
+      });
+    });
+    document.querySelectorAll('#modePills .pill').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === selectedMode);
+      b.addEventListener('click', () => {
+        document.querySelectorAll('#modePills .pill').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        selectedMode = b.dataset.mode;
+        fetchCandidates();
+      });
+    });
+  }
+
+  function showSkeletons() {
+    const area = document.getElementById('candidatesArea');
+    area.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+      area.innerHTML += `
+        <div class="skeleton-card">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="skeleton" style="width:44px;height:44px;border-radius:50%;flex-shrink:0"></div>
+            <div style="flex:1">
+              <div class="skeleton skeleton-line" style="width:55%"></div>
+              <div class="skeleton skeleton-line" style="width:40%;margin-bottom:0"></div>
+            </div>
+            <div class="skeleton" style="width:48px;height:24px;border-radius:999px"></div>
+          </div>
+          <div class="skeleton skeleton-line" style="margin-top:12px;width:100%"></div>
+        </div>`;
+    }
+    document.getElementById('countBadge').textContent = '불러오는 중...';
+  }
+
+  function renderCandidates(items) {
+    const area = document.getElementById('candidatesArea');
+    area.innerHTML = '';
+    document.getElementById('countBadge').textContent = items.length + '명';
+
+    if (!items || items.length === 0) {
+      area.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          추천할 파트너가 없습니다.<br>필터를 바꿔보세요
+        </div>`;
+      return;
+    }
+
+    items.forEach((c, idx) => {
+      const score = Math.round(Number(c.matchScore) || 0);
+      const completion = Math.round(Number(c.completionRate) || 0);
+      const rating = Number(c.avgRating || 0).toFixed(1);
+      const isFav = c.isFavorite;
+
+      const card = document.createElement('div');
+      card.className = 'candidate-card';
+      card.style.animationDelay = (idx * 0.05) + 's';
+      const avatarHtml = c.avatarUrl ? `<a href="/app/profile.html?id=${c.userId}"><img class="candidate-avatar" src="${c.avatarUrl}" alt="${c.nickname||''}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid var(--border)"/></a>` : (c.userId ? `<a href="/app/profile.html?id=${c.userId}"><div class="avatar">${avatarInitial(c.nickname)}</div></a>` : `<div class="avatar">${avatarInitial(c.nickname)}</div>`);
+      card.innerHTML = `
+        <div class="card-top">
+          ${avatarHtml}
+          <div class="card-info">
+            <div class="card-name">${c.userId ? `<a href="/app/profile.html?id=${c.userId}" style="color:inherit;text-decoration:none">${c.nickname || ('user' + c.userId)}</a>` : (c.nickname || ('user' + c.userId))}</div>
+            <div class="card-sub">평점 ⭐ ${rating} · ${c.timezone || 'Asia/Seoul'}</div>
+          </div>
+          <div class="card-right">
+            <span class="score-badge ${scoreClass(score)}">${score}점</span>
+            <button class="fav-btn" data-id="${c.userId}" aria-label="즐겨찾기">${isFav ? '★' : '☆'}</button>
+          </div>
+        </div>
+        <div class="progress-row">
+          <span class="progress-label">완료율</span>
+          <div class="progress-bar"><div class="progress-fill" style="width:${completion}%"></div></div>
+          <span class="progress-val">${completion}%</span>
+        </div>
+        <div class="card-bottom">
+          <div class="tag-row">
+            <span class="tag tag-ai">✦ AI 매칭</span>
+            <span class="tag tag-mode">${modeLabel(c.preferredFocusMode)}</span>
+          </div>
+          <button class="invite-btn" data-id="${c.userId}">세션 초대하기</button>
+        </div`;;
+
+      // avatar fallback to local holder if image fails
+      const img = card.querySelector('.candidate-avatar');
+      if (img) {
+        img.onerror = function(){ this.onerror=null; this.src = placeholderAvatarDataUrl((c.nickname||'')[0]||'U'); };
+      }
+
+      // if userId missing (not a registered user), disable interactive buttons
+      if (!c.userId) {
+        const favBtn = card.querySelector('.fav-btn');
+        if (favBtn) { favBtn.disabled = true; favBtn.title = '등록된 사용자만 즐겨찾기 가능합니다'; }
+        const inviteBtn = card.querySelector('.invite-btn');
+        if (inviteBtn) { inviteBtn.disabled = true; inviteBtn.textContent = '초대 불가'; inviteBtn.title = '등록된 사용자만 초대 가능합니다'; }
+      }
+
+      // 즐겨찾기
+      const favBtnEl = card.querySelector('.fav-btn');
+      favBtnEl.addEventListener('click', async (e) => {
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        try {
+          const token = getToken();
+          const id = btn.dataset.id;
+          if (c.isFavorite) {
+            const r = await fetch(`/api/users/me/favorites/${id}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
+            if (r.ok) { c.isFavorite = false; btn.textContent = '☆'; showToast('즐겨찾기 해제'); }
+            else showToast('해제 실패');
+          } else {
+            const r = await fetch(`/api/users/me/favorites/${id}`, { method: 'POST', headers: { Authorization: 'Bearer ' + token } });
+            if (r.ok) { c.isFavorite = true; btn.textContent = '★'; showToast('즐겨찾기 추가 ★'); }
+            else showToast('추가 실패');
+          }
+        } catch (err) { showToast('서버 오류'); }
+        finally { btn.disabled = false; }
+      });
+
+      // 초대
+      const inviteBtnEl = card.querySelector('.invite-btn');
+      inviteBtnEl.addEventListener('click', async (e) => {
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        const previousText = btn.textContent;
+        btn.textContent = '초대 중…';
+        try {
+          // only allow invite if user is registered
+          if (!c.userId) { showToast('등록된 사용자만 초대할 수 있습니다'); return; }
+          const token = getToken();
+          const startsAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+          // 1. create session
+          const r = await fetch('/api/sessions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+            body: JSON.stringify({ startsAt, durationMin: selectedDuration, focusMode: selectedMode })
+          });
+          if (!r.ok) { showToast('세션 생성 실패'); return; }
+          const session = await r.json();
+          // 2. send invite notification to target user
+          const ir = await fetch(`/api/sessions/${session.id}/invite`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+            body: JSON.stringify({ targetUserId: c.userId })
+          });
+          showToast(ir.ok ? `${c.nickname || '파트너'}에게 초대를 보냈습니다 ✓` : '초대 알림 발송 실패');
+        } catch (err) { showToast('서버 오류'); }
+        finally { btn.disabled = false; btn.textContent = previousText || '세션 초대하기'; }
+      });
+
+      area.appendChild(card);
+    });
+  }
+
+  async function fetchCandidates() {
+    showSkeletons();
+    try {
+      const token = getToken();
+      const qp = `?focusMode=${encodeURIComponent(selectedMode)}&duration=${encodeURIComponent(selectedDuration)}`;
+      const r = await fetch('/api/matching/candidates' + qp, {
+        headers: { Authorization: token ? 'Bearer ' + token : '' }
+      });
+      if (r.ok) {
+        const j = await r.json();
+        renderCandidates(j.candidates || []);
+      } else if (r.status === 401) {
+        document.getElementById('candidatesArea').innerHTML = '<div class="empty-state"><div class="empty-icon">🔒</div>로그인이 필요합니다</div>';
+        document.getElementById('countBadge').textContent = '-';
+        showToast('로그인이 필요합니다');
+      } else {
+        document.getElementById('candidatesArea').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div>불러오기 실패</div>';
+        document.getElementById('countBadge').textContent = '-';
+      }
+    } catch (e) {
+      console.error(e);
+      document.getElementById('candidatesArea').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div>서버 오류</div>';
+      document.getElementById('countBadge').textContent = '-';
+    }
+  }
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    if (history.length > 1) history.back();
+    else window.location.href = '/app/home_dashboard.html';
+  });
+
+  initPills();
+  fetchCandidates();
+
+})();
+</script>
+</body>
+</html>

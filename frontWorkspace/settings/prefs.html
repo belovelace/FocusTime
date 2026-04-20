@@ -3,17 +3,448 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>매칭 선호도 — FocusTime</title>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  <style>body{font-family:Inter, Pretendard, sans-serif;min-height:100vh;padding:24px}</style>
+  <title>설정 — FocusTime</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: #3B5BDB;
+      --primary-light: #EDF2FF;
+      --secondary: #2F9E44;
+      --bg: #F8F9FA;
+      --surface: #FFFFFF;
+      --text: #212529;
+      --text-muted: #6C757D;
+      --border: #DEE2E6;
+      --danger: #FA5252;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    .header {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 20px;
+    }
+    .back-btn {
+      width: 36px; height: 36px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--surface);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: var(--text); transition: background 0.15s;
+    }
+    .back-btn:hover { background: var(--bg); }
+    .header-title { font-size: 17px; font-weight: 700; }
+
+    .main { max-width: 640px; margin: 0 auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; }
+
+    .section-card {
+      background: var(--surface);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .section-header {
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-title {
+      font-size: 15px; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+    .section-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; }
+
+    .field-label {
+      font-size: 12px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px;
+    }
+    .text-input {
+      width: 100%; padding: 10px 14px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 14px; font-family: inherit;
+      background: var(--surface); color: var(--text);
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    .text-input:focus { border-color: var(--primary); }
+    .text-input::placeholder { color: #adb5bd; }
+    textarea.text-input { resize: none; line-height: 1.5; }
+    select.text-input { cursor: pointer; }
+
+    .pill-group { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pill {
+      padding: 7px 16px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--surface);
+      font-size: 13px; font-weight: 500; color: var(--text-muted);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .pill:hover { border-color: var(--primary); color: var(--primary); }
+    .pill.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+    /* Toggle switch */
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .toggle-info { flex: 1; min-width: 0; }
+    .toggle-name { font-size: 14px; font-weight: 600; }
+    .toggle-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .toggle-switch {
+      position: relative; width: 44px; height: 24px; flex-shrink: 0; margin-left: 16px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #CED4DA; border-radius: 999px;
+      transition: background 0.2s;
+    }
+    .toggle-track::before {
+      position: absolute; content: '';
+      height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background: white; border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+    .toggle-switch input:checked + .toggle-track { background: var(--primary); }
+    .toggle-switch input:checked + .toggle-track::before { transform: translateX(20px); }
+
+    /* Avatar area */
+    .avatar-row {
+      display: flex; align-items: center; gap: 16px;
+    }
+    .avatar-circle {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--primary-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; font-weight: 700; color: var(--primary);
+      flex-shrink: 0; overflow: hidden;
+    }
+    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    .save-btn {
+      width: 100%; padding: 14px;
+      background: var(--primary); color: white;
+      border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+    }
+    .save-btn:hover { background: #2f4abf; }
+    .save-btn:active { transform: scale(0.98); }
+    .save-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    #toast {
+      position: fixed; bottom: 80px; left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: #212529; color: white;
+      padding: 10px 18px; border-radius: 999px;
+      font-size: 13px; font-weight: 500;
+      opacity: 0; transition: opacity 0.18s, transform 0.18s;
+      z-index: 200; white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
 </head>
 <body>
-  <header>
-    <h1 class="text-xl font-bold">매칭 선호도</h1>
-  </header>
-  <main>
-    <p class="mt-4 text-sm text-gray-600">이 페이지에서 매칭 선호도 옵션을 설정할 수 있습니다. (임시 페이지)</p>
-  </main>
+
+<header class="header">
+  <button id="backBtn" class="back-btn" aria-label="뒤로">←</button>
+  <img src="/images/img/focustime_logo_refined.png" alt="FocusTime" style="height:28px;object-fit:contain">
+  <span class="header-title" style="margin-left:8px">설정</span>
+</header>
+
+<main class="main">
+
+  <!-- 프로필 -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title">👤 프로필</div>
+      <div class="section-subtitle">다른 사용자에게 보이는 정보입니다</div>
+    </div>
+    <div class="section-body">
+      <div class="avatar-row">
+        <div class="avatar-circle" id="avatarCircle">
+          <span id="avatarInitial">?</span>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600" id="avatarName">불러오는 중...</div>
+          <div class="avatar-hint">닉네임을 변경하면 반영됩니다</div>
+        </div>
+      </div>
+      <div>
+        <div class="field-label">닉네임</div>
+        <input id="nicknameInput" class="text-input" type="text" placeholder="닉네임을 입력하세요" maxlength="20" />
+      </div>
+      <div>
+        <div class="field-label">한 줄 소개</div>
+        <textarea id="bioInput" class="text-input" rows="2" placeholder="예: 매일 오전 집중 세션을 즐기는 개발자"></textarea>
+      </div>
+      <div>
+        <div class="field-label">타임존</div>
+        <select id="timezoneSelect" class="text-input">
+          <option value="Asia/Seoul">아시아/서울 (KST, UTC+9)</option>
+          <option value="Asia/Tokyo">아시아/도쿄 (JST, UTC+9)</option>
+          <option value="Asia/Shanghai">아시아/상하이 (CST, UTC+8)</option>
+          <option value="Asia/Singapore">아시아/싱가포르 (SGT, UTC+8)</option>
+          <option value="America/New_York">미국/뉴욕 (EST, UTC-5)</option>
+          <option value="America/Los_Angeles">미국/LA (PST, UTC-8)</option>
+          <option value="Europe/London">유럽/런던 (GMT, UTC+0)</option>
+          <option value="Europe/Berlin">유럽/베를린 (CET, UTC+1)</option>
+          <option value="UTC">UTC</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 매칭 선호도 -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title">🎯 매칭 선호도</div>
+      <div class="section-subtitle">세션 탐색 기본값으로 적용됩니다</div>
+    </div>
+    <div class="section-body">
+      <div>
+        <div class="field-label">선호 세션 길이</div>
+        <div class="pill-group" id="durationPills">
+          <button class="pill" data-val="25">25분</button>
+          <button class="pill" data-val="50">50분</button>
+          <button class="pill" data-val="75">75분</button>
+        </div>
+      </div>
+      <div>
+        <div class="field-label">집중 모드</div>
+        <div class="pill-group" id="modePills">
+          <button class="pill" data-val="desk">데스크</button>
+          <button class="pill" data-val="moving">이동</button>
+          <button class="pill" data-val="any">무관</button>
+        </div>
+      </div>
+      <div>
+        <div class="field-label">선호 시간대</div>
+        <div class="pill-group" id="timePills">
+          <button class="pill" data-val="morning">오전</button>
+          <button class="pill" data-val="afternoon">오후</button>
+          <button class="pill" data-val="evening">저녁</button>
+          <button class="pill" data-val="any">무관</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 알림 설정 -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title">🔔 알림</div>
+      <div class="section-subtitle">받고 싶은 알림 유형을 선택하세요</div>
+    </div>
+    <div class="section-body" style="gap:0">
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-name">매칭 완료 알림</div>
+          <div class="toggle-desc">파트너가 내 세션에 참여했을 때</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="notifMatched" checked>
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-name">세션 시작 리마인더</div>
+          <div class="toggle-desc">세션 시작 10분 전에 알림</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="notifReminder" checked>
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-name">초대 알림</div>
+          <div class="toggle-desc">누군가 나를 세션에 초대했을 때</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="notifInvite" checked>
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <button id="saveBtn" class="save-btn">저장</button>
+
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="/app/js/api.js"></script>
+<script>
+(function () {
+  let prefs = { preferredDuration: 25, preferredMode: 'desk', preferredTime: 'any', notifications: { matched: true, reminder: true, invite: true } };
+
+  function showToast(msg, ms = 2200) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), ms);
+  }
+
+  function getToken() {
+    return localStorage.getItem('ft:token') || localStorage.getItem('token') || '';
+  }
+
+  function activatePill(groupId, val) {
+    document.querySelectorAll(`#${groupId} .pill`).forEach(p => {
+      p.classList.toggle('active', String(p.dataset.val) === String(val));
+    });
+  }
+
+  function initPillGroups() {
+    [['durationPills', 'preferredDuration'], ['modePills', 'preferredMode'], ['timePills', 'preferredTime']].forEach(([groupId, key]) => {
+      document.querySelectorAll(`#${groupId} .pill`).forEach(p => {
+        p.addEventListener('click', () => {
+          const val = p.dataset.val;
+          prefs[key] = key === 'preferredDuration' ? Number(val) : val;
+          activatePill(groupId, val);
+        });
+      });
+    });
+  }
+
+  function applyPrefsToUI(p) {
+    activatePill('durationPills', p.preferredDuration || 25);
+    activatePill('modePills', p.preferredMode || 'desk');
+    activatePill('timePills', p.preferredTime || 'any');
+    const notif = p.notifications || {};
+    document.getElementById('notifMatched').checked = notif.matched !== false;
+    document.getElementById('notifReminder').checked = notif.reminder !== false;
+    document.getElementById('notifInvite').checked = notif.invite !== false;
+  }
+
+  async function loadProfile() {
+    const token = getToken();
+    if (!token) return;
+    try {
+      const r = await fetch('/api/users/me', { headers: { Authorization: 'Bearer ' + token } });
+      if (r.ok) {
+        const u = await r.json();
+        document.getElementById('nicknameInput').value = u.nickname || '';
+        document.getElementById('bioInput').value = u.bio || '';
+        if (u.timezone) document.getElementById('timezoneSelect').value = u.timezone;
+        const initial = (u.nickname || u.email || '?')[0].toUpperCase();
+        document.getElementById('avatarInitial').textContent = initial;
+        document.getElementById('avatarName').textContent = u.nickname || u.email || '';
+        if (u.avatarUrl) {
+          const img = document.createElement('img');
+          img.src = u.avatarUrl;
+          img.alt = u.nickname || '';
+          img.onerror = () => {};
+          const circle = document.getElementById('avatarCircle');
+          circle.innerHTML = '';
+          circle.appendChild(img);
+        }
+        // update avatar preview on nickname change
+        document.getElementById('nicknameInput').addEventListener('input', e => {
+          const v = e.target.value;
+          document.getElementById('avatarInitial').textContent = (v || '?')[0].toUpperCase();
+          document.getElementById('avatarName').textContent = v || '';
+        });
+      }
+    } catch (e) { console.error('profile load error', e); }
+  }
+
+  async function loadPrefs() {
+    const token = getToken();
+    if (!token) return;
+    try {
+      // Try localStorage cache first for instant render
+      const cached = localStorage.getItem('ft:prefs');
+      if (cached) {
+        try { const p = JSON.parse(cached); Object.assign(prefs, p); applyPrefsToUI(prefs); } catch {}
+      }
+      // Then fetch from server and update
+      const r = await fetch('/api/users/me/prefs', { headers: { Authorization: 'Bearer ' + token } });
+      if (r.ok) {
+        const serverPrefs = await r.json();
+        Object.assign(prefs, serverPrefs);
+        applyPrefsToUI(prefs);
+        localStorage.setItem('ft:prefs', JSON.stringify(prefs));
+      }
+    } catch (e) { console.error('prefs load error', e); }
+  }
+
+  async function saveAll() {
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.textContent = '저장 중...';
+    const token = getToken();
+    try {
+      // 1. Save profile
+      const nickname = document.getElementById('nicknameInput').value.trim();
+      const bio = document.getElementById('bioInput').value.trim();
+      const timezone = document.getElementById('timezoneSelect').value;
+      const profilePayload = {};
+      if (nickname) profilePayload.nickname = nickname;
+      if (bio !== undefined) profilePayload.bio = bio;
+      if (timezone) profilePayload.timezone = timezone;
+
+      const pr = await fetch('/api/users/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify(profilePayload)
+      });
+
+      // 2. Save matching prefs + notifications
+      prefs.notifications = {
+        matched: document.getElementById('notifMatched').checked,
+        reminder: document.getElementById('notifReminder').checked,
+        invite: document.getElementById('notifInvite').checked,
+      };
+      const qr = await fetch('/api/users/me/prefs', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify(prefs)
+      });
+
+      if (pr.ok && qr.ok) {
+        localStorage.setItem('ft:prefs', JSON.stringify(prefs));
+        showToast('설정이 저장되었습니다 ✓');
+      } else {
+        showToast('저장 중 오류가 발생했습니다');
+      }
+    } catch (e) {
+      console.error('save error', e);
+      showToast('서버 오류');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '저장';
+    }
+  }
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    if (history.length > 1) history.back();
+    else window.location.href = '/app/home_dashboard.html';
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', saveAll);
+
+  initPillGroups();
+  loadProfile();
+  loadPrefs();
+})();
+</script>
 </body>
 </html>
