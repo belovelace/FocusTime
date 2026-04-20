@@ -1,181 +1,365 @@
 <!doctype html>
-<html lang="ko">
+<html class="light" lang="ko">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-bright": "#f8f9fa", "surface-container-lowest": "#ffffff",
+            "on-primary-fixed-variant": "#0736ba", "secondary": "#006e24",
+            "on-secondary": "#ffffff", "surface-variant": "#e1e3e4",
+            "primary-fixed-dim": "#b8c3ff", "on-background": "#191c1d",
+            "secondary-fixed": "#8dfa94", "on-secondary-fixed-variant": "#005319",
+            "surface": "#f8f9fa", "on-secondary-container": "#007326",
+            "on-primary-fixed": "#001355", "error-container": "#ffdad6",
+            "outline-variant": "#c4c5d6", "on-primary": "#ffffff",
+            "primary": "#1a40c2", "inverse-primary": "#b8c3ff",
+            "on-error-container": "#93000a", "error": "#ba1a1a",
+            "inverse-surface": "#2e3132", "surface-dim": "#d9dadb",
+            "on-tertiary": "#ffffff", "inverse-on-surface": "#f0f1f2",
+            "outline": "#747686", "background": "#f8f9fa",
+            "secondary-container": "#8af791", "on-surface-variant": "#444654",
+            "tertiary-container": "#006da4", "surface-container-low": "#f3f4f5",
+            "on-error": "#ffffff", "surface-container": "#edeeef",
+            "tertiary": "#00547f", "primary-container": "#3b5bdb",
+            "on-primary-container": "#e2e5ff", "primary-fixed": "#dde1ff",
+            "on-surface": "#191c1d", "surface-container-highest": "#e1e3e4",
+            "surface-container-high": "#e6e7e8"
+          },
+          borderRadius: { DEFAULT: "0.375rem", lg: "0.75rem", xl: "1rem", "2xl": "1.25rem", full: "9999px" },
+          fontFamily: { headline: ["Pretendard","sans-serif"], body: ["Pretendard","sans-serif"] }
+        }
+      }
+    }
+  </script>
   <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   <title>세션 완료 — FocusTime</title>
   <style>
-    /* Toast styling (small, reused pattern) */
+    * { font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; -webkit-font-smoothing: antialiased; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+    @keyframes popIn {
+      0%   { transform: scale(0.4); opacity: 0; }
+      70%  { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    .pop-in { animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up   { animation: fadeUp 0.4s ease both; }
+    .fade-up-1 { animation-delay: 0.15s; }
+    .fade-up-2 { animation-delay: 0.25s; }
+    .fade-up-3 { animation-delay: 0.35s; }
+    .fade-up-4 { animation-delay: 0.45s; }
+    .fade-up-5 { animation-delay: 0.55s; }
+
+    .star-btn { transition: transform 120ms ease, color 120ms ease; }
+    .star-btn:active { transform: scale(1.3); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1a40c2 0%, #3b5bdb 100%);
+      transition: opacity 150ms ease, transform 100ms ease;
+    }
+    .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+
+    .fav-btn-pill {
+      border: 1.5px solid #c4c5d6;
+      transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+    }
+    .fav-btn-pill.active { background: #fff7e0; border-color: #f5a623; color: #b87a00; }
+
     #toast {
-      position: fixed;
-      bottom: 88px;
-      left: 50%;
+      position: fixed; bottom: 32px; left: 50%;
       transform: translateX(-50%) translateY(10px);
-      background: #191c1d;
-      color: #f0f1f2;
-      padding: 9px 18px;
-      border-radius: 9999px;
-      font-size: 13px;
-      font-weight: 500;
-      opacity: 0;
-      transition: opacity 180ms ease, transform 180ms ease;
-      pointer-events: none;
-      white-space: nowrap;
-      z-index: 200;
+      background: #2e3132; color: #f0f1f2;
+      padding: 9px 20px; border-radius: 9999px;
+      font-size: 13px; font-weight: 500;
+      opacity: 0; transition: opacity 180ms ease, transform 180ms ease;
+      pointer-events: none; white-space: nowrap; z-index: 200;
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    ::-webkit-scrollbar { display: none; }
   </style>
 </head>
-<body class="bg-background text-on-surface antialiased">
-  <main class="max-w-md mx-auto pt-20 px-4">
-    <div class="text-center mb-6">
-      <div class="w-20 h-20 mx-auto rounded-full bg-primary text-white flex items-center justify-center text-4xl">✓</div>
-      <h1 class="text-2xl font-bold mt-4">집중 완료! 🎉</h1>
-      <p class="text-on-surface-variant mt-2">50분 세션을 완료했습니다</p>
+<body class="bg-background text-on-surface antialiased min-h-screen">
+
+  <!-- Top bar -->
+  <header class="fixed top-0 left-0 w-full bg-white/80 backdrop-blur-sm z-40 border-b border-outline-variant/30">
+    <div class="max-w-md mx-auto px-4 h-14 flex items-center">
+      <button id="backBtn" class="p-2 -ml-2 rounded-xl text-on-surface-variant hover:bg-surface-container" aria-label="뒤로">
+        <span class="material-symbols-outlined text-[22px]">arrow_back</span>
+      </button>
+      <span class="ml-2 text-[15px] font-semibold">세션 완료</span>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto pt-20 pb-12 px-4 space-y-4">
+
+    <!-- Hero -->
+    <div class="text-center py-6 fade-up">
+      <div class="pop-in w-20 h-20 mx-auto rounded-full flex items-center justify-center shadow-lg"
+           style="background:linear-gradient(135deg,#1a40c2,#3b5bdb)">
+        <span class="material-symbols-outlined text-white text-[42px]" style="font-variation-settings:'FILL' 1,'wght' 600">check_circle</span>
+      </div>
+      <h1 class="text-[26px] font-extrabold mt-4 tracking-tight">집중 완료! 🎉</h1>
+      <p id="sessionSummary" class="text-on-surface-variant mt-1 text-[14px]">세션을 완료했습니다</p>
     </div>
 
-    <div class="bg-surface rounded-xl p-4 mb-4">
-      <label class="block text-sm font-semibold mb-2">오늘의 성취를 적어보세요</label>
-      <textarea id="resultText" class="w-full h-24 p-3 rounded-lg bg-surface-container-high" placeholder="논문 2장 초안 완성!"></textarea>
-      <div id="resultCount" class="text-right text-sm text-on-surface-variant mt-2">0 / 100</div>
-
-      <div class="mt-4">
-        <label class="block text-sm font-semibold mb-2">파트너는 어땠나요?</label>
-        <div class="flex gap-2 items-center" id="starRow" role="radiogroup" aria-label="파트너 평점">
-          <button class="star text-2xl leading-none px-2 py-1 rounded text-gray-400" data-value="1" aria-label="1점" role="radio">☆</button>
-          <button class="star text-2xl leading-none px-2 py-1 rounded text-gray-400" data-value="2" aria-label="2점" role="radio">☆</button>
-          <button class="star text-2xl leading-none px-2 py-1 rounded text-gray-400" data-value="3" aria-label="3점" role="radio">☆</button>
-          <button class="star text-2xl leading-none px-2 py-1 rounded text-gray-400" data-value="4" aria-label="4점" role="radio">☆</button>
-          <button class="star text-2xl leading-none px-2 py-1 rounded text-gray-400" data-value="5" aria-label="5점" role="radio">☆</button>
-        </div>
+    <!-- Stats row -->
+    <div id="statsRow" class="grid grid-cols-2 gap-3 fade-up fade-up-1" style="display:none">
+      <div class="bg-white rounded-2xl p-4 text-center shadow-sm border border-outline-variant/20">
+        <div class="text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant mb-1">집중 시간</div>
+        <div id="statDuration" class="text-[22px] font-extrabold text-primary">—분</div>
       </div>
+      <div class="bg-white rounded-2xl p-4 text-center shadow-sm border border-outline-variant/20">
+        <div class="text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant mb-1">모드</div>
+        <div id="statMode" class="text-[22px] font-extrabold text-primary">—</div>
+      </div>
+    </div>
 
-      <div class="mt-4 flex items-center justify-between">
+    <!-- Achievement -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant/20 fade-up fade-up-2">
+      <label class="block text-[13px] font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">오늘의 성취</label>
+      <textarea id="resultText" rows="3"
+        class="w-full p-3 rounded-xl bg-surface-container text-[14px] resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 border border-transparent focus:border-primary/20"
+        placeholder="예) 논문 2장 초안 완성! 코드 리뷰 3건 처리 ✅"></textarea>
+      <div id="resultCount" class="text-right text-[12px] text-on-surface-variant mt-1">0 / 100</div>
+    </div>
+
+    <!-- Partner section (shown only when partner exists) -->
+    <div id="partnerSection" class="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant/20 fade-up fade-up-3" style="display:none">
+      <div class="text-[13px] font-semibold text-on-surface-variant uppercase tracking-wider mb-4">파트너 평가</div>
+
+      <!-- Partner info + fav -->
+      <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-3">
-          <img id="favPartnerAvatar" src="/app/assets/avatar-sample.svg" alt="partner" class="w-10 h-10 rounded-full"/>
+          <div class="relative">
+            <img id="favPartnerAvatar" src="" alt="partner"
+                 class="w-11 h-11 rounded-full object-cover bg-surface-container"
+                 onerror="this.onerror=null;this.src='';this.style.display='none';document.getElementById('avatarFallback').style.display='flex'"/>
+            <div id="avatarFallback" class="w-11 h-11 rounded-full bg-primary/10 text-primary font-bold text-[16px] items-center justify-center" style="display:none">?</div>
+          </div>
           <div>
-            <div id="favPartnerName" class="font-medium">김민준</div>
-            <div class="text-sm text-on-surface-variant">파트너</div>
+            <div id="favPartnerName" class="font-semibold text-[15px]">파트너</div>
+            <div class="text-[12px] text-on-surface-variant">이번 세션 파트너</div>
           </div>
         </div>
-        <button id="favToggle" class="px-3 py-2 border rounded text-primary" data-partner-id="1">즐겨찾기 추가 ☆</button>
+        <button id="favToggle"
+          class="fav-btn-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-semibold text-on-surface-variant"
+          data-partner-id="">
+          <span id="favIcon" class="text-[17px]">☆</span>
+          <span id="favLabel">즐겨찾기</span>
+        </button>
+      </div>
+
+      <!-- Star rating -->
+      <div>
+        <div class="text-[13px] text-on-surface-variant mb-2">파트너는 어땠나요?</div>
+        <div class="flex gap-1" id="starRow" role="radiogroup" aria-label="파트너 평점">
+          <button class="star star-btn text-[28px] leading-none px-1 text-gray-300" data-value="1" aria-label="1점" role="radio">☆</button>
+          <button class="star star-btn text-[28px] leading-none px-1 text-gray-300" data-value="2" aria-label="2점" role="radio">☆</button>
+          <button class="star star-btn text-[28px] leading-none px-1 text-gray-300" data-value="3" aria-label="3점" role="radio">☆</button>
+          <button class="star star-btn text-[28px] leading-none px-1 text-gray-300" data-value="4" aria-label="4점" role="radio">☆</button>
+          <button class="star star-btn text-[28px] leading-none px-1 text-gray-300" data-value="5" aria-label="5점" role="radio">☆</button>
+        </div>
       </div>
     </div>
 
-    <div class="space-y-3">
-      <button id="saveComplete" class="w-full px-4 py-3 bg-primary text-white rounded-lg">저장</button>
-      <button id="nextBtn" class="w-full px-4 py-3 bg-primary text-white rounded-lg">다음 세션 바로 예약하기</button>
-      <button id="backBtn" class="w-full px-4 py-3 bg-surface-container-low rounded-lg">대시보드로 돌아가기</button>
+    <!-- Solo session message (shown when no partner) -->
+    <div id="soloSection" class="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant/20 fade-up fade-up-3 flex items-center gap-3" style="display:none">
+      <span class="material-symbols-outlined text-primary text-[28px]" style="font-variation-settings:'FILL' 1">self_improvement</span>
+      <div>
+        <div class="font-semibold text-[14px]">혼자 집중한 세션</div>
+        <div class="text-[12px] text-on-surface-variant mt-0.5">다음엔 파트너와 함께해보세요 💪</div>
+      </div>
     </div>
+
+    <!-- Action buttons -->
+    <div class="space-y-2 fade-up fade-up-4 pt-2">
+      <button id="saveComplete" class="btn-primary w-full px-4 py-3.5 text-white rounded-2xl font-bold text-[15px]">
+        저장하기
+      </button>
+      <button id="nextBtn" class="w-full px-4 py-3.5 rounded-2xl font-semibold text-[15px] text-primary bg-primary/8 border border-primary/20 hover:bg-primary/12 transition-colors">
+        다음 세션 예약하기
+      </button>
+      <button id="dashBtn" class="w-full px-4 py-3.5 rounded-2xl font-semibold text-[15px] text-on-surface-variant bg-surface-container hover:bg-surface-container-high transition-colors">
+        대시보드로 돌아가기
+      </button>
+    </div>
+
   </main>
 
-  <!-- Toast container -->
   <div id="toast" aria-live="polite"></div>
 
   <script src="/app/js/api.js"></script>
   <script>
-    (function(){
-      // Small toast helper used by this page
-      function showToast(msg, ms = 2500){
-        const t = document.getElementById('toast');
-        if (!t) return; // should always exist
-        t.textContent = msg;
-        t.classList.add('show');
-        clearTimeout(t._timer);
-        t._timer = setTimeout(()=> t.classList.remove('show'), ms);
-      }
+  (function(){
+    function showToast(msg, ms = 2500){
+      const t = document.getElementById('toast');
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove('show'), ms);
+    }
 
-      // star rating interaction
-      const stars = Array.from(document.querySelectorAll('#starRow .star'));
-      let selectedRating = 0;
-      function updateStars(n){
-        stars.forEach(s=>{
-          const v = Number(s.getAttribute('data-value'));
-          s.classList.toggle('text-yellow-400', v <= n);
-          s.textContent = v <= n ? '★' : '☆';
-          s.setAttribute('aria-checked', String(v === n));
-        });
-      }
-      stars.forEach(s=> s.addEventListener('click', ()=>{ selectedRating = Number(s.getAttribute('data-value')); updateStars(selectedRating); }));
+    // ── Star rating ──
+    const stars = Array.from(document.querySelectorAll('#starRow .star'));
+    let selectedRating = 0;
+    function updateStars(n){
+      stars.forEach(s => {
+        const v = Number(s.dataset.value);
+        s.classList.toggle('text-yellow-400', v <= n);
+        s.classList.toggle('text-gray-300', v > n);
+        s.textContent = v <= n ? '★' : '☆';
+        s.setAttribute('aria-checked', String(v === n));
+      });
+    }
+    stars.forEach(s => s.addEventListener('click', () => { selectedRating = Number(s.dataset.value); updateStars(selectedRating); }));
 
-      // update character count for result textarea
-      const resultEl = document.getElementById('resultText');
-      const resultCount = document.getElementById('resultCount');
-      if (resultEl && resultCount){
-        resultEl.addEventListener('input', ()=>{
-          const len = Math.min(100, resultEl.value.length);
-          resultCount.textContent = `${len} / 100`;
-          if (resultEl.value.length > 100) resultEl.value = resultEl.value.slice(0,100);
-        });
-      }
+    // ── Char count ──
+    const resultEl = document.getElementById('resultText');
+    const resultCount = document.getElementById('resultCount');
+    resultEl.addEventListener('input', () => {
+      const len = Math.min(100, resultEl.value.length);
+      resultCount.textContent = `${len} / 100`;
+      if (resultEl.value.length > 100) resultEl.value = resultEl.value.slice(0, 100);
+    });
 
-      document.getElementById('nextBtn').addEventListener('click', async ()=>{
-        // submit result + rating if session present
-        const sessionId = FTApi.getSessionId();
-        const text = document.getElementById('resultText').value.trim();
-        const payload = { resultText: text, rating: selectedRating || null };
-        if (sessionId){
-          try{
-            const res = await FTApi.postGoal(sessionId, payload);
-            if (res && res.ok){ FTApi.setSessionId(null); window.location.href = '/app/home.html'; return; }
-            else { console.error(res); showToast('저장 실패'); }
-          }catch(e){ console.error(e); showToast('서버 오류'); }
+    // ── Fav toggle ──
+    const favBtn = document.getElementById('favToggle');
+    const favIcon = document.getElementById('favIcon');
+    const favLabel = document.getElementById('favLabel');
+
+    async function refreshFavUI(partnerId){
+      try {
+        const list = await FTApi.getFavorites();
+        const items = list?.body ?? list ?? [];
+        const found = Array.isArray(items) && items.some(p => String(p.id) === String(partnerId));
+        if (found) {
+          favBtn.classList.add('active');
+          favIcon.textContent = '★';
+          favLabel.textContent = '즐겨찾기됨';
+          favBtn.dataset.favorited = '1';
+        } else {
+          favBtn.classList.remove('active');
+          favIcon.textContent = '☆';
+          favLabel.textContent = '즐겨찾기';
+          favBtn.dataset.favorited = '0';
         }
-        else { window.location.href = '/app/home.html'; }
-      });
+      } catch(e) { console.error(e); }
+    }
 
-      // save button on page
-      const saveBtn = document.getElementById('saveComplete');
-      if (saveBtn) saveBtn.addEventListener('click', async ()=>{
-        const sessionId = FTApi.getSessionId();
-        const text = document.getElementById('resultText').value.trim();
-        const payload = { resultText: text, rating: selectedRating || null };
-        if (!sessionId){ showToast('세션 ID가 없습니다'); return; }
-        try{
-          const res = await FTApi.postGoal(sessionId, payload);
-          if (res && res.ok){ showToast('저장되었습니다'); }
-          else { showToast('저장 실패'); }
-        }catch(e){ console.error(e); showToast('서버 오류'); }
-      });
+    favBtn.addEventListener('click', async () => {
+      const partnerId = favBtn.getAttribute('data-partner-id');
+      if (!partnerId) return;
+      try {
+        if (favBtn.dataset.favorited === '1') {
+          const res = await FTApi.removeFavorite(partnerId);
+          if (res?.ok) { favBtn.classList.remove('active'); favIcon.textContent = '☆'; favLabel.textContent = '즐겨찾기'; favBtn.dataset.favorited = '0'; showToast('즐겨찾기에서 제거됐습니다'); }
+          else showToast('제거 실패');
+        } else {
+          const res = await FTApi.addFavorite(partnerId);
+          if (res?.ok) { favBtn.classList.add('active'); favIcon.textContent = '★'; favLabel.textContent = '즐겨찾기됨'; favBtn.dataset.favorited = '1'; showToast('즐겨찾기에 추가됐습니다 ★'); }
+          else if (res?.status === 409) showToast('이미 즐겨찾기 되어 있습니다');
+          else showToast('추가 실패');
+        }
+      } catch(e) { console.error(e); showToast('서버 오류'); }
+    });
 
-      document.getElementById('backBtn').addEventListener('click', ()=>{ window.location.href = '/app/home_dashboard.html#'; });
-
-      // favorite toggle
-      const favBtn = document.getElementById('favToggle');
-      async function refreshFavUI(){
-        // naive: check /api/users/me/favorites and see if partnerId is included
-        try{
-          const list = await FTApi.getFavorites();
-          const partnerId = favBtn.getAttribute('data-partner-id');
-          const found = Array.isArray(list.body?list.body:list) && (list.body || list).some(p => String(p.id) === String(partnerId));
-          if (found){ favBtn.textContent = '즐겨찾기 제거 ★'; favBtn.dataset.favorited = '1'; }
-          else { favBtn.textContent = '즐겨찾기 추가 ☆'; favBtn.dataset.favorited = '0'; }
-        }catch(e){ console.error(e); }
+    // ── Load session + partner ──
+    async function init(){
+      const sessionId = FTApi.getSessionId();
+      if (!sessionId) {
+        document.getElementById('soloSection').style.display = 'flex';
+        return;
       }
+      try {
+        const [meRes, sRes] = await Promise.all([
+          FTApi.request('/api/users/me'),
+          FTApi.getSession(sessionId)
+        ]);
 
-      if (favBtn){
-        favBtn.addEventListener('click', async ()=>{
-          const partnerId = favBtn.getAttribute('data-partner-id');
-          try{
-            if (favBtn.dataset.favorited === '1'){
-              const res = await FTApi.removeFavorite(partnerId);
-              if (res && res.ok){ favBtn.textContent = '즐겨찾기 추가 ☆'; favBtn.dataset.favorited = '0'; showToast('즐겨찾기에서 제거되었습니다'); }
-              else showToast('제거 실패');
-            } else {
-              const res = await FTApi.addFavorite(partnerId);
-              if (res && res.ok){ favBtn.textContent = '즐겨찾기 제거 ★'; favBtn.dataset.favorited = '1'; showToast('즐겨찾기에 추가되었습니다'); }
-              else if (res && res.status === 409) showToast('이미 즐겨찾기 되어 있습니다');
-              else showToast('추가 실패');
+        if (sRes?.ok && sRes.body) {
+          const s = sRes.body;
+          // stats
+          const dur = s.durationMin ? s.durationMin + '분' : '—분';
+          document.getElementById('sessionSummary').textContent = `${dur} 집중 세션을 완료했습니다`;
+          document.getElementById('statDuration').textContent = dur;
+          const modeMap = { desk: '🖥 데스크', moving: '🚶 무빙', any: '✨ 자유' };
+          document.getElementById('statMode').textContent = modeMap[s.focusMode] || s.focusMode || '—';
+          document.getElementById('statsRow').style.display = 'grid';
+
+          // determine partner
+          const meId = meRes?.ok ? String(meRes.body.id) : null;
+          const partnerId = meId && String(meId) === String(s.hostId) ? s.partnerId : s.hostId;
+
+          if (partnerId) {
+            favBtn.setAttribute('data-partner-id', String(partnerId));
+            // load partner profile
+            const pRes = await FTApi.request(`/api/users/${partnerId}`);
+            if (pRes?.ok && pRes.body) {
+              const p = pRes.body;
+              document.getElementById('favPartnerName').textContent = p.nickname || ('user' + partnerId);
+              const avatarEl = document.getElementById('favPartnerAvatar');
+              const fallbackEl = document.getElementById('avatarFallback');
+              if (p.avatarUrl) {
+                avatarEl.src = p.avatarUrl;
+                avatarEl.style.display = '';
+                fallbackEl.style.display = 'none';
+              } else {
+                avatarEl.style.display = 'none';
+                fallbackEl.style.display = 'flex';
+                fallbackEl.textContent = (p.nickname || 'P')[0].toUpperCase();
+              }
             }
-          }catch(e){ console.error(e); showToast('서버 오류'); }
-        });
-        // init
-        refreshFavUI();
+            document.getElementById('partnerSection').style.display = 'block';
+            await refreshFavUI(partnerId);
+          } else {
+            document.getElementById('soloSection').style.display = 'flex';
+          }
+        } else {
+          document.getElementById('soloSection').style.display = 'flex';
+        }
+      } catch(e) {
+        console.error(e);
+        document.getElementById('soloSection').style.display = 'flex';
       }
+    }
 
-    })();
+    // ── Save / Next / Back ──
+    async function saveResult(andNavigate){
+      const sessionId = FTApi.getSessionId();
+      const text = resultEl.value.trim();
+      const payload = { resultText: text, rating: selectedRating || null };
+      if (!sessionId) { if (andNavigate) window.location.href = '/app/home_dashboard.html'; return; }
+      try {
+        const res = await FTApi.postGoal(sessionId, payload);
+        if (res?.ok) {
+          if (andNavigate === 'next') { FTApi.setSessionId(null); window.location.href = '/app/home_dashboard.html'; }
+          else if (andNavigate === 'dash') { FTApi.setSessionId(null); window.location.href = '/app/home_dashboard.html'; }
+          else showToast('저장됐습니다 ✓');
+        } else { showToast('저장 실패'); }
+      } catch(e) { console.error(e); showToast('서버 오류'); }
+    }
+
+    document.getElementById('saveComplete').addEventListener('click', () => saveResult(false));
+    document.getElementById('nextBtn').addEventListener('click', () => saveResult('next'));
+    document.getElementById('dashBtn').addEventListener('click', () => saveResult('dash'));
+    document.getElementById('backBtn').addEventListener('click', () => { window.location.href = '/app/home_dashboard.html'; });
+
+    init();
+  })();
   </script>
 </body>
 </html>
