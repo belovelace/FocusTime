@@ -236,6 +236,14 @@
     (async ()=>{
       await fetchMe();
       await loadAll();
+      // autoplay if requested
+      try{
+        const params = new URLSearchParams(location.search);
+        if (params.get('autoplay') === '1'){
+          const vid = document.getElementById('localVideo');
+          if (vid && typeof vid.play === 'function'){ try{ await vid.play(); }catch(e){ /* autoplay may be blocked */ } }
+        }
+      }catch(e){}
       refreshInterval = setInterval(loadAll, 3000);
     })();
 

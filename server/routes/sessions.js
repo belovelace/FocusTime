@@ -26,9 +26,12 @@ router.get('/', auth, async (req, res) => {
 // POST /api/sessions (create)
 router.post('/', auth, async (req, res) => {
   try {
-    const { startsAt, durationMin, focusMode } = req.body;
+    let { startsAt, durationMin, focusMode } = req.body;
     if (!startsAt || !durationMin) return res.status(400).json({ error: 'missing fields' });
-    const session = await prisma.session.create({ data: { hostId: req.userId, startsAt: new Date(startsAt), durationMin, focusMode } });
+    // normalize focusMode aliases to enum values expected by Prisma
+    const aliasMap = { deep: 'desk', study: 'any', work: 'moving', desk: 'desk', moving: 'moving', any: 'any' };
+    if (typeof focusMode === 'string') focusMode = aliasMap[focusMode] || focusMode;
+    const session = await prisma.session.create({ data: { hostId: req.userId, startsAt: new Date(startsAt), durationMin: Number(durationMin), focusMode } });
     res.status(201).json(session);
   } catch (err) { console.error(err); res.status(500).json({ error: 'create failed' }); }
 });
@@ -47,6 +50,14 @@ router.get('/:id', auth, async (req, res) => {
 router.post('/:id/join', auth, async (req, res) => {
   try {
     const id = parseInt(req.params.id,10);
+    const session = await prisma.session.findUnique({ where: { id } });
+    if (!session) return res.status(404).json({ error: 'not found' });
+    // allow join only within 15 minutes before start or later
+    const starts = new Date(session.startsAt).getTime();
+    const allowedFrom = starts - (15 * 60 * 1000);
+    const now = Date.now();
+    if (now < allowedFrom) return res.status(400).json({ error: 'too_early', message: '예약 시간과 불일치 합니다.' });
+
     // atomic update: only set partnerId if currently null
     const updateResult = await prisma.session.updateMany({ where: { id, partnerId: null }, data: { partnerId: req.userId, status: 'matched' } });
     if (updateResult.count === 0) return res.status(409).json({ error: 'already matched or not available' });
@@ -55,7 +66,6 @@ router.post('/:id/join', auth, async (req, res) => {
     await prisma.sessionParticipant.create({ data: { sessionId: id, userId: req.userId, role: 'partner' } });
 
     // create notifications for host
-    const session = await prisma.session.findUnique({ where: { id } });
     if (session && session.hostId) {
       await prisma.notification.createMany({ data: [
         { userId: session.hostId, type: 'matched', payload: { sessionId: id, partnerId: req.userId } },
