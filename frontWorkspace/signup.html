@@ -1,46 +1,143 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
-  <title>Sign Up - FocusTime</title>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B5BDB',
+            'primary-500': '#4C6EF5',
+            background: '#F8F9FA',
+            surface: '#FFFFFF',
+            'surface-container-high': '#e7e8e9',
+            'surface-container-lowest': '#ffffff',
+            'surface-variant': '#E1E3E4',
+            'on-surface': '#212529',
+            'on-surface-variant':'#6C757D',
+            danger: '#FA5252'
+          },
+          borderRadius: { DEFAULT: '0.5rem', xl: '0.75rem', full: '9999px' },
+          fontFamily: { body: ['Pretendard','sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>body{font-family:'Pretendard',sans-serif;min-height:100dvh}</style>
+  <title>회원가입 — FocusTime</title>
 </head>
-<body class="bg-background text-on-surface min-h-screen flex items-center justify-center">
-  <main class="w-full max-w-md p-6 bg-white rounded-xl shadow-lg">
-    <h1 class="text-2xl font-bold mb-4">회원가입</h1>
-    <label class="block text-sm font-medium">이메일</label>
-    <input id="email" type="email" class="w-full p-3 rounded-md border mt-1 mb-3" />
-    <label class="block text-sm font-medium">비밀번호</label>
-    <input id="password" type="password" class="w-full p-3 rounded-md border mt-1 mb-3" />
-    <label class="block text-sm font-medium">비밀번호 확인</label>
-    <input id="password2" type="password" class="w-full p-3 rounded-md border mt-1 mb-4" />
-    <button id="signupBtn" class="w-full py-3 bg-indigo-600 text-white rounded-md">회원가입</button>
-    <p class="mt-4 text-sm">이미 계정이 있나요? <a href="/app/login.html" class="text-indigo-600 font-bold">로그인</a></p>
+<body class="bg-background text-on-surface antialiased">
+  <header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 py-3 bg-background">
+    <button aria-label="뒤로" class="p-2 rounded-lg">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </button>
+    <h1 class="text-xl font-black text-primary">포커스타임</h1>
+    <div class="w-10"></div>
+  </header>
+
+  <main class="flex min-h-screen flex-col pt-20 pb-12 px-6 max-w-md mx-auto w-full">
+    <div class="mt-8 mb-8 text-center">
+      <h2 class="text-3xl font-extrabold tracking-tight">회원가입</h2>
+      <p class="mt-2 text-on-surface-variant">FocusTime에 오신 것을 환영합니다</p>
+    </div>
+
+    <form id="signupForm" class="flex flex-col gap-4" onsubmit="return false;">
+      <div class="flex justify-center">
+        <div class="relative">
+          <div class="w-24 h-24 rounded-full bg-surface-container-lowest flex items-center justify-center text-on-surface-variant border-2 border-dashed border-surface-variant">
+            <span class="material-symbols-outlined text-3xl">person</span>
+          </div>
+          <button type="button" aria-label="프로필 사진 변경" class="absolute -right-2 -bottom-2 bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm">
+            <span class="material-symbols-outlined text-sm">edit</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <label for="email" class="text-sm font-bold tracking-widest text-on-surface-variant uppercase ml-1">이메일 주소</label>
+        <input id="email" name="email" type="email" required placeholder="example@focus.com"
+               class="w-full h-14 px-4 bg-surface-container-high rounded-xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest outline-none text-on-surface" />
+      </div>
+
+      <div class="space-y-2">
+        <label for="password" class="text-sm font-bold tracking-widest text-on-surface-variant uppercase ml-1">비밀번호</label>
+        <div class="relative">
+          <input id="password" name="password" type="password" required placeholder="비밀번호 (8자 이상)"
+                 class="w-full h-14 px-4 bg-surface-container-high rounded-xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest outline-none text-on-surface" />
+          <button type="button" id="togglePassword" aria-label="비밀번호 보기" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
+            <span class="material-symbols-outlined">visibility</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <label for="password2" class="text-sm font-bold tracking-widest text-on-surface-variant uppercase ml-1">비밀번호 확인</label>
+        <input id="password2" name="password2" type="password" required placeholder="비밀번호 확인"
+               class="w-full h-14 px-4 bg-surface-container-high rounded-xl focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest outline-none text-on-surface" />
+      </div>
+
+      <button id="signupBtn" type="button" class="w-full h-14 mt-2 bg-gradient-to-r from-[#1a40c2] to-[#3b5bdb] text-white font-bold rounded-xl shadow-lg active:scale-[0.98]">시작하기</button>
+
+      <div class="my-6 flex items-center gap-4">
+        <div class="h-[1px] flex-1 bg-surface-variant/50"></div>
+        <span class="text-xs font-bold text-surface-variant uppercase tracking-widest">또는</span>
+        <div class="h-[1px] flex-1 bg-surface-variant/50"></div>
+      </div>
+
+      <div class="space-y-3">
+        <button id="kakaoBtn" type="button" class="w-full h-14 bg-[#FEE500] text-[#191919] font-bold rounded-xl flex items-center justify-center gap-3">
+          <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1;">chat_bubble</span>
+          카카오로 시작하기
+        </button>
+      </div>
+    </form>
+
+    <div class="mt-auto pt-10 text-center">
+      <p class="text-on-surface-variant font-medium">
+        이미 계정이 있나요?
+        <a href="/app/login.html" class="ml-1 text-primary font-bold">로그인</a>
+      </p>
+    </div>
+
+    <div class="absolute top-1/4 -right-20 w-64 h-64 bg-primary/5 rounded-full blur-[80px] -z-10"></div>
   </main>
 
   <script src="/app/js/api.js"></script>
   <script>
-    (function(){
-      const email = document.getElementById('email');
-      const password = document.getElementById('password');
-      const password2 = document.getElementById('password2');
-      const btn = document.getElementById('signupBtn');
-      console.log('signup inputs', email, password, password2);
-      btn.addEventListener('click', async ()=>{
-        const em = email.value.trim(); const pw = password.value; const pw2 = password2.value;
-        if (!em || !pw || pw.length < 8 || pw !== pw2){ alert('필드를 확인하세요'); return; }
-        try {
-          const res = await FTApi.signup({ email: em, password: pw, nickname: em.split('@')[0], timezone: 'Asia/Seoul' });
-          if (res.ok && res.body && res.body.accessToken){ FTApi.setToken(res.body.accessToken); window.location.href = '/app/home.html'; return; }
-          // fallback to login attempt
-          const lg = await FTApi.login(em, pw);
-          if (lg.ok && lg.body && lg.body.accessToken){ FTApi.setToken(lg.body.accessToken); window.location.href = '/app/home.html'; return; }
-          alert('회원가입 실패');
-        } catch(e){ alert('회원가입 중 오류'); }
-      });
-    })();
+  (function(){
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const password2 = document.getElementById('password2');
+    const signupBtn = document.getElementById('signupBtn');
+    const toggle = document.getElementById('togglePassword');
+
+    toggle.addEventListener('click', ()=>{
+      if (!password) return;
+      const visible = password.type === 'text';
+      password.type = visible ? 'password' : 'text';
+      toggle.querySelector('span').textContent = visible ? 'visibility' : 'visibility_off';
+    });
+
+    signupBtn.addEventListener('click', async ()=>{
+      if (!email || !password || !password2) { alert('필드를 확인하세요'); return; }
+      const em = email.value.trim(); const pw = password.value; const pw2 = password2.value;
+      if (!em || !pw || pw.length < 8 || pw !== pw2) { alert('비밀번호를 확인하세요 (8자 이상, 동일해야 함)'); return; }
+      try {
+        const res = await FTApi.signup({ email: em, password: pw, nickname: em.split('@')[0], timezone: 'Asia/Seoul' });
+        if (res && res.ok && res.body && res.body.accessToken) { FTApi.setToken(res.body.accessToken); window.location.href = '/app/home.html'; return; }
+        const lg = await FTApi.login(em, pw);
+        if (lg && lg.ok && lg.body && lg.body.accessToken) { FTApi.setToken(lg.body.accessToken); window.location.href = '/app/home.html'; return; }
+        alert('회원가입/로그인 실패');
+      } catch (e) { console.error(e); alert('서버 오류'); }
+    });
+
+    document.getElementById('kakaoBtn').addEventListener('click', ()=>{ window.location.href = '/auth/kakao'; });
+  })();
   </script>
 </body>
 </html>
