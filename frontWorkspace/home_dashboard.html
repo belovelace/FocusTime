@@ -801,7 +801,7 @@
   async function loadUpcomingForDate(dateIso) {
     try {
       const day = (new Date(dateIso)).toISOString().slice(0,10);
-      const res = await FTApi.request('/api/sessions?date=' + encodeURIComponent(day));
+      const res = await FTApi.request('/api/sessions?participant=me&date=' + encodeURIComponent(day));
       if (res && res.ok && res.body && res.body.items) {
         const sessions = res.body.items;
         // enrich each session with user's goal (if any)
@@ -815,10 +815,7 @@
             }
           }catch(e){ /* ignore per-item goal load errors */ }
         }));
-        // show only sessions that haven't fully ended (end time > now) in Upcoming
-        const now = Date.now();
-        const futureSessions = sessions.filter(s => { const starts = new Date(s.startsAt).getTime(); const ends = starts + ((s.durationMin||25) * 60000); return ends > now; });
-        renderSessionCards(futureSessions);
+        renderSessionCards(sessions);
       } else {
         upcomingList.innerHTML = '<div class="text-sm text-gray-500">예정된 세션을 불러오지 못했습니다.</div>';
       }
