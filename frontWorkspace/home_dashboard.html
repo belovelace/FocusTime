@@ -127,12 +127,8 @@
   /* ghost border rule: accessibility-only, nearly invisible */
   .ghost-border { border: 1px solid rgba(196, 197, 214, 0.15); }
 
-  /* Progress bar animation */
-  @keyframes progressIn {
-    from { width: 0%; }
-    to { width: 50%; }
-  }
-  .progress-bar { animation: progressIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both; }
+  /* Progress bar */
+  .progress-bar { transition: width 0.9s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
   /* Stagger fade-in */
   @keyframes fadeUp {
@@ -147,11 +143,6 @@
   .fade-up-5 { animation-delay: 0.36s; }
 
   /* ── Stats card: white convex emboss ── */
-  @keyframes progressIn {
-    from { width: 0%; }
-    to   { width: 50%; }
-  }
-  .progress-bar { animation: progressIn 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.2s both; }
 
   @keyframes convexShine {
     0%        { opacity:0; transform: translateX(-160%) skewX(-22deg); }
@@ -353,7 +344,7 @@
         <div class="h-2 w-full rounded-full overflow-hidden"
              style="background:rgba(160,175,220,0.22);box-shadow:inset 0 1px 3px rgba(140,155,200,0.30)">
           <div class="progress-bar h-full rounded-full"
-               style="width:50%;background:linear-gradient(90deg,#6ee89e,#8dfa94);box-shadow:0 0 4px #8dfa94,0 0 12px #8dfa94,0 0 28px rgba(141,250,148,0.9),0 0 56px rgba(141,250,148,0.6),0 0 80px rgba(141,250,148,0.25)"></div>
+               style="width:0%;background:linear-gradient(90deg,#6ee89e,#8dfa94);box-shadow:0 0 4px #8dfa94,0 0 12px #8dfa94,0 0 28px rgba(141,250,148,0.9),0 0 56px rgba(141,250,148,0.6),0 0 80px rgba(141,250,148,0.25)"></div>
         </div>
         <!-- Mini stats row -->
         <div class="flex gap-4 mt-4 pt-4" style="border-top:1px solid rgba(160,175,220,0.25)">
@@ -760,10 +751,10 @@
       const sessEl = document.querySelector('[data-key="completedSessions"] p.text-base');
       if (sessEl) sessEl.textContent = (s.completedSessionsWeek ?? 0) + '회';
 
-      // progress bar
+      // progress bar — use rAF so transition fires after initial 0% render
       const pct = Math.min(100, Math.round(focused / GOAL_MIN * 100));
       const bar = document.querySelector('#statsCard .progress-bar');
-      if (bar) bar.style.width = pct + '%';
+      if (bar) requestAnimationFrame(() => { bar.style.width = pct + '%'; });
 
       // goal label
       const goalEl = document.querySelector('[data-key="weekGoal"]');
@@ -781,14 +772,14 @@
         for (let i = 0; i < 7; i++) {
           const d = new Date(today); d.setDate(d.getDate() - i);
           const key = d.toISOString().slice(0, 10);
-          if ((s.perDay[key] || 0) > 0) count++;
+          if ((s.perDay[key]?.minutes || 0) > 0) count++;
           else break;
         }
         return count;
       })();
       const streakEl = document.querySelector('[data-key="streak"]');
       if (streakEl) streakEl.textContent = streak > 0 ? streak + '일 🔥' : '0일';
-    } catch (_) {}
+    } catch (e) { console.error('[loadStats]', e); }
   }
   await loadStats();
   // load favorites
