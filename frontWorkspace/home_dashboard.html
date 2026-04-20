@@ -801,7 +801,7 @@
   async function loadUpcomingForDate(dateIso) {
     try {
       const day = (new Date(dateIso)).toISOString().slice(0,10);
-      const res = await FTApi.request('/api/sessions?date=' + encodeURIComponent(day));
+      const res = await FTApi.request('/api/sessions?participant=me&date=' + encodeURIComponent(day));
       if (res && res.ok && res.body && res.body.items) {
         const sessions = res.body.items;
         // enrich each session with user's goal (if any)
@@ -815,10 +815,7 @@
             }
           }catch(e){ /* ignore per-item goal load errors */ }
         }));
-        // show only sessions that haven't fully ended (end time > now) in Upcoming
-        const now = Date.now();
-        const futureSessions = sessions.filter(s => { const starts = new Date(s.startsAt).getTime(); const ends = starts + ((s.durationMin||25) * 60000); return ends > now; });
-        renderSessionCards(futureSessions);
+        renderSessionCards(sessions);
       } else {
         upcomingList.innerHTML = '<div class="text-sm text-gray-500">예정된 세션을 불러오지 못했습니다.</div>';
       }
@@ -835,10 +832,16 @@
       upcomingList.innerHTML = '<div class="text-sm text-gray-500">예정된 세션이 없습니다.</div>';
       return;
     }
+    const meId = String(document.getElementById('userAvatar')?.dataset.userId || '');
     const list = document.createElement('div');
     sessions.forEach(s => {
       const starts = new Date(s.startsAt);
       const ends = new Date(starts.getTime() + (s.durationMin||25)*60000);
+      // 나와 함께하는 상대방: 내가 호스트면 partner, 내가 파트너면 host
+      const amHost = meId && String(s.hostId) === meId;
+      const other = amHost ? (s.partner || {}) : (s.host || {});
+      const otherName = other.nickname || (amHost ? '파트너 미정' : s.host?.nickname || '호스트');
+      const otherAvatar = other.avatarUrl || '';
       const card = document.createElement('div');
       card.className = 'session-card bg-surface-container-lowest rounded-2xl p-5 space-y-3 mb-3';
       card.dataset.sessionId = s.id;
@@ -854,12 +857,12 @@
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-full overflow-hidden bg-surface-container-high flex-shrink-0">
-            <img src="${s.partnerAvatar||''}" class="w-full h-full object-cover partner-avatar" alt="파트너"/>
+          <div class="w-11 h-11 rounded-full overflow-hidden bg-surface-container-high flex-shrink-0 flex items-center justify-center text-on-surface-variant font-bold text-[15px]">
+            ${otherAvatar ? `<img src="${otherAvatar}" class="w-full h-full object-cover partner-avatar" alt="${otherName}"/>` : `<span>${(otherName||'?')[0].toUpperCase()}</span>`}
           </div>
           <div class="flex-1 min-w-0">
-            <p class="partner-name text-[14px] font-bold text-on-surface">${s.partnerName||s.nickname||'파트너'}</p>
-            <p class="text-[12px] text-on-surface-variant truncate">${s.notes||''}</p>
+            <p class="partner-name text-[14px] font-bold text-on-surface">${otherName}</p>
+            <p class="text-[12px] text-on-surface-variant truncate">${amHost ? '호스트' : '파트너로 참여'} · ${s.goalText||''}</p>
           </div>
           <div class="flex flex-col items-end">
             <div class="flex items-center gap-2">
@@ -885,17 +888,17 @@
         const starts = new Date(s.startsAt).getTime();
         const durationMs = (Number(s.durationMin || 25) * 60 * 1000);
         const ends = starts + durationMs;
-        const allowedFrom = starts - (15 * 60 * 1000);
         const now = Date.now();
         const isHost = myId && myId === String(s.hostId);
         const isPartner = myId && myId === String(s.partnerId);
         const isFinished = now > ends;
         // host/partner or completed session: navigate directly, no join API needed
         if (isHost || isPartner || isFinished) {
-          window.location.href = '/app/session.html?id=' + encodeURIComponent(id);
+          window.location.href = '/app/session.html?id=' + encodeURIComponent(id) + '&autoplay=1';
           return;
         }
         if (s.partnerId) { showToast('이미 매칭되었습니다.'); return; }
+        const allowedFrom = starts - (15 * 60 * 1000);
         if (now < allowedFrom) {
           alert('예약 시간과 불일치 합니다.');
           return;
@@ -998,7 +1001,7 @@
       if (!route) return;
       switch(route){
         case 'home': window.location.href = '/app/home_dashboard.html'; break;
-        case 'explore': window.location.href = '/app/home.html'; break; // placeholder
+        case 'explore': window.location.href = 'http://localhost:4000/app/sessions/browse.html'; break;
         case 'history': window.location.href = '/app/history.html'; break;
         case 'profile': window.location.href = '/app/profile.html'; break;
       }

@@ -6,11 +6,13 @@ const auth = require('../middleware/auth');
 // GET /api/sessions (browse)
 router.get('/', auth, async (req, res) => {
   try {
-    const { date, duration, mode, page = 1, host, past } = req.query;
+    const { date, duration, mode, page = 1, host, past, participant } = req.query;
     const where = {};
 
-    // allow host=me to filter sessions where the authenticated user is the host
-    if (host === 'me') {
+    // participant=me → sessions where current user is host OR partner
+    if (participant === 'me') {
+      where.OR = [{ hostId: req.userId }, { partnerId: req.userId }];
+    } else if (host === 'me') {
       where.hostId = req.userId;
     } else if (host) {
       const hid = parseInt(host, 10);
@@ -38,7 +40,11 @@ router.get('/', auth, async (req, res) => {
     }
 
     const take = 20; const skip = (page-1)*take;
-    const items = await prisma.session.findMany({ where, skip, take, orderBy });
+    const userSelect = { select: { id: true, nickname: true, avatarUrl: true } };
+    const items = await prisma.session.findMany({
+      where, skip, take, orderBy,
+      include: { host: userSelect, partner: userSelect }
+    });
     const total = await prisma.session.count({ where });
     res.json({ total, items });
   } catch (err) { console.error(err); res.status(500).json({ error: 'server error' }); }
@@ -77,33 +83,7 @@ router.post('/:id/join', auth, async (req, res) => {
     const id = parseInt(req.params.id,10);
     const session = await prisma.session.findUnique({ where: { id } });
     if (!session) return res.status(404).json({ error: 'not found' });
-    // allow join only within 15 minutes before start or later
-    const starts = new Date(session.startsAt).getTime();
-    const durationMs = Number(session.durationMin || 25) * 60 * 1000;
-    const allowedFrom = starts - durationMs;
-    const ends = starts + durationMs;
-    const now = Date.now();
-
-    // TODO: remove console.log before production
-    console.log('[join]', {
-      now: new Date(),
-      allowedFrom: new Date(allowedFrom),
-      ends: new Date(ends),
-      sessionStartsAt: session.startsAt,
-    });
-
-    const devBypass = process.env.DEV_ALLOW_EARLY_JOIN === '1';
-    if (!devBypass && (now < allowedFrom || now > ends)) {
-      return res.status(400).json({
-        error: 'too_early_or_finished',
-        message: '참가 가능한 시간이 아닙니다.',
-        debug: {
-          now: new Date(now),
-          allowedFrom: new Date(allowedFrom),
-          ends: new Date(ends),
-        }
-      });
-    }
+    // no time restriction for joining
 
     // atomic update: only set partnerId if currently null
     const updateResult = await prisma.session.updateMany({ where: { id, partnerId: null }, data: { partnerId: req.userId, status: 'matched' } });
@@ -123,6 +103,22 @@ router.post('/:id/join', auth, async (req, res) => {
     const updated = await prisma.session.findUnique({ where: { id } });
     res.json(updated);
   } catch (err) { console.error(err); res.status(500).json({ error: 'join failed' }); }
+});
+
+// POST /api/sessions/:id/invite -> host invites a specific user to join the session
+router.post('/:id/invite', auth, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { targetUserId } = req.body;
+    if (!targetUserId) return res.status(400).json({ error: 'targetUserId required' });
+    const session = await prisma.session.findUnique({ where: { id } });
+    if (!session) return res.status(404).json({ error: 'session not found' });
+    if (String(session.hostId) !== String(req.userId)) return res.status(403).json({ error: 'not host' });
+    await prisma.notification.create({
+      data: { userId: BigInt(targetUserId), type: 'invite', payload: { sessionId: id, hostId: Number(req.userId) } }
+    });
+    res.json({ ok: true });
+  } catch (err) { console.error(err); res.status(500).json({ error: 'invite failed' }); }
 });
 
 // DELETE /api/sessions/:id -> cancel a scheduled session (host only, must be before startsAt)
