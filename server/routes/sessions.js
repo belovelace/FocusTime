@@ -164,6 +164,46 @@ router.get('/:id/goals', auth, async (req, res) => {
   } catch (err) { console.error(err); res.status(500).json({ error: 'list failed' }); }
 });
 
+// PATCH /api/sessions/:id/status -> change status (for host actions like cancel)
+router.patch('/:id/status', auth, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { status } = req.body || {};
+    if (!status) return res.status(400).json({ error: 'status required' });
+    const session = await prisma.session.findUnique({ where: { id } });
+    if (!session) return res.status(404).json({ error: 'not found' });
+    if (String(session.hostId) !== String(req.userId)) return res.status(403).json({ error: 'forbidden' });
+    if (status === 'cancelled') {
+      const starts = new Date(session.startsAt).getTime();
+      const cancelDeadline = starts - (10 * 60 * 1000);
+      if (Date.now() >= cancelDeadline) return res.status(400).json({ error: 'too_late_to_cancel', message: '세션은 시작 10분 전까지만 취소 가능합니다.' });
+    }
+    const updated = await prisma.session.update({ where: { id }, data: { status } });
+    res.json(updated);
+  } catch (err) { console.error(err); res.status(500).json({ error: 'status update failed' }); }
+});
+
+// POST /api/sessions/:id/complete -> mark session done and optionally record actual duration minutes
+router.post('/:id/complete', auth, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { actualDurationMin } = req.body || {};
+    const session = await prisma.session.findUnique({ where: { id } });
+    if (!session) return res.status(404).json({ error: 'not found' });
+    // Only host or partner can mark complete
+    if (String(session.hostId) !== String(req.userId) && String(session.partnerId) !== String(req.userId)) return res.status(403).json({ error: 'forbidden' });
+    const data = { status: 'done' };
+    const updated = await prisma.session.update({ where: { id }, data });
+
+    if (typeof actualDurationMin === 'number' && actualDurationMin > 0) {
+      // record actual duration as a sessionGoal result entry for the user
+      try { await prisma.sessionGoal.create({ data: { sessionId: id, userId: req.userId, resultText: `actual:${actualDurationMin}` } }); } catch(e){ console.error('goal write failed', e); }
+    }
+
+    res.json(updated);
+  } catch (err) { console.error(err); res.status(500).json({ error: 'complete failed' }); }
+});
+
 // POST /api/sessions/:id/video
 router.post('/:id/video', auth, async (req, res) => {
   try {

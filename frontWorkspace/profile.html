@@ -1,228 +1,673 @@
-<!doctype html>
-<html lang="ko">
+<!DOCTYPE html>
+<html class="light" lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-  <title>프로필 — FocusTime</title>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>프로필 — FocusTime</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "background":                 "#f8f9fa",
+          "surface":                    "#f8f9fa",
+          "surface-bright":             "#f8f9fa",
+          "surface-container-lowest":   "#ffffff",
+          "surface-container-low":      "#f3f4f5",
+          "surface-container":          "#edeeef",
+          "surface-container-high":     "#e7e8e9",
+          "surface-container-highest":  "#e1e3e4",
+          "surface-dim":                "#d9dadb",
+          "surface-variant":            "#e1e3e4",
+          "on-surface":                 "#191c1d",
+          "on-surface-variant":         "#444654",
+          "primary":                    "#1a40c2",
+          "primary-container":          "#3b5bdb",
+          "on-primary":                 "#ffffff",
+          "on-primary-container":       "#e2e5ff",
+          "on-primary-fixed-variant":   "#0736ba",
+          "on-primary-fixed":           "#001355",
+          "primary-fixed":              "#dde1ff",
+          "primary-fixed-dim":          "#b8c3ff",
+          "secondary":                  "#006e24",
+          "secondary-container":        "#8af791",
+          "on-secondary-container":     "#007326",
+          "secondary-fixed":            "#8dfa94",
+          "secondary-fixed-dim":        "#71dd7a",
+          "tertiary":                   "#00547f",
+          "tertiary-container":         "#006da4",
+          "on-tertiary-container":      "#d4e9ff",
+          "tertiary-fixed":             "#cce5ff",
+          "tertiary-fixed-dim":         "#91cdff",
+          "outline":                    "#747686",
+          "outline-variant":            "#c4c5d6",
+          "error":                      "#ba1a1a",
+          "error-container":            "#ffdad6",
+          "on-error":                   "#ffffff",
+          "on-error-container":         "#93000a",
+          "inverse-surface":            "#2e3132",
+          "inverse-on-surface":         "#f0f1f2",
+          "inverse-primary":            "#b8c3ff",
+          "surface-tint":               "#3052d2",
+        },
+        borderRadius: {
+          DEFAULT: "0.375rem",
+          lg: "0.75rem",
+          xl: "1rem",
+          "2xl": "1.25rem",
+          full: "9999px"
+        },
+        fontFamily: {
+          headline: ["Pretendard", "sans-serif"],
+          body:     ["Pretendard", "sans-serif"],
+          label:    ["Pretendard", "sans-serif"]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  *, body { font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+  }
+  .icon-filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+  /* scrollbar hide */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* CTA gradient button */
+  .btn-primary {
+    background: linear-gradient(135deg, #1a40c2 0%, #3b5bdb 100%);
+    color: #fff;
+    transition: opacity 150ms ease-in-out, transform 100ms ease-in-out;
+  }
+  .btn-primary:hover { opacity: 0.92; }
+  .btn-primary:active { transform: scale(0.97); opacity: 0.88; }
+
+  /* Settings row hover (no border) */
+  .setting-row {
+    transition: background 120ms ease-in-out;
+  }
+  .setting-row:hover { background: #f3f4f5; }
+  .setting-row:active { background: #edeeef; }
+
+  /* Partner card hover */
+  .partner-card { transition: transform 150ms ease-in-out; }
+  .partner-card:active { transform: scale(0.94); }
+
+  /* Tag chip */
+  .tag-chip { transition: background 120ms ease; }
+  .tag-chip:hover { background: #dde1ff; }
+
+  /* Stagger fade-up */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up   { animation: fadeUp 0.38s cubic-bezier(.22,1,.36,1) both; }
+  .delay-1   { animation-delay: .05s; }
+  .delay-2   { animation-delay: .10s; }
+  .delay-3   { animation-delay: .16s; }
+  .delay-4   { animation-delay: .22s; }
+  .delay-5   { animation-delay: .28s; }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 88px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: #191c1d;
+    color: #f0f1f2;
+    padding: 9px 18px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 180ms ease, transform 180ms ease;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 200;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Edit mode input */
+  .edit-input {
+    background: #edeeef;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 14px;
+    width: 100%;
+    transition: background 120ms ease, box-shadow 120ms ease;
+    outline: none;
+    color: #191c1d;
+  }
+  .edit-input:focus {
+    background: #ffffff;
+    box-shadow: 0 0 0 2px rgba(26,64,194,0.20);
+  }
+
+  /* Ambient shadow for floating cards */
+  .ambient-card {
+    box-shadow: 0 2px 20px rgba(25, 28, 29, 0.055);
+  }
+
+  /* Session status badge */
+  .badge-open     { background: rgba(58,91,219,.10); color: #1a40c2; }
+  .badge-matched  { background: rgba(0,110,36,.10);  color: #006e24; }
+  .badge-active   { background: rgba(0,110,36,.18);  color: #005019; }
+  .badge-done     { background: #edeeef;              color: #747686; }
+  .badge-cancelled{ background: rgba(186,26,26,.08); color: #ba1a1a; }
+</style>
 </head>
-<body class="bg-background text-on-surface antialiased">
-  <header class="fixed top-0 left-0 w-full bg-white/60 backdrop-blur-sm z-40">
-    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <button id="profileBack" aria-label="뒤로" class="p-2 rounded-lg"><span class="material-symbols-outlined">arrow_back</span></button>
-        <div class="font-bold">프로필</div>
-      </div>
-      <button id="edit" class="text-primary">편집</button>
-    </div>
+
+<body class="bg-background text-on-surface min-h-screen flex flex-col items-center">
+<div class="w-[390px] min-h-[844px] bg-background relative flex flex-col overflow-hidden pb-28" style="box-shadow: 0 0 80px rgba(25,28,29,0.10)">
+
+  <!-- ── TopAppBar ── -->
+  <header class="flex justify-between items-center px-5 h-14 w-full sticky top-0 z-50" style="background:rgba(248,249,250,0.88);backdrop-filter:blur(16px)">
+    <button id="profileBack" aria-label="뒤로가기" class="w-9 h-9 flex items-center justify-center rounded-full transition-colors hover:bg-surface-container-low active:bg-surface-container">
+      <span class="material-symbols-outlined text-primary text-[22px]">arrow_back</span>
+    </button>
+    <h1 class="text-[17px] font-bold tracking-tight text-on-surface">프로필</h1>
+    <button id="editBtn" class="text-primary font-semibold text-sm px-3 py-1 rounded-lg transition-colors hover:bg-surface-container-low">편집</button>
   </header>
 
-  <main class="max-w-md mx-auto pt-20 px-4">
-    <div id="toast" aria-live="polite" style="position:fixed;left:50%;transform:translateX(-50%);top:18px;display:none;padding:8px 12px;border-radius:6px;background:rgba(0,0,0,0.75);color:#fff;z-index:60;font-size:14px;"></div>
-    <div id="profileArea" class="text-center mb-6">
-      <div class="relative inline-block">
-        <img id="avatar" src="/app/assets/avatar-sample.jpg" alt="avatar" class="w-24 md:w-24 lg:w-24 xl:w-24 rounded-full border-2 border-primary" style="width:96px;height:96px;"/>
-        <button aria-label="프로필 사진 변경" id="avatarEdit" class="absolute -right-2 -bottom-2 bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center"> <span class="material-symbols-outlined">edit</span></button>
-      </div>
-      <h2 id="displayName" class="text-xl font-bold mt-3">—</h2>
-      <p id="displayBio" class="text-on-surface-variant">—</p>
-      <div id="interestTags" class="flex gap-2 justify-center mt-3"></div>
-    </div>
+  <!-- ── MAIN SCROLL AREA ── -->
+  <main class="flex-1 overflow-y-auto no-scrollbar" id="mainScroll">
 
-    <div id="statsRow" class="grid grid-cols-3 gap-3 mb-6">
-      <div class="p-4 rounded-lg text-center bg-surface-container-lowest">
-        <div id="statSessions" class="text-lg font-bold">0회</div>
-        <div class="text-sm text-on-surface-variant">완료 세션</div>
-      </div>
-      <div class="p-4 rounded-lg text-center bg-surface-container-lowest">
-        <div id="statTime" class="text-lg font-bold">0시간</div>
-        <div class="text-sm text-on-surface-variant">총 집중</div>
-      </div>
-      <div class="p-4 rounded-lg text-center bg-surface-container-lowest">
-        <div id="statWeek" class="text-lg font-bold">0/0</div>
-        <div class="text-sm text-on-surface-variant">이번 주</div>
-      </div>
-    </div>
+    <!-- ── View Mode ── -->
+    <div id="viewMode">
 
-    <section class="mb-6">
-      <h3 class="font-semibold mb-3">단골 파트너</h3>
-      <div id="partners" class="flex gap-3 overflow-auto">
-      </div>
-
-      <section class="mt-4">
-        <h3 class="font-semibold mb-3">예정된 세션 (내가 호스트한 것)</h3>
-        <div id="mySessions" class="space-y-3"></div>
+      <!-- Profile Hero -->
+      <section class="flex flex-col items-center pt-8 pb-6 px-6 fade-up">
+        <div class="relative mb-5">
+          <div class="w-[88px] h-[88px] rounded-full overflow-hidden bg-surface-container-high" style="box-shadow: 0 0 0 3px #fff, 0 0 0 5px rgba(59,91,219,.18)">
+            <img id="avatar" alt="프로필 사진" class="w-full h-full object-cover"
+                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdIUmw8RN3bREkwecdbqLiobknIxYM3RMhZpsNnwd2_2cy0cARiAuvEAfe6Dl7oWJnbs1HsLI2iWtQmHWLNuFXNe8Ok9BuS0eyHp_I5UZxOFjB0Vhkh5cxvZEGFLZ8pTTxJ5RrkLDMkxJMc0at_ECqklIf7122FVJd3-PkH95RXPq1Bhagh1vRne5x4QJZqonbrYWrXhaQpOf52iNMuDZ4kXIgZQEM5L8JrDH5cfSRyz_lUivRGhY_zvm0x0yEZmW4D8EpwMJUSA4"/>
+          </div>
+          <button id="avatarEditBtn" aria-label="프로필 사진 변경"
+                  class="btn-primary absolute -bottom-0.5 -right-0.5 w-7 h-7 rounded-full flex items-center justify-center"
+                  style="box-shadow:0 2px 8px rgba(59,91,219,.35);border:2px solid #f8f9fa">
+            <span class="material-symbols-outlined icon-filled text-[14px]">edit</span>
+          </button>
+        </div>
+        <h2 id="displayName" class="text-[22px] font-extrabold text-on-surface tracking-tight mb-1">—</h2>
+        <p id="displayBio" class="text-[13px] text-on-surface-variant mb-4 text-center leading-relaxed max-w-[240px]">—</p>
+        <div id="interestTags" class="flex flex-wrap gap-2 justify-center"></div>
       </section>
-    </section>
 
-    <section>
-      <h3 class="font-semibold mb-3">설정</h3>
-      <div id="settingsList" class="space-y-2">
-        <button data-action="notifications" class="w-full text-left p-3 rounded bg-surface-container-lowest">알림 설정</button>
-        <button data-action="prefs" class="w-full text-left p-3 rounded bg-surface-container-lowest">매칭 선호도</button>
-        <button data-action="subscription" class="w-full text-left p-3 rounded bg-surface-container-lowest">구독 관리</button>
-        <button id="logout" class="w-full text-left p-3 rounded bg-surface-container-lowest text-danger">로그아웃</button>
+      <!-- Stats Row -->
+      <section class="px-5 mb-7 fade-up delay-1">
+        <div class="rounded-2xl p-1 bg-surface-container-low" style="box-shadow:0 2px 16px rgba(25,28,29,0.04)">
+          <div class="grid grid-cols-3 gap-1">
+            <div class="bg-surface-container-lowest rounded-xl py-4 flex flex-col items-center justify-center">
+              <span class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">완료 세션</span>
+              <span id="statSessions" class="text-[18px] font-extrabold text-primary tracking-tight">—</span>
+            </div>
+            <div class="bg-surface-container-lowest rounded-xl py-4 flex flex-col items-center justify-center">
+              <span class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">총 집중</span>
+              <span id="statTime" class="text-[18px] font-extrabold text-primary tracking-tight">—</span>
+            </div>
+            <div class="bg-surface-container-lowest rounded-xl py-4 flex flex-col items-center justify-center">
+              <span class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">이번 주</span>
+              <span id="statWeek" class="text-[18px] font-extrabold text-primary tracking-tight">—</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Partners Section -->
+      <section class="mb-7 fade-up delay-2">
+        <div class="flex justify-between items-center px-5 mb-4">
+          <h3 class="text-[14px] font-bold text-on-surface">단골 파트너</h3>
+          <button class="text-[12px] font-semibold text-primary">전체 보기</button>
+        </div>
+        <div id="partners" class="flex gap-4 overflow-x-auto no-scrollbar px-5 pb-1">
+          <!-- JS로 채워짐; 정적 fallback -->
+          <div class="partner-card flex-shrink-0 flex flex-col items-center gap-2 cursor-pointer" data-id="fav-1">
+            <div class="relative">
+              <div class="w-[56px] h-[56px] rounded-full overflow-hidden bg-surface-container-high" style="box-shadow:0 0 0 2px #fff,0 0 0 3.5px rgba(59,91,219,.15)">
+                <img class="w-full h-full object-cover"
+                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZNHL1u3vtBAzosvOUQmknB8FIUf-WxgbvpM6s8wJslaes2Quh4o9-l5ZrAsNyC5kSeYTgxvOte9et16n7sOdiGcIJVPVOHeCHjrZvCIe4BDQNKERAA1Dj_SYgNsA_-C68c5-gbYq51Q5cXSIPpPesFzOzcNzBWn6mZpIYUTiQt71heokfhosqNNwbSliUcUrOPy2COnvd3LjLE1LBqeoiSd73oVY5QUjbjc3g0FaKcpEBPeLUarbD9dIxDswnuyWq3QjTbLxIhX0"
+                     alt="진우"/>
+              </div>
+              <span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-secondary" style="border:2px solid #f8f9fa"></span>
+            </div>
+            <span class="text-[11px] font-medium text-on-surface-variant">진우</span>
+          </div>
+          <div class="partner-card flex-shrink-0 flex flex-col items-center gap-2 cursor-pointer" data-id="fav-2">
+            <div class="relative">
+              <div class="w-[56px] h-[56px] rounded-full overflow-hidden bg-surface-container-high" style="box-shadow:0 0 0 2px #fff,0 0 0 3.5px rgba(59,91,219,.15)">
+                <img class="w-full h-full object-cover"
+                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjhzUfCNBIG7tcCIHHO4vVDaAoFEP8kgSWQEHRHuwQHu93B_UPwsbycCCMTB_o2n6raP6DlgOLOjc5tXhgxKDCVEtJr8bSwIHvi7s2Uh0v96So4QKxrKPm_kYhtV8Q_FwUzLOmGDng87udwDfpDPpaUkzwjZryapeYofTofmujecRvvDjF2fPscUFViUcm71XrxGAcP3XCwlixIwXfSnBo4vQ9w9FTgiPCp0VHylK0tle_Hkq42iyapwWRtQsmpIsRhSSnYid199c"
+                     alt="민경"/>
+              </div>
+            </div>
+            <span class="text-[11px] font-medium text-on-surface-variant">민경</span>
+          </div>
+          <div class="partner-card flex-shrink-0 flex flex-col items-center gap-2 cursor-pointer" data-id="fav-3">
+            <div class="relative">
+              <div class="w-[56px] h-[56px] rounded-full overflow-hidden bg-surface-container-high" style="box-shadow:0 0 0 2px #fff,0 0 0 3.5px rgba(59,91,219,.15)">
+                <img class="w-full h-full object-cover"
+                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr2rKrcwoyID5pH1t4FZYkGZVK6ZBdZyyC0Z-BZ94t5DpjTb0NcELbhm3PCk2ADI5sUWIt622NLJ5kDCN-6juwW3U1ChZdRvrK5mkedOHcHcwDMhN7d-_0nHMSwa1Phq-HKhVZstuZHsg7Gc2nTj4jsUE3rOiSXFEnNIIBXHn5j3buC2-Pymzpu4m95FK7YLYljSL9Ik7boXRwJ3iJ0ztE3L52qSMgEzrQqKFiXnQHTtoQ5kV03HVr44t3J6z-qrRdMD1MQr8YGLk"
+                     alt="도윤"/>
+              </div>
+            </div>
+            <span class="text-[11px] font-medium text-on-surface-variant">도윤</span>
+          </div>
+          <div class="partner-card flex-shrink-0 flex flex-col items-center gap-2 cursor-pointer" data-id="fav-4">
+            <div class="relative">
+              <div class="w-[56px] h-[56px] rounded-full overflow-hidden bg-surface-container-high" style="box-shadow:0 0 0 2px #fff,0 0 0 3.5px rgba(59,91,219,.15)">
+                <img class="w-full h-full object-cover"
+                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEyc6wKWjskvQZYbklZ0w5ALmtwYFhIBb9WTIsp5eUlJ-HXz_WjEkcuocXOyYHtnla47SPrvcz8bjMFcLoaKsRngCQshWKuHYi0H7qIaAQfda3i874EH-NWz0R75kdADsZbNJQLtR3kSJdvZnsPbCYPvBoRf1Q4N9-BNurHMc19ErBpPlZ5wEnxHV1CkGGq1jf3dFIsIskblw85HB_gNBUv7DpKDg_M-fR3Ix-gl2riUZ9_93bqgm5ZQS8xjG7Z4hVR1Y4-_QMmWs"
+                     alt="서현"/>
+              </div>
+            </div>
+            <span class="text-[11px] font-medium text-on-surface-variant">서현</span>
+          </div>
+          <!-- 추가 버튼 -->
+          <div class="partner-card flex-shrink-0 flex flex-col items-center gap-2 cursor-pointer">
+            <div class="w-[56px] h-[56px] rounded-full bg-surface-container-low flex items-center justify-center"
+                 style="border:1.5px dashed #c4c5d6">
+              <span class="material-symbols-outlined text-outline text-[20px]">person_add</span>
+            </div>
+            <span class="text-[11px] font-medium text-on-surface-variant">추가</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Upcoming Sessions -->
+      <section class="px-5 mb-7 fade-up delay-3">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-[14px] font-bold text-on-surface">내 예정 세션</h3>
+          <button class="text-[12px] font-semibold text-primary">모두 보기</button>
+        </div>
+        <div id="mySessions" class="space-y-2">
+          <div class="text-[13px] text-on-surface-variant py-2">불러오는 중…</div>
+        </div>
+      </section>
+
+      <!-- Settings Section -->
+      <section class="px-5 mb-7 fade-up delay-4">
+        <h3 class="text-[14px] font-bold text-on-surface mb-3">설정</h3>
+        <div class="rounded-2xl overflow-hidden bg-surface-container-lowest ambient-card">
+
+          <button data-action="notifications"
+                  class="setting-row w-full flex items-center justify-between px-5 py-4 rounded-none">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(59,91,219,.10)">
+                <span class="material-symbols-outlined text-primary text-[18px]">notifications</span>
+              </div>
+              <span class="text-[14px] font-medium text-on-surface">알림 설정</span>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant text-[18px]">chevron_right</span>
+          </button>
+
+          <div class="mx-5 h-px bg-surface-container-low"></div>
+
+          <button data-action="prefs"
+                  class="setting-row w-full flex items-center justify-between px-5 py-4 rounded-none">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(0,84,127,.08)">
+                <span class="material-symbols-outlined text-[#00547f] text-[18px]">tune</span>
+              </div>
+              <span class="text-[14px] font-medium text-on-surface">매칭 선호도</span>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant text-[18px]">chevron_right</span>
+          </button>
+
+          <div class="mx-5 h-px bg-surface-container-low"></div>
+
+          <button data-action="subscription"
+                  class="setting-row w-full flex items-center justify-between px-5 py-4 rounded-none">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(0,110,36,.08)">
+                <span class="material-symbols-outlined text-secondary text-[18px]">workspace_premium</span>
+              </div>
+              <span class="text-[14px] font-medium text-on-surface">구독 관리</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full" style="background:rgba(0,110,36,.10);color:#006e24">Free</span>
+              <span class="material-symbols-outlined text-outline-variant text-[18px]">chevron_right</span>
+            </div>
+          </button>
+
+          <div class="mx-5 h-px bg-surface-container-low"></div>
+
+          <button data-action="privacy"
+                  class="setting-row w-full flex items-center justify-between px-5 py-4 rounded-none">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#edeeef">
+                <span class="material-symbols-outlined text-on-surface-variant text-[18px]">shield</span>
+              </div>
+              <span class="text-[14px] font-medium text-on-surface">개인정보처리방침</span>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant text-[18px]">chevron_right</span>
+          </button>
+
+          <div class="mx-5 h-px bg-surface-container-low"></div>
+
+          <button id="logout"
+                  class="setting-row w-full flex items-center justify-between px-5 py-4 rounded-none">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(186,26,26,.07)">
+                <span class="material-symbols-outlined text-[18px]" style="color:#ba1a1a">logout</span>
+              </div>
+              <span class="text-[14px] font-medium" style="color:#ba1a1a">로그아웃</span>
+            </div>
+          </button>
+
+        </div>
+      </section>
+    </div><!-- /viewMode -->
+
+    <!-- ── Edit Mode ── -->
+    <div id="editMode" class="hidden px-5 pt-6 pb-8 space-y-5">
+
+      <!-- Avatar preview -->
+      <div class="flex flex-col items-center gap-3 mb-2">
+        <div class="relative">
+          <div class="w-[88px] h-[88px] rounded-full overflow-hidden bg-surface-container-high" style="box-shadow:0 0 0 3px #fff,0 0 0 5px rgba(59,91,219,.18)">
+            <img id="editAvatarPreview" class="w-full h-full object-cover" src="" alt="미리보기"/>
+          </div>
+          <div class="btn-primary absolute -bottom-0.5 -right-0.5 w-7 h-7 rounded-full flex items-center justify-center"
+               style="box-shadow:0 2px 8px rgba(59,91,219,.35);border:2px solid #f8f9fa">
+            <span class="material-symbols-outlined icon-filled text-[14px]">photo_camera</span>
+          </div>
+        </div>
       </div>
-    </section>
+
+      <!-- Avatar URL -->
+      <div>
+        <label class="block text-[12px] font-semibold text-on-surface-variant uppercase tracking-wider mb-2">아바타 URL</label>
+        <input id="avatarUrlInput" type="url" placeholder="https://..." class="edit-input"/>
+      </div>
+
+      <!-- Nickname -->
+      <div>
+        <label class="block text-[12px] font-semibold text-on-surface-variant uppercase tracking-wider mb-2">닉네임</label>
+        <input id="nicknameInput" type="text" maxlength="20" placeholder="닉네임 입력" class="edit-input"/>
+        <p class="text-[11px] text-on-surface-variant mt-1.5 ml-1">최대 20자</p>
+      </div>
+
+      <!-- Bio -->
+      <div>
+        <label class="block text-[12px] font-semibold text-on-surface-variant uppercase tracking-wider mb-2">한줄 소개</label>
+        <input id="bioInput" type="text" maxlength="50" placeholder="나를 한 줄로 표현해보세요" class="edit-input"/>
+        <p class="text-[11px] text-on-surface-variant mt-1.5 ml-1">최대 50자</p>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="flex gap-3 pt-2">
+        <button id="cancelEditBtn"
+                class="flex-1 py-3 rounded-xl text-sm font-bold text-primary transition-colors hover:bg-surface-container-low"
+                style="border:1.5px solid rgba(26,64,194,.25)">
+          취소
+        </button>
+        <button id="saveBtn"
+                class="btn-primary flex-1 py-3 rounded-xl text-sm font-bold">
+          저장
+        </button>
+      </div>
+
+    </div><!-- /editMode -->
+
   </main>
 
-  <script src="/app/js/api.js"></script>
-  <script>
-    (function(){
-      const params = new URLSearchParams(location.search);
-      let editing = params.get('edit') === '1';
+  <!-- ── Bottom Nav ── -->
+  <nav class="absolute bottom-0 left-0 right-0 z-50 flex justify-center items-center px-4 pb-6 pt-3 rounded-t-2xl"
+       style="background:rgba(255,255,255,0.85);backdrop-filter:blur(20px);border-top:0.5px solid rgba(196,197,214,.2)">
+    <div class="flex flex-col items-center px-4 py-1 rounded-xl" style="background:rgba(208,235,255,.7);color:#1a40c2">
+      <span class="material-symbols-outlined icon-filled text-[22px]">person</span>
+      <span class="text-[10px] font-semibold uppercase tracking-wider mt-0.5">프로필</span>
+    </div>
+  </nav>
 
-      const avatarEl = document.getElementById('avatar');
-      const nameEl = document.getElementById('displayName');
-      const bioEl = document.getElementById('displayBio');
-      const profileArea = document.getElementById('profileArea');
-      const editBtn = document.getElementById('edit');
+</div><!-- /shell -->
 
-      async function fetchAndRender(){
-        try{
-          const res = await FTApi.request('/api/users/me');
-          if (res.ok && res.body){
-            const u = res.body;
-            avatarEl.src = u.avatarUrl || '/app/assets/avatar-sample.jpg';
-            nameEl.textContent = u.nickname || (u.email || '').split('@')[0];
-            bioEl.textContent = u.bio || '';
-            // stats placeholders
-            document.getElementById('statSessions').textContent = (u.completedSessions || 0) + '회';
-            document.getElementById('statTime').textContent = u.totalFocused || '0시간';
-            document.getElementById('statWeek').textContent = u.weekProgress || '0/0';
-            // interest tags (if present)
-            const tagsEl = document.getElementById('interestTags');
-            tagsEl.innerHTML = '';
-            const tags = u.interests || u.tags || ['공부','글쓰기','코딩'];
-            tags.slice(0,8).forEach(t=>{ const b = document.createElement('div'); b.className='px-3 py-1 rounded-full bg-primary-container text-on-primary-container text-sm'; b.textContent = t; tagsEl.appendChild(b); });
-            if (editing) enterEditMode(u);
-          } else {
-            console.error('profile load failed', res);
-          }
-        }catch(e){ console.error(e); }
+<!-- Toast -->
+<div id="toast" aria-live="polite"></div>
+
+<script src="/app/js/api.js"></script>
+<script>
+(function () {
+  /* ── Helpers ── */
+  function showToast(msg, ms = 2500) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), ms);
+  }
+
+  function statusLabel(s) {
+    const map = { open: '모집 중', matched: '매칭 완료', active: '진행 중', done: '완료', cancelled: '취소됨' };
+    return map[s] || s;
+  }
+  function statusClass(s) {
+    return `badge-${s}`;
+  }
+
+  /* ── State ── */
+  let currentUser = {};
+
+  /* ── DOM refs ── */
+  const viewMode      = document.getElementById('viewMode');
+  const editModeEl    = document.getElementById('editMode');
+  const editBtn       = document.getElementById('editBtn');
+  const cancelEditBtn = document.getElementById('cancelEditBtn');
+  const saveBtn       = document.getElementById('saveBtn');
+  const avatarEl      = document.getElementById('avatar');
+  const nameEl        = document.getElementById('displayName');
+  const bioEl         = document.getElementById('displayBio');
+  const tagsEl        = document.getElementById('interestTags');
+
+  /* ── Render user data ── */
+  function renderUser(u) {
+    avatarEl.src = u.avatarUrl || '/app/assets/avatar-sample.svg';
+    nameEl.textContent = u.nickname || (u.email || '').split('@')[0] || '사용자';
+    bioEl.textContent  = u.bio || '';
+
+    tagsEl.innerHTML = '';
+    const tags = u.interests || u.tags || ['공부', '글쓰기', '코딩'];
+    tags.slice(0, 8).forEach(t => {
+      const b = document.createElement('span');
+      b.className = 'tag-chip px-3 py-1 rounded-full text-primary text-xs font-semibold cursor-default';
+      b.style.background = '#edf2ff';
+      b.textContent = t;
+      tagsEl.appendChild(b);
+    });
+
+    document.getElementById('statSessions').textContent = (u.completedSessions != null ? u.completedSessions + '회' : '—');
+    document.getElementById('statTime').textContent     = u.totalFocused  || '—';
+    document.getElementById('statWeek').textContent     = u.weekProgress  || '—';
+  }
+
+  /* ── Fetch & render ── */
+  async function fetchAndRender() {
+    try {
+      if (typeof FTApi === 'undefined') return; // dev preview without api
+      const res = await FTApi.request('/api/users/me');
+      if (res.ok && res.body) {
+        currentUser = res.body;
+        renderUser(currentUser);
       }
+    } catch (e) { console.error(e); }
+  }
 
-      function enterEditMode(user){
-        editing = true;
-        editBtn.textContent = '저장';
-        profileArea.innerHTML = '';
-        const form = document.createElement('form');
-        form.className = 'space-y-3';
-        form.innerHTML = `
-          <div class="flex flex-col items-center gap-3">
-            <img id="editAvatarPreview" src="${user.avatarUrl||'/app/assets/avatar-sample.jpg'}" class="w-24 h-24 rounded-full border-2 border-primary"/>
-            <input id="avatarUrlInput" placeholder="아바타 이미지 URL" class="w-full p-2 rounded bg-surface-container-low" value="${user.avatarUrl||''}" />
-          </div>
-          <div>
-            <label class="block text-sm mb-1">닉네임</label>
-            <input id="nicknameInput" class="w-full p-2 rounded bg-surface-container-low" value="${(user.nickname||'').replace(/"/g,'')}">
-          </div>
-          <div>
-            <label class="block text-sm mb-1">한줄 소개</label>
-            <input id="bioInput" class="w-full p-2 rounded bg-surface-container-low" value="${(user.bio||'').replace(/"/g,'')}">
-          </div>
-          <div class="flex gap-2 justify-center">
-            <button id="saveProfile" type="button" class="px-4 py-2 bg-primary text-white rounded">저장</button>
-            <button id="cancelEdit" type="button" class="px-4 py-2 border rounded">취소</button>
-          </div>
-        `;
-        profileArea.appendChild(form);
+  /* ── Edit mode ── */
+  function enterEdit() {
+    viewMode.classList.add('hidden');
+    editModeEl.classList.remove('hidden');
+    editBtn.textContent = '';
+    document.getElementById('nicknameInput').value  = currentUser.nickname  || '';
+    document.getElementById('bioInput').value       = currentUser.bio       || '';
+    document.getElementById('avatarUrlInput').value = currentUser.avatarUrl || '';
+    document.getElementById('editAvatarPreview').src = currentUser.avatarUrl || avatarEl.src;
+    document.getElementById('mainScroll').scrollTop = 0;
+  }
 
-        document.getElementById('avatarUrlInput').addEventListener('input', (e)=>{ document.getElementById('editAvatarPreview').src = e.target.value || '/app/assets/avatar-sample.jpg'; });
-        document.getElementById('cancelEdit').addEventListener('click', ()=>{ editing=false; editBtn.textContent='편집'; fetchAndRender(); });
-        document.getElementById('saveProfile').addEventListener('click', async ()=>{
-          const btn = document.getElementById('saveProfile');
-          btn.disabled = true; btn.setAttribute('aria-busy','true');
-          const payload = {
-            nickname: document.getElementById('nicknameInput').value.trim(),
-            bio: document.getElementById('bioInput').value.trim(),
-            avatarUrl: document.getElementById('avatarUrlInput').value.trim() || null
-          };
-          function showToast(msg, ms = 2500){ const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(t._hideTimer); t._hideTimer = setTimeout(()=>{ t.style.display = 'none'; }, ms); }
-          try{
-            const r = await FTApi.request('/api/users/me', { method: 'PATCH', body: payload });
-            if (r.ok){ editing=false; editBtn.textContent='편집'; fetchAndRender(); showToast('저장되었습니다'); }
-            else { console.error(r); showToast('저장 실패'); }
-          }catch(e){ console.error(e); showToast('서버 오류'); }
-          finally{ btn.disabled = false; btn.removeAttribute('aria-busy'); }
+  function exitEdit() {
+    viewMode.classList.remove('hidden');
+    editModeEl.classList.add('hidden');
+    editBtn.textContent = '편집';
+  }
+
+  document.getElementById('avatarUrlInput').addEventListener('input', e => {
+    const prev = document.getElementById('editAvatarPreview');
+    prev.src = e.target.value.trim() || currentUser.avatarUrl || '/app/assets/avatar-sample.svg';
+  });
+
+  editBtn.addEventListener('click', enterEdit);
+  cancelEditBtn.addEventListener('click', exitEdit);
+  document.getElementById('avatarEditBtn').addEventListener('click', enterEdit);
+
+  saveBtn.addEventListener('click', async () => {
+    const payload = {
+      nickname:  document.getElementById('nicknameInput').value.trim(),
+      bio:       document.getElementById('bioInput').value.trim(),
+      avatarUrl: document.getElementById('avatarUrlInput').value.trim() || null,
+    };
+    if (!payload.nickname) { showToast('닉네임을 입력해주세요'); return; }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = '저장 중…';
+    try {
+      if (typeof FTApi === 'undefined') {
+        // dev preview: mock success
+        currentUser = { ...currentUser, ...payload };
+        renderUser(currentUser);
+        exitEdit();
+        showToast('저장되었습니다');
+        return;
+      }
+      const r = await FTApi.request('/api/users/me', { method: 'PATCH', body: payload });
+      if (r.ok) {
+        currentUser = { ...currentUser, ...payload };
+        renderUser(currentUser);
+        exitEdit();
+        showToast('저장되었습니다');
+      } else {
+        showToast('저장에 실패했습니다');
+      }
+    } catch (e) {
+      console.error(e);
+      showToast('서버 오류가 발생했습니다');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = '저장';
+    }
+  });
+
+  /* ── Load upcoming sessions ── */
+  async function loadMySessions() {
+    const el = document.getElementById('mySessions');
+    try {
+      if (typeof FTApi === 'undefined') {
+        el.innerHTML = '<div class="text-[13px] text-on-surface-variant">예정된 세션이 없습니다.</div>';
+        return;
+      }
+      const res = await FTApi.request('/api/sessions?host=me&upcoming=1');
+      if (res && res.ok && res.body && res.body.items && res.body.items.length) {
+        el.innerHTML = '';
+        res.body.items.forEach(s => {
+          const dateStr = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(s.startsAt));
+          const row = document.createElement('div');
+          row.className = 'bg-surface-container-lowest rounded-xl px-4 py-3.5 flex items-center justify-between ambient-card';
+          row.innerHTML = `
+            <div class="flex-1 min-w-0">
+              <p class="text-[13px] font-semibold text-on-surface truncate">${dateStr}</p>
+              <p class="text-[12px] text-on-surface-variant mt-0.5">${s.durationMin}분 · ${s.goalText || '목표 없음'}</p>
+            </div>
+            <div class="flex items-center gap-2 ml-3 flex-shrink-0">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusClass(s.status)}">${statusLabel(s.status)}</span>
+              <button class="view-session text-[12px] font-bold px-3 py-1.5 rounded-lg btn-primary" data-id="${s.id}">보기</button>
+              <button class="cancel-my-session text-[12px] font-medium px-2 py-1.5 rounded-lg transition-colors hover:bg-surface-container text-on-surface-variant" data-id="${s.id}">취소</button>
+            </div>
+          `;
+          el.appendChild(row);
         });
+
+        el.querySelectorAll('.view-session').forEach(b => {
+          b.addEventListener('click', e => {
+            window.location.href = '/app/session.html?id=' + encodeURIComponent(e.currentTarget.dataset.id);
+          });
+        });
+        el.querySelectorAll('.cancel-my-session').forEach(b => {
+          b.addEventListener('click', async e => {
+            if (!confirm('정말 이 세션을 취소하시겠습니까?')) return;
+            const id = e.currentTarget.dataset.id;
+            try {
+              const r = await FTApi.request('/api/sessions/' + encodeURIComponent(id) + '/status', {
+                method: 'PATCH', body: { status: 'cancelled' }
+              });
+              if (r && r.ok) { showToast('세션이 취소되었습니다.'); loadMySessions(); }
+              else showToast('취소 실패');
+            } catch (err) { console.error(err); showToast('서버 오류'); }
+          });
+        });
+      } else {
+        el.innerHTML = '<div class="text-[13px] text-on-surface-variant py-1">예정된 세션이 없습니다.</div>';
       }
+    } catch (e) {
+      console.error(e);
+      el.innerHTML = '<div class="text-[13px] text-on-surface-variant py-1">불러오기 실패</div>';
+    }
+  }
 
-      editBtn.addEventListener('click', ()=>{
-        if (!editing) enterEditMode({});
-        else {
-          // if in edit mode, clicking '저장' is handled by the save button in form
-        }
-      });
-
-      // load my upcoming sessions so the profile page is more useful
-      async function loadMySessions(){
-        const el = document.getElementById('mySessions');
-        if (!el) return;
-        el.innerHTML = '<div class="text-sm text-on-surface-variant">불러오는 중…</div>';
-        try{
-          // request sessions where hostId = me
-          const res = await FTApi.request('/api/sessions?host=me');
-          if (res && res.ok && res.body && res.body.items){
-            const items = res.body.items;
-            el.innerHTML = '';
-            items.forEach(s => {
-              const row = document.createElement('div');
-              row.className = 'p-3 rounded-lg bg-surface-container-lowest flex items-center justify-between';
-              row.innerHTML = `
-                <div>
-                  <div class="text-sm font-medium">${new Intl.DateTimeFormat('ko-KR',{dateStyle:'short',timeStyle:'short'}).format(new Date(s.startsAt))}</div>
-                  <div class="text-xs text-on-surface-variant">${s.durationMin}분 · ${s.goalText||''}</div>
-                </div>
-                <div>
-                  <button class="btn-cta view-session text-white text-[12px] font-bold px-3 py-1 rounded" data-id="${s.id}">보기</button>
-                  <button class="text-sm ml-2 text-danger cancel-my-session" data-id="${s.id}">취소</button>
-                </div>
-              `;
-              el.appendChild(row);
-            });
-            // wire handlers
-            el.querySelectorAll('.view-session').forEach(b => b.addEventListener('click', (e)=>{ const id = e.currentTarget.dataset.id; window.location.href = '/app/session.html?id=' + encodeURIComponent(id); }));
-            el.querySelectorAll('.cancel-my-session').forEach(b => b.addEventListener('click', async (e)=>{
-              if (!confirm('정말 이 세션을 취소하시겠습니까?')) return;
-              const id = e.currentTarget.dataset.id;
-              try{
-                const r = await FTApi.request('/api/sessions/' + encodeURIComponent(id), { method: 'DELETE' });
-                if (r && r.ok){ showToast('세션이 취소되었습니다.'); loadMySessions(); }
-                else showToast('취소 실패');
-              }catch(err){ console.error(err); showToast('서버 오류'); }
-            }));
-          } else {
-            el.innerHTML = '<div class="text-sm text-on-surface-variant">예정된 세션이 없습니다.</div>';
-          }
-        }catch(e){ console.error(e); el.innerHTML = '<div class="text-sm text-on-surface-variant">불러오기 실패</div>'; }
+  /* ── Back button ── */
+  document.getElementById('profileBack').addEventListener('click', () => {
+    if (history.length > 1) { history.back(); return; }
+    try {
+      if (document.referrer && new URL(document.referrer).origin === location.origin) {
+        window.location.href = document.referrer; return;
       }
+    } catch (_) {}
+    window.location.href = '/app/home_dashboard.html';
+  });
 
-      // call after initial fetch
-      fetchAndRender();
-      loadMySessions();
+  /* ── Logout ── */
+  document.getElementById('logout').addEventListener('click', () => {
+    if (typeof FTApi !== 'undefined') FTApi.setToken(null);
+    window.location.href = '/app/login.html';
+  });
 
-      // avatar edit button routes to profile edit (useful from signup)
-      const avatarEditBtn = document.getElementById('avatarEdit');
-      if (avatarEditBtn) avatarEditBtn.addEventListener('click', ()=>{ window.location.href = '/app/profile.html?edit=1'; });
+  /* ── Settings rows ── */
+  document.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      const routes = {
+        notifications: '/app/settings/notifications.html',
+        prefs:         '/app/settings/prefs.html',
+        subscription:  '/app/subscription.html',
+        privacy:       '/app/privacy.html',
+      };
+      if (routes[action]) window.location.href = routes[action];
+    });
+  });
 
-      // profile back button: prefer history.back(), then document.referrer, then dashboard
-      const profileBack = document.getElementById('profileBack');
-      if (profileBack) profileBack.addEventListener('click', ()=>{
-        if (history.length > 1) { history.back(); return; }
-        try{
-          if (document.referrer && new URL(document.referrer).origin === location.origin) { window.location.href = document.referrer; return; }
-        }catch(e){}
-        window.location.href = '/app/home_dashboard.html';
-      });
-
-      // logout
-      document.getElementById('logout').addEventListener('click', ()=>{ FTApi.setToken(null); window.location.href='/app/login.html'; });
-
-      fetchAndRender();
-    })();
-  </script>
+  /* ── ?edit=1 auto-enter edit mode ── */
+  const params = new URLSearchParams(location.search);
+  if (params.get('edit') === '1') {
+    fetchAndRender().then(enterEdit);
+  } else {
+    fetchAndRender();
+  }
+  loadMySessions();
+})();
+</script>
 </body>
 </html>

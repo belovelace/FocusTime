@@ -19,6 +19,7 @@ const userRoutes = require('./routes/users');
 const sessionRoutes = require('./routes/sessions');
 const notificationRoutes = require('./routes/notifications');
 const subscriptionRoutes = require('./routes/subscriptions');
+const privacyRoutes = require('./routes/privacy');
 const webhookRoutes = require('./routes/webhooks');
 
 const app = express();
@@ -40,6 +41,7 @@ const favoritesRoutes = require('./routes/favorites');
 app.use('/api/users/me/favorites', favoritesRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/privacy', privacyRoutes);
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 
