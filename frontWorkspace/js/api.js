@@ -19,9 +19,15 @@
     const res = await fetch(API_BASE + path, opts);
     if (res.status === 401){
       setToken(null);
-      // preserve return URL so login redirects back
-      const next = `${location.pathname}${location.search}`;
-      window.location.href = `/app/login.html?next=${encodeURIComponent(next)}`;
+      // preserve return URL so login redirects back, but avoid looping if already on login page
+      const currPath = location.pathname || '';
+      if (!currPath.endsWith('/login.html')){
+        const next = `${location.pathname}${location.search}`;
+        window.location.href = `/app/login.html?next=${encodeURIComponent(next)}`;
+      } else {
+        // already on login page, just reload to show unauthenticated state
+        window.location.reload();
+      }
       throw new Error('unauthenticated');
     }
     let json = null;

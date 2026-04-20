@@ -38,15 +38,23 @@
       <section class="md:col-span-2 space-y-6">
         <div class="w-full bg-black rounded-lg overflow-hidden aspect-video">
           <!-- Local video player -->
-          <video id="localVideo" class="w-full h-full object-cover" controls playsinline preload="metadata" src="/images/video/focustime.mov">해당 브라우저에서 비디오를 재생할 수 없습니다.</video>
+          <video id="localVideo" class="w-full h-full object-cover" controls playsinline preload="metadata" poster="/images/video/video-placeholder.png">해당 브라우저에서 비디오를 재생할 수 없습니다.</video>
 <!-- fallback poster if video missing -->
-<noscript><img src="/images/video-placeholder.png" alt="video placeholder"/></noscript>
+<noscript><img src="/app/assets/video-placeholder.png" alt="video placeholder"/></noscript>
 <script>
   // If the demo video resource is missing, show the placeholder poster
   (function(){
     const vid = document.getElementById('localVideo');
-    vid.addEventListener('error', ()=>{
-      try{ vid.poster = '/images/video-placeholder.png'; }catch(e){}
+    vid.addEventListener('error', ()=>{ try{ // fallback to frontWorkspace asset if project-level images path fails
+        vid.poster = '/images/video/video-placeholder.png';
+        // also try app asset path as a last resort
+        setTimeout(()=>{ try{ if (!vid.poster) vid.poster = '/app/assets/video-placeholder.png'; }catch(e){} }, 100);
+      }catch(e){} });
+    // allow tap-to-play fallback when autoplay is blocked
+    vid.addEventListener('click', async ()=>{
+      try{
+        if (vid.paused) await vid.play();
+      }catch(e){ console.error('play failed', e); }
     });
   })();
 </script>
@@ -107,11 +115,17 @@
     function pad(n){ return String(n).padStart(2,'0'); }
     function fmtHMS(ms){ if (ms <= 0) return '00:00:00'; const total = Math.max(0, Math.floor(ms/1000)); const hh = Math.floor(total/3600); const mm = Math.floor((total%3600)/60); const ss = total%60; return pad(hh)+ ':' + pad(mm) + ':' + pad(ss); }
 
-    // Resolve sessionId (localStorage or ?id=)
-    let sessionId = FTApi.getSessionId();
+    // Resolve sessionId (prefer ?id= param, else localStorage)
+    let sessionId;
+    let sessionChanged = false;
     const params = new URLSearchParams(location.search);
     const idParam = params.get('id');
-    if (!sessionId && idParam) { sessionId = idParam; FTApi.setSessionId(String(sessionId)); }
+    if (idParam) {
+      sessionId = idParam;
+      if (String(FTApi.getSessionId()) !== String(idParam)) { FTApi.setSessionId(String(idParam)); sessionChanged = true; }
+    } else {
+      sessionId = FTApi.getSessionId();
+    }
     if (!sessionId){ alert('세션이 선택되지 않았습니다.'); window.location.href='/app/home.html'; return; }
 
     const messagesEl = document.getElementById('messages');
@@ -178,14 +192,23 @@
 
     // Timer handling
     let sessionEnd = null;
-    function startTimer(endTime){
+    let sessionStart = null;
+    function startTimer(startTime, endTime){
       if (timerInterval) clearInterval(timerInterval);
+      sessionStart = new Date(startTime).getTime();
       sessionEnd = new Date(endTime).getTime();
       function tick(){
         const now = Date.now();
-        const rem = sessionEnd - now;
-        timerEl.textContent = fmtHMS(rem);
-        if (rem <= 0){ clearInterval(timerInterval); timerLabel.textContent = '세션 종료'; }
+        if (now < sessionStart) {
+          const remToStart = sessionStart - now;
+          timerEl.textContent = fmtHMS(remToStart);
+          timerLabel.textContent = '시작까지';
+        } else {
+          const rem = sessionEnd - now;
+          timerEl.textContent = fmtHMS(rem);
+          if (rem <= 0){ clearInterval(timerInterval); timerLabel.textContent = '세션 종료'; }
+          else timerLabel.textContent = '남은 시간';
+        }
       }
       tick();
       timerInterval = setInterval(tick, 1000);
@@ -200,15 +223,25 @@
           hostName.textContent = s.hostId || '—';
           sessionStatus.textContent = s.status || '—';
           sessionBadge.textContent = (s.durationMin ? s.durationMin + '분' : '--분');
-          // compute timer end using startsAt + duration
+          // compute timer start/end using startsAt + duration
           if (s.startsAt && s.durationMin){
             const start = new Date(s.startsAt).getTime();
             const end = start + (s.durationMin*60000);
-            startTimer(end);
+            // start timer with both start and end so pre-start countdown is shown
+            startTimer(start, end);
           }
           if (s.goalText) goalText.textContent = '나의 목표: ' + s.goalText;
+
+          // reset chat sub greeting per session
+          const chatSubEl = document.getElementById('chatSub');
+          if (chatSubEl) {
+            chatSubEl.textContent = '안녕하세요! 이번 세션 함께 집중해볼까요?';
+          }
         }
-        if (mRes && mRes.ok){ await renderMessages(mRes.body); }
+        if (mRes && mRes.ok){
+          if (sessionChanged) { messagesEl.innerHTML = ''; sessionChanged = false; }
+          await renderMessages(mRes.body);
+        }
       }catch(e){ if (e.message === 'unauthenticated') return; console.error(e); }
     }
 

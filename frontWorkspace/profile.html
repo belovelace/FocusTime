@@ -427,6 +427,42 @@
 
   </main>
 
+  <!-- recommend candidates fetch helper (adds Authorization header if code used fetch elsewhere) -->
+  <script>
+    (function(){
+      // if a matching container exists, fetch candidates and render minimal cards
+      async function loadMatching(){
+        try{
+          const container = document.getElementById('matchingCandidates');
+          if(!container) return;
+          // prefer FTApi (adds Authorization); fallback to direct fetch with token
+          let res;
+          if (typeof FTApi !== 'undefined') {
+            res = await FTApi.request('/api/matching/candidates');
+            if (res && res.ok) {
+              renderCandidates(container, res.body.candidates || res.body || []);
+              return;
+            }
+          }
+          const token = localStorage.getItem('ft:token');
+          const r = await fetch('/api/matching/candidates', { headers: { 'Authorization': token ? 'Bearer '+token : '' } });
+          if (r.ok){ const j = await r.json(); renderCandidates(container, j.candidates || []); }
+        }catch(e){ console.error('matching load failed', e); }
+      }
+      function renderCandidates(container, list){
+        container.innerHTML = '';
+        if(!Array.isArray(list) || list.length===0) { container.innerHTML = '<div class="text-sm text-gray-500">추천 파트너가 없습니다.</div>'; return; }
+        list.slice(0,6).forEach(c=>{
+          const d = document.createElement('div'); d.className='p-3 rounded-xl bg-white shadow mb-2';
+          d.innerHTML = `<div class="flex items-center justify-between"><div><div class="font-bold">${c.nickname||c.userId}</div><div class="text-xs text-gray-600">점수 ${c.matchScore}</div></div><div>${c.isFavorite? '★':''}</div></div>`;
+          container.appendChild(d);
+        });
+      }
+      // fire on load
+      document.addEventListener('DOMContentLoaded', loadMatching);
+    })();
+  </script>
+
   <!-- ── Bottom Nav ── -->
   <nav class="absolute bottom-0 left-0 right-0 z-50 flex justify-center items-center px-4 pb-6 pt-3 rounded-t-2xl"
        style="background:rgba(255,255,255,0.85);backdrop-filter:blur(20px);border-top:0.5px solid rgba(196,197,214,.2)">

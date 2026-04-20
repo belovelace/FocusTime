@@ -240,4 +240,13 @@ router.post('/:id/video', auth, async (req, res) => {
   } catch (err) { console.error(err); res.status(500).json({ error: 'video failed' }); }
 });
 
+// GET /api/sessions/:id/video -> list video entries (youtubeUrl)
+router.get('/:id/video', auth, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id,10);
+    const items = await prisma.sessionVideo.findMany({ where: { sessionId: id }, orderBy: { setAt: 'asc' } });
+    res.json(items);
+  } catch (err) { console.error(err); res.status(500).json({ error: 'video list failed' }); }
+});
+
 module.exports = router;

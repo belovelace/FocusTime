@@ -27,7 +27,7 @@
       <p class="mt-2 text-on-surface-variant">다시 집중의 시간으로 돌아올 시간입니다</p>
     </div>
 
-    <form id="loginForm" class="flex flex-col gap-4" onsubmit="return false;">
+    <form id="loginForm" class="flex flex-col gap-4" method="POST" action="/api/auth/login">
       <div class="space-y-2">
         <label for="email" class="text-sm font-bold tracking-widest text-on-surface-variant uppercase ml-1">이메일 주소</label>
         <input id="email" name="email" type="email" required placeholder="email@example.com"
@@ -106,11 +106,20 @@
         const res = await FTApi.login(em, pw);
         if (res && res.ok && res.body && res.body.accessToken) {
           FTApi.setToken(res.body.accessToken);
-          // if caller passed a `next` param, redirect there
+          // if caller passed a `next` param, redirect there unless it points back to login (avoid redirect loops)
           const params = new URLSearchParams(location.search);
           const next = params.get('next');
-          // default to dashboard after login
-          window.location.href = next ? next : '/app/home_dashboard.html';
+          let dest = '/app/home_dashboard.html';
+          if (next) {
+            try {
+              const nextUrl = new URL(next, location.origin);
+              const nextPath = nextUrl.pathname || '';
+              if (!nextPath.endsWith('/login.html')) dest = next;
+            } catch (e) {
+              // ignore invalid next param
+            }
+          }
+          window.location.href = dest;
           return;
         }
         alert('로그인 실패');

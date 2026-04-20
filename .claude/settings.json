@@ -5,7 +5,18 @@
       "Bash(netstat -ano)",
       "Bash(findstr 3306)",
       "Bash(DATABASE_URL_TEST=\"mysql://root:1234@localhost:3306/focustime_test\" npm test --silent)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(pnpm -v)",
+      "Bash(tasklist /FI \"PID eq 2472\")",
+      "Bash(powershell -Command \"Get-Process -Id 2472 | Format-List Id,ProcessName,Path,StartTime\")",
+      "Bash(awk '{print $NF}')",
+      "Bash(taskkill /PID 32544 /F)",
+      "Bash(taskkill /PID 5948 /F)",
+      "Bash(cmd.exe /c \"taskkill /F /PID 32544\")",
+      "Bash(curl -s -X POST http://localhost:4000/api/auth/login -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"tester1@example.com\\\\\",\\\\\"password\\\\\":\\\\\"testpass\\\\\"}\")",
+      "Bash(findstr :4000)",
+      "Bash(tasklist /FI \"PID eq 7152\")",
+      "Bash(powershell -NoProfile -Command \"Get-Process -Id 7152 | Format-List *\")"
     ]
   }
 }
