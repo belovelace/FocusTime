@@ -31,12 +31,16 @@ router.get('/', auth, async (req, res) => {
       where.startsAt = { gte: dayStart.toISOString(), lt: dayEnd.toISOString() };
     }
 
-    // support past=1 to fetch sessions that started before now
+    // support past=1 / upcoming=1 to filter by time relative to now
+    const { upcoming } = req.query;
     let orderBy = { startsAt: 'asc' };
     if (past === '1') {
       where.startsAt = where.startsAt || {};
       where.startsAt.lt = new Date().toISOString();
       orderBy = { startsAt: 'desc' };
+    } else if (upcoming === '1') {
+      where.startsAt = where.startsAt || {};
+      where.startsAt.gte = new Date().toISOString();
     }
 
     const take = 20; const skip = (page-1)*take;
