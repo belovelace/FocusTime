@@ -735,7 +735,7 @@
       const res = await FTApi.request('/api/users/me/stats');
       if (!res || !res.ok) return;
       const s = res.body;
-      const GOAL_MIN = 300; // 5시간 default weekly goal
+      const GOAL_MIN = (() => { try { return Number(JSON.parse(localStorage.getItem('ft:prefs') || '{}').weeklyGoalMin) || 300; } catch { return 300; } })();
 
       function fmtMin(v) {
         if (v == null || isNaN(v)) return '0분';
