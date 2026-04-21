@@ -105,21 +105,6 @@
     .empty-state { animation: fadeUp .4s ease both; }
 
     /* Goal drum picker */
-    .goal-drum-col {
-      height: 180px; overflow: hidden; position: relative; flex: 1;
-      background: #f3f4f5; border-radius: 14px;
-    }
-    .goal-drum-col::before, .goal-drum-col::after {
-      content: ''; position: absolute; left: 0; right: 0; z-index: 2; pointer-events: none;
-    }
-    .goal-drum-col::before {
-      top: 0; height: 68px;
-      background: linear-gradient(to bottom, rgba(255,255,255,0.97), transparent);
-    }
-    .goal-drum-col::after {
-      bottom: 0; height: 68px;
-      background: linear-gradient(to top, rgba(255,255,255,0.97), transparent);
-    }
     .goal-drum-list {
       list-style: none; margin: 0; padding: 0;
       display: flex; flex-direction: column; align-items: center;
@@ -129,16 +114,10 @@
     .goal-drum-list.grabbing { cursor: grabbing; transition: none; }
     .goal-drum-item {
       height: 36px; display: flex; align-items: center; justify-content: center;
-      font-size: 17px; font-weight: 500; color: #b0b2c0; width: 100%;
+      font-size: 17px; font-weight: 500; color: #9a9cb0; width: 100%;
       transition: color .12s, font-size .12s, font-weight .12s;
     }
-    .goal-drum-item.selected { color: #191c1d; font-size: 22px; font-weight: 700; }
-    .goal-drum-line {
-      position: absolute; left: 8px; right: 8px; height: 36px;
-      top: 50%; transform: translateY(-50%);
-      background: rgba(26,64,194,0.09); border-radius: 10px;
-      z-index: 1; pointer-events: none;
-    }
+    .goal-drum-item.selected { color: #191c1d; font-size: 21px; font-weight: 700; }
   </style>
 </head>
 
@@ -226,23 +205,30 @@
       <h3 class="text-[15px] font-bold text-on-surface mb-1">이번 주 목표 설정</h3>
       <p class="text-[12px] text-on-surface-variant mb-5">최소 1시간 · 최대 168시간 (7일)</p>
 
-      <!-- Drum picker: 일 + 시간 -->
-      <div class="relative flex items-center gap-3 mb-3">
-        <!-- Day drum -->
-        <div class="flex flex-col items-center gap-1.5 flex-1">
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">일</span>
-          <div class="goal-drum-col w-full">
-            <div class="goal-drum-line"></div>
-            <ul id="goalDayList" class="goal-drum-list"></ul>
+      <!-- Drum picker: 일 + 시간 (home_dashboard 동일 구조) -->
+      <div class="rounded-xl overflow-hidden relative mb-3" style="background:#edeeef">
+        <!-- 선택 하이라이트 라인 (드럼 전체 폭) -->
+        <div style="position:absolute;left:8px;right:8px;height:36px;top:50%;transform:translateY(-50%);background:rgba(26,64,194,0.08);border-radius:10px;z-index:1;pointer-events:none"></div>
+        <!-- 상단 페이드 -->
+        <div style="position:absolute;top:0;left:0;right:0;height:64px;background:linear-gradient(to bottom,rgba(237,238,239,0.96),transparent);z-index:2;pointer-events:none"></div>
+        <!-- 하단 페이드 -->
+        <div style="position:absolute;bottom:0;left:0;right:0;height:64px;background:linear-gradient(to top,rgba(237,238,239,0.96),transparent);z-index:2;pointer-events:none"></div>
+        <div class="flex px-1 py-1" style="height:180px">
+          <!-- 일 드럼 -->
+          <div class="flex-1 overflow-hidden h-full">
+            <ul id="goalDayList" class="goal-drum-list h-full"></ul>
           </div>
-        </div>
-        <span class="text-[22px] font-light text-outline-variant mb-0 mt-5">:</span>
-        <!-- Hour drum -->
-        <div class="flex flex-col items-center gap-1.5 flex-1">
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">시간</span>
-          <div class="goal-drum-col w-full">
-            <div class="goal-drum-line"></div>
-            <ul id="goalHourList" class="goal-drum-list"></ul>
+          <!-- 일 레이블 -->
+          <div class="flex items-center justify-center px-2" style="position:relative;z-index:3;flex-shrink:0">
+            <span class="text-[12px] font-bold" style="color:#444654">일</span>
+          </div>
+          <!-- 시간 드럼 -->
+          <div class="flex-1 overflow-hidden h-full">
+            <ul id="goalHourList" class="goal-drum-list h-full"></ul>
+          </div>
+          <!-- 시간 레이블 -->
+          <div class="flex items-center justify-center px-2" style="position:relative;z-index:3;flex-shrink:0">
+            <span class="text-[12px] font-bold" style="color:#444654">시간</span>
           </div>
         </div>
       </div>
