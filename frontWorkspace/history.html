@@ -103,6 +103,42 @@
 
     /* Empty state */
     .empty-state { animation: fadeUp .4s ease both; }
+
+    /* Goal drum picker */
+    .goal-drum-col {
+      height: 180px; overflow: hidden; position: relative; flex: 1;
+      background: #f3f4f5; border-radius: 14px;
+    }
+    .goal-drum-col::before, .goal-drum-col::after {
+      content: ''; position: absolute; left: 0; right: 0; z-index: 2; pointer-events: none;
+    }
+    .goal-drum-col::before {
+      top: 0; height: 68px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.97), transparent);
+    }
+    .goal-drum-col::after {
+      bottom: 0; height: 68px;
+      background: linear-gradient(to top, rgba(255,255,255,0.97), transparent);
+    }
+    .goal-drum-list {
+      list-style: none; margin: 0; padding: 0;
+      display: flex; flex-direction: column; align-items: center;
+      transition: transform .18s cubic-bezier(.22,1,.36,1);
+      cursor: grab; user-select: none;
+    }
+    .goal-drum-list.grabbing { cursor: grabbing; transition: none; }
+    .goal-drum-item {
+      height: 36px; display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 500; color: #b0b2c0; width: 100%;
+      transition: color .12s, font-size .12s, font-weight .12s;
+    }
+    .goal-drum-item.selected { color: #191c1d; font-size: 22px; font-weight: 700; }
+    .goal-drum-line {
+      position: absolute; left: 8px; right: 8px; height: 36px;
+      top: 50%; transform: translateY(-50%);
+      background: rgba(26,64,194,0.09); border-radius: 10px;
+      z-index: 1; pointer-events: none;
+    }
   </style>
 </head>
 
@@ -188,8 +224,34 @@
          style="transform:translateY(100%);transition:transform .28s cubic-bezier(0.32,0.72,0,1)">
       <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-5"></div>
       <h3 class="text-[15px] font-bold text-on-surface mb-1">이번 주 목표 설정</h3>
-      <p class="text-[12px] text-on-surface-variant mb-5">홈 화면 stats 카드의 목표 집중 시간을 설정합니다.</p>
-      <div id="goalPills" class="grid grid-cols-4 gap-2 mb-6"></div>
+      <p class="text-[12px] text-on-surface-variant mb-5">최소 1시간 · 최대 168시간 (7일)</p>
+
+      <!-- Drum picker: 일 + 시간 -->
+      <div class="relative flex items-center gap-3 mb-3">
+        <!-- Day drum -->
+        <div class="flex flex-col items-center gap-1.5 flex-1">
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">일</span>
+          <div class="goal-drum-col w-full">
+            <div class="goal-drum-line"></div>
+            <ul id="goalDayList" class="goal-drum-list"></ul>
+          </div>
+        </div>
+        <span class="text-[22px] font-light text-outline-variant mb-0 mt-5">:</span>
+        <!-- Hour drum -->
+        <div class="flex flex-col items-center gap-1.5 flex-1">
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">시간</span>
+          <div class="goal-drum-col w-full">
+            <div class="goal-drum-line"></div>
+            <ul id="goalHourList" class="goal-drum-list"></ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total display -->
+      <p class="text-center text-[13px] font-semibold text-primary mb-5">
+        총 <span id="goalTotalDisplay">—</span>
+      </p>
+
       <button id="saveGoalBtn"
               class="w-full py-3.5 rounded-2xl text-[14px] font-bold text-white transition-opacity"
               style="background:linear-gradient(135deg,#1a40c2,#3b5bdb)">저장</button>
@@ -423,63 +485,131 @@
     }
   })();
 
-  /* ── Weekly Goal ── */
+  /* ── Weekly Goal Drum ── */
   (function () {
-    const GOAL_OPTIONS = [60, 90, 120, 150, 180, 240, 300, 360, 420, 480, 540, 600];
+    const ITEM_H = 36, PAD = 2;
+    const DAYS  = Array.from({ length: 8 },  (_, i) => i);   // 0–7
+    const HOURS = Array.from({ length: 24 }, (_, i) => i);   // 0–23
 
     function fmtGoal(min) {
-      const h = Math.floor(min / 60), m = min % 60;
-      return m ? `${h}시간 ${m}분` : `${h}시간`;
+      const totalH = Math.round(min / 60);
+      const d = Math.floor(totalH / 24), h = totalH % 24;
+      if (d === 0) return h + '시간';
+      if (h === 0) return d + '일';
+      return d + '일 ' + h + '시간';
     }
 
     function loadGoalMin() {
-      try { return JSON.parse(localStorage.getItem('ft:prefs') || '{}').weeklyGoalMin || 300; }
+      try { return Number(JSON.parse(localStorage.getItem('ft:prefs') || '{}').weeklyGoalMin) || 300; }
       catch { return 300; }
     }
 
-    let selectedGoal = loadGoalMin();
+    /* ── drum helpers ── */
+    function buildList(listEl, items, initIdx) {
+      listEl.innerHTML = '';
+      for (let i = 0; i < PAD; i++) {
+        const li = document.createElement('li');
+        li.className = 'goal-drum-item'; li.style.height = ITEM_H + 'px';
+        listEl.appendChild(li);
+      }
+      items.forEach((v, i) => {
+        const li = document.createElement('li');
+        li.className = 'goal-drum-item' + (i === initIdx ? ' selected' : '');
+        li.textContent = v; li.style.height = ITEM_H + 'px';
+        listEl.appendChild(li);
+      });
+      for (let i = 0; i < PAD; i++) {
+        const li = document.createElement('li');
+        li.className = 'goal-drum-item'; li.style.height = ITEM_H + 'px';
+        listEl.appendChild(li);
+      }
+      snap(listEl, initIdx, false);
+    }
 
-    // render goal display
+    function snap(listEl, idx, anim) {
+      if (!anim) listEl.classList.add('grabbing');
+      listEl.style.transform = 'translateY(' + (-(idx * ITEM_H)) + 'px)';
+      if (!anim) requestAnimationFrame(() => listEl.classList.remove('grabbing'));
+      listEl.querySelectorAll('.goal-drum-item').forEach((li, i) =>
+        li.classList.toggle('selected', i - PAD === idx));
+    }
+
+    function getIdx(listEl) {
+      const m = (listEl.style.transform || '').match(/translateY\((-?[\d.]+)px\)/);
+      return m ? Math.round(-parseFloat(m[1]) / ITEM_H) : 0;
+    }
+
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+    function makeDraggable(listEl, maxIdx, onChange) {
+      let sY = 0, sOff = 0, drag = false;
+      const start = y => { drag = true; sY = y; sOff = getIdx(listEl) * ITEM_H; listEl.classList.add('grabbing'); };
+      const move  = y => { if (!drag) return; snap(listEl, clamp(Math.round((sOff + (sY - y)) / ITEM_H), 0, maxIdx), false); onChange(); };
+      const end   = ()  => { if (!drag) return; drag = false; listEl.classList.remove('grabbing'); snap(listEl, clamp(getIdx(listEl), 0, maxIdx), true); onChange(); };
+      listEl.addEventListener('mousedown',  e => start(e.clientY));
+      window.addEventListener('mousemove',  e => { if (drag) move(e.clientY); });
+      window.addEventListener('mouseup',    end);
+      listEl.addEventListener('touchstart', e => { e.preventDefault(); start(e.touches[0].clientY); }, { passive: false });
+      listEl.addEventListener('touchmove',  e => { e.preventDefault(); move(e.touches[0].clientY); }, { passive: false });
+      listEl.addEventListener('touchend',   end);
+      listEl.parentElement.addEventListener('wheel', e => {
+        e.preventDefault();
+        snap(listEl, clamp(getIdx(listEl) + (e.deltaY > 0 ? 1 : -1), 0, maxIdx), true);
+        onChange();
+      }, { passive: false });
+    }
+
+    /* ── total goal display ── */
+    function updateTotal() {
+      const d = getIdx(document.getElementById('goalDayList'));
+      const h = getIdx(document.getElementById('goalHourList'));
+      const total = d * 24 + h;
+      const clamped = clamp(total, 1, 168);
+      const display = clamped < 24 ? clamped + '시간' : (Math.floor(clamped/24) + '일' + (clamped%24 ? ' ' + clamped%24 + '시간' : ''));
+      document.getElementById('goalTotalDisplay').textContent = display;
+    }
+
+    /* ── constraint: 7일이면 시간=0, 0일이면 시간≥1 ── */
+    function constrain() {
+      const dayList  = document.getElementById('goalDayList');
+      const hourList = document.getElementById('goalHourList');
+      const d = getIdx(dayList), h = getIdx(hourList);
+      if (d === 7 && h > 0)  snap(hourList, 0, true);
+      if (d === 0 && h === 0) snap(hourList, 1, true);
+      updateTotal();
+    }
+
+    /* ── build drums once (called on first open) ── */
+    let _drumsReady = false;
+    function ensureDrums() {
+      if (_drumsReady) return;
+      _drumsReady = true;
+      buildList(document.getElementById('goalDayList'),  DAYS,  0);
+      buildList(document.getElementById('goalHourList'), HOURS, 1);
+      makeDraggable(document.getElementById('goalDayList'),  DAYS.length  - 1, constrain);
+      makeDraggable(document.getElementById('goalHourList'), HOURS.length - 1, constrain);
+    }
+
+    /* ── seek drums to a saved goal ── */
+    function seekToGoal() {
+      const totalH = Math.round(loadGoalMin() / 60);
+      const d = clamp(Math.floor(totalH / 24), 0, 7);
+      const h = d === 7 ? 0 : (d === 0 ? Math.max(1, totalH % 24) : totalH % 24);
+      snap(document.getElementById('goalDayList'),  d, false);
+      snap(document.getElementById('goalHourList'), h, false);
+      updateTotal();
+    }
+
+    /* ── render card display ── */
     function renderDisplay() {
-      document.getElementById('goalDisplay').textContent = fmtGoal(selectedGoal);
+      document.getElementById('goalDisplay').textContent = fmtGoal(loadGoalMin());
     }
     renderDisplay();
 
-    // build pills
-    function buildPills() {
-      const container = document.getElementById('goalPills');
-      container.innerHTML = '';
-      GOAL_OPTIONS.forEach(min => {
-        const btn = document.createElement('button');
-        btn.className = 'py-2.5 rounded-xl text-[12px] font-semibold transition-colors border';
-        btn.textContent = fmtGoal(min);
-        btn.dataset.min = min;
-        applyPillStyle(btn, min === selectedGoal);
-        btn.addEventListener('click', () => {
-          selectedGoal = min;
-          container.querySelectorAll('button').forEach(b =>
-            applyPillStyle(b, Number(b.dataset.min) === selectedGoal));
-        });
-        container.appendChild(btn);
-      });
-    }
-
-    function applyPillStyle(btn, active) {
-      if (active) {
-        btn.style.background = '#3b5bdb';
-        btn.style.color = '#e2e5ff';
-        btn.style.borderColor = 'transparent';
-      } else {
-        btn.style.background = '#f3f4f5';
-        btn.style.color = '#444654';
-        btn.style.borderColor = 'transparent';
-      }
-    }
-
-    // modal open/close
+    /* ── modal open / close ── */
     function openModal() {
-      selectedGoal = loadGoalMin();
-      buildPills();
+      ensureDrums();
+      seekToGoal();
       const modal = document.getElementById('goalModal');
       const sheet = document.getElementById('goalSheet');
       modal.style.removeProperty('display');
@@ -487,35 +617,31 @@
     }
 
     function closeModal() {
-      const sheet = document.getElementById('goalSheet');
-      sheet.style.transform = 'translateY(100%)';
+      document.getElementById('goalSheet').style.transform = 'translateY(100%)';
       setTimeout(() => { document.getElementById('goalModal').style.display = 'none'; }, 300);
     }
 
     document.getElementById('editGoalBtn').addEventListener('click', openModal);
     document.getElementById('goalOverlay').addEventListener('click', closeModal);
 
-    // save
+    /* ── save ── */
     document.getElementById('saveGoalBtn').addEventListener('click', async () => {
-      // update localStorage
+      const d = getIdx(document.getElementById('goalDayList'));
+      const h = getIdx(document.getElementById('goalHourList'));
+      const goalMin = clamp((d * 24 + h) * 60, 60, 10080);
+
       let prefs = {};
       try { prefs = JSON.parse(localStorage.getItem('ft:prefs') || '{}'); } catch {}
-      prefs.weeklyGoalMin = selectedGoal;
+      prefs.weeklyGoalMin = goalMin;
       localStorage.setItem('ft:prefs', JSON.stringify(prefs));
 
-      // sync to server
       try {
-        if (typeof FTApi !== 'undefined') {
-          await FTApi.request('/api/users/me/prefs', {
-            method: 'PATCH',
-            body: prefs,
-          });
-        }
+        if (typeof FTApi !== 'undefined')
+          await FTApi.request('/api/users/me/prefs', { method: 'PATCH', body: prefs });
       } catch (e) { console.warn('prefs sync failed', e); }
 
       renderDisplay();
       closeModal();
-      // show toast with a tiny delay so sheet closes first
       setTimeout(() => {
         const t = document.getElementById('toast');
         t.textContent = '목표가 저장되었습니다.';
