@@ -776,6 +776,8 @@
     } catch (e) { console.error('[loadStats]', e); }
   }
   await loadStats();
+  // bfcache 복원 시 목표값 재반영 (history.html에서 설정 후 뒤로가기)
+  window.addEventListener('pageshow', (e) => { if (e.persisted) loadStats(); });
   // load favorites
   async function loadFavorites(){
     const favRow = document.getElementById('favoritesRow');
