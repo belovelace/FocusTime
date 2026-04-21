@@ -776,7 +776,6 @@
     } catch (e) { console.error('[loadStats]', e); }
   }
   await loadStats();
-  // bfcache 복원 시 목표값 재반영 (history.html에서 설정 후 뒤로가기)
   window.addEventListener('pageshow', (e) => { if (e.persisted) loadStats(); });
   // load favorites
   async function loadFavorites(){
@@ -1023,9 +1022,10 @@
     requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; });
   }
   function hideCancelModal() {
+    const modal = document.getElementById('cancelModal');
     const sheet = document.getElementById('cancelModalSheet');
     sheet.style.transform = 'translateY(100%)';
-    setTimeout(() => { document.getElementById('cancelModal').style.display = 'none'; _cancelTargetId = null; }, 300);
+    setTimeout(() => { modal.style.display = 'none'; _cancelTargetId = null; }, 300);
   }
   document.getElementById('cancelModalDismiss').addEventListener('click', hideCancelModal);
   document.getElementById('cancelModalOverlay').addEventListener('click', hideCancelModal);
