@@ -127,12 +127,8 @@
   /* ghost border rule: accessibility-only, nearly invisible */
   .ghost-border { border: 1px solid rgba(196, 197, 214, 0.15); }
 
-  /* Progress bar animation */
-  @keyframes progressIn {
-    from { width: 0%; }
-    to { width: 50%; }
-  }
-  .progress-bar { animation: progressIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both; }
+  /* Progress bar */
+  .progress-bar { transition: width 0.9s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
   /* Stagger fade-in */
   @keyframes fadeUp {
@@ -147,11 +143,6 @@
   .fade-up-5 { animation-delay: 0.36s; }
 
   /* ── Stats card: white convex emboss ── */
-  @keyframes progressIn {
-    from { width: 0%; }
-    to   { width: 50%; }
-  }
-  .progress-bar { animation: progressIn 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.2s both; }
 
   @keyframes convexShine {
     0%        { opacity:0; transform: translateX(-160%) skewX(-22deg); }
@@ -353,7 +344,7 @@
         <div class="h-2 w-full rounded-full overflow-hidden"
              style="background:rgba(160,175,220,0.22);box-shadow:inset 0 1px 3px rgba(140,155,200,0.30)">
           <div class="progress-bar h-full rounded-full"
-               style="width:50%;background:linear-gradient(90deg,#6ee89e,#8dfa94);box-shadow:0 0 4px #8dfa94,0 0 12px #8dfa94,0 0 28px rgba(141,250,148,0.9),0 0 56px rgba(141,250,148,0.6),0 0 80px rgba(141,250,148,0.25)"></div>
+               style="width:0%;background:linear-gradient(90deg,#6ee89e,#8dfa94);box-shadow:0 0 4px #8dfa94,0 0 12px #8dfa94,0 0 28px rgba(141,250,148,0.9),0 0 56px rgba(141,250,148,0.6),0 0 80px rgba(141,250,148,0.25)"></div>
         </div>
         <!-- Mini stats row -->
         <div class="flex gap-4 mt-4 pt-4" style="border-top:1px solid rgba(160,175,220,0.25)">
@@ -364,12 +355,12 @@
           <div style="width:1px;background:rgba(160,175,220,0.25)"></div>
           <div>
             <p class="text-[10px] uppercase tracking-wider mb-0.5" style="color:rgba(60,75,120,0.50)">연속 일수</p>
-            <p class="text-base font-bold" style="color:#1a2a5e">3일 🔥</p>
+            <p class="text-base font-bold" data-key="streak" style="color:#1a2a5e">-</p>
           </div>
           <div style="width:1px;background:rgba(160,175,220,0.25)"></div>
           <div>
             <p class="text-[10px] uppercase tracking-wider mb-0.5" style="color:rgba(60,75,120,0.50)">달성률</p>
-            <p class="text-base font-bold" style="color:#1a2a5e">50%</p>
+            <p class="text-base font-bold" data-key="achieveRate" style="color:#1a2a5e">-</p>
           </div>
         </div>
       </div>
@@ -732,15 +723,59 @@
         const ua = document.getElementById('userAvatar');
         ua.dataset.userId = u.id;
         ua.onerror = function(){ this.onerror=null; this.src = placeholderAvatarDataUrl((u.nickname||'')[0]); };
-        // fill weekly stats if present
-        function fmtMinutes(v){ if (v == null) return null; if (typeof v === 'number') { const h = Math.floor(v/60); const m = v%60; return (h? h + '시간 ':'') + (m? m + '분':'') || '0분'; } return String(v); }
-        if (u.totalFocused != null) document.querySelector('[data-key="focusedWeek"]').textContent = fmtMinutes(u.totalFocused);
-        if (u.completedSessions !== undefined) { const el = document.querySelector('[data-key="completedSessions"]'); const target = el ? el.querySelector('p.text-base') : null; if (target) target.textContent = String(u.completedSessions) + '회'; }
-        if (u.weekGoal) document.querySelector('[data-key="weekGoal"]').textContent = '목표 ' + u.weekGoal;
       }
     } catch (_) {}
   }
   await loadUser();
+
+  /* ── Load weekly stats ── */
+  async function loadStats() {
+    try {
+      if (typeof FTApi === 'undefined') return;
+      const res = await FTApi.request('/api/users/me/stats');
+      if (!res || !res.ok) return;
+      const s = res.body;
+      const GOAL_MIN = 300; // 5시간 default weekly goal
+
+      function fmtMin(v) {
+        if (v == null || isNaN(v)) return '0분';
+        const h = Math.floor(v / 60), m = v % 60;
+        return (h ? h + '시간 ' : '') + (m ? m + '분' : '') || '0분';
+      }
+
+      const focused = Number(s.focusedMinutesWeek) || 0;
+      document.querySelector('[data-key="focusedWeek"]').textContent = fmtMin(focused);
+
+      const sessEl = document.querySelector('[data-key="completedSessions"] p.text-base');
+      if (sessEl) sessEl.textContent = (s.completedSessionsWeek ?? 0) + '회';
+
+      const pct = Math.min(100, Math.round(focused / GOAL_MIN * 100));
+      const bar = document.querySelector('#statsCard .progress-bar');
+      if (bar) requestAnimationFrame(() => { bar.style.width = pct + '%'; });
+
+      const goalEl = document.querySelector('[data-key="weekGoal"]');
+      if (goalEl) goalEl.textContent = '목표 ' + fmtMin(GOAL_MIN);
+
+      const rateEl = document.querySelector('[data-key="achieveRate"]');
+      if (rateEl) rateEl.textContent = pct + '%';
+
+      const streak = (() => {
+        if (!s.perDay || typeof s.perDay !== 'object') return 0;
+        const today = new Date();
+        let count = 0;
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(today); d.setDate(d.getDate() - i);
+          const key = d.toISOString().slice(0, 10);
+          if ((s.perDay[key]?.minutes || 0) > 0) count++;
+          else break;
+        }
+        return count;
+      })();
+      const streakEl = document.querySelector('[data-key="streak"]');
+      if (streakEl) streakEl.textContent = streak > 0 ? streak + '일 🔥' : '0일';
+    } catch (e) { console.error('[loadStats]', e); }
+  }
+  await loadStats();
   // load favorites
   async function loadFavorites(){
     const favRow = document.getElementById('favoritesRow');
@@ -939,26 +974,11 @@
     });
 
     // wire cancel buttons
-    document.querySelectorAll('.cancel-session').forEach(btn => btn.addEventListener('click', async (e) => {
+    document.querySelectorAll('.cancel-session').forEach(btn => btn.addEventListener('click', (e) => {
       const card = btn.closest('.session-card');
       const id = card && card.dataset ? card.dataset.sessionId : null;
       if (!id) return;
-      if (!confirm('정말 이 예정된 세션을 취소하시겠습니까?')) return;
-      try{
-        const res = await FTApi.request('/api/sessions/' + encodeURIComponent(id), { method: 'DELETE' });
-        if (res && res.ok){
-          // remove from rendered sessions and rerender
-          _renderedSessions = _renderedSessions.filter(x=> String(x.id) !== String(id));
-          renderSessionCards(_renderedSessions);
-          showToast('세션이 취소되었습니다.');
-        } else if (res && res.status === 400 && res.body && res.body.error === 'too_late_to_cancel') {
-          alert(res.body.message || '세션은 시작 10분 전까지만 취소 가능합니다.');
-        } else if (res && res.status === 403) {
-          alert('이 세션을 취소할 권한이 없습니다.');
-        } else {
-          showToast('취소에 실패했습니다.');
-        }
-      }catch(e){ console.error(e); showToast('서버 오류'); }
+      showCancelModal(id);
     }));
 
     // start timers
@@ -991,6 +1011,42 @@
 
   function formatDuration(sec) { if (sec <= 0) return '0초'; const m = Math.floor(sec/60); const s = sec%60; return (m? m + '분 ':'') + s + '초'; }
 
+  /* ── Cancel session modal ── */
+  let _cancelTargetId = null;
+  function showCancelModal(id) {
+    _cancelTargetId = id;
+    const modal = document.getElementById('cancelModal');
+    const sheet = document.getElementById('cancelModalSheet');
+    modal.style.removeProperty('display');
+    requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; });
+  }
+  function hideCancelModal() {
+    const sheet = document.getElementById('cancelModalSheet');
+    sheet.style.transform = 'translateY(100%)';
+    setTimeout(() => { document.getElementById('cancelModal').style.display = 'none'; _cancelTargetId = null; }, 300);
+  }
+  document.getElementById('cancelModalDismiss').addEventListener('click', hideCancelModal);
+  document.getElementById('cancelModalOverlay').addEventListener('click', hideCancelModal);
+  document.getElementById('cancelModalConfirm').addEventListener('click', async () => {
+    const id = _cancelTargetId;
+    if (!id) return;
+    hideCancelModal();
+    try {
+      const res = await FTApi.request('/api/sessions/' + encodeURIComponent(id), { method: 'DELETE' });
+      if (res && res.ok) {
+        _renderedSessions = _renderedSessions.filter(x => String(x.id) !== String(id));
+        renderSessionCards(_renderedSessions);
+        showToast('세션이 취소되었습니다.');
+      } else if (res && res.status === 400 && res.body && res.body.error === 'too_late_to_cancel') {
+        showToast(res.body.message || '시작 15분 전까지만 취소 가능합니다.');
+      } else if (res && res.status === 403) {
+        showToast('이 세션을 취소할 권한이 없습니다.');
+      } else {
+        showToast('취소에 실패했습니다.');
+      }
+    } catch (e) { console.error(e); showToast('서버 오류'); }
+  });
+
   /* ── Nav active state and routing ── */
   document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', function(e) {
@@ -1009,5 +1065,23 @@
   });
 })();
 </script>
+
+<!-- Cancel session confirmation modal -->
+<div id="cancelModal" class="fixed inset-0 z-[100] flex items-end justify-center" style="display:none!important">
+  <div id="cancelModalOverlay" class="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
+  <div id="cancelModalSheet" class="relative w-full max-w-md bg-white rounded-t-3xl p-6 pb-8 shadow-2xl"
+       style="transform:translateY(100%);transition:transform .28s cubic-bezier(0.32,0.72,0,1)">
+    <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-5"></div>
+    <div class="flex items-center gap-3 mb-2">
+      <span class="material-symbols-outlined text-error text-[28px]">cancel</span>
+      <h3 class="text-base font-bold text-on-surface">세션 취소</h3>
+    </div>
+    <p class="text-sm text-on-surface-variant mb-6">이 예약된 세션을 취소하시겠습니까?<br>취소 후에는 되돌릴 수 없습니다.</p>
+    <div class="flex gap-3">
+      <button id="cancelModalDismiss" class="flex-1 py-3 rounded-xl text-sm font-semibold text-on-surface-variant bg-surface-container">돌아가기</button>
+      <button id="cancelModalConfirm" class="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-error">취소하기</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
