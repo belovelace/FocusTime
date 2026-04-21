@@ -477,6 +477,24 @@
 <!-- Toast -->
 <div id="toast" aria-live="polite"></div>
 
+<!-- Profile cancel session modal -->
+<div id="profileCancelModal" class="fixed inset-0 z-[100] flex items-end justify-center" style="display:none!important">
+  <div id="profileCancelOverlay" class="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
+  <div id="profileCancelSheet" class="relative w-full max-w-md bg-white rounded-t-3xl p-6 pb-10 shadow-2xl"
+       style="transform:translateY(100%);transition:transform .28s cubic-bezier(0.32,0.72,0,1)">
+    <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-5"></div>
+    <div class="flex items-center gap-3 mb-2">
+      <span class="material-symbols-outlined text-error text-[26px]">cancel</span>
+      <h3 class="text-[15px] font-bold text-on-surface">세션 취소</h3>
+    </div>
+    <p class="text-[13px] text-on-surface-variant mb-6">이 예약된 세션을 취소하시겠습니까?<br>취소 후에는 되돌릴 수 없습니다.</p>
+    <div class="flex gap-3">
+      <button id="profileCancelDismiss" class="flex-1 py-3 rounded-xl text-[13px] font-semibold text-on-surface-variant bg-surface-container">돌아가기</button>
+      <button id="profileCancelConfirm" class="flex-1 py-3 rounded-xl text-[13px] font-semibold text-white bg-error">취소하기</button>
+    </div>
+  </div>
+</div>
+
 <script src="/app/js/api.js"></script>
 <script>
 (function () {
@@ -616,60 +634,96 @@
         el.innerHTML = '<div class="text-[13px] text-on-surface-variant">예정된 세션이 없습니다.</div>';
         return;
       }
-      const res = await FTApi.request('/api/sessions?host=me&upcoming=1');
-      if (res && res.ok && res.body && res.body.items && res.body.items.length) {
-        el.innerHTML = '';
-        res.body.items.forEach(s => {
-          const dateStr = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(s.startsAt));
-          const row = document.createElement('div');
-          row.className = 'bg-surface-container-lowest rounded-xl px-4 py-3.5 flex items-center justify-between ambient-card';
-          row.innerHTML = `
-            <div class="flex-1 min-w-0">
-              <p class="text-[13px] font-semibold text-on-surface truncate">${dateStr}</p>
-              <p class="text-[12px] text-on-surface-variant mt-0.5">${s.durationMin}분 · ${s.goalText || '목표 없음'}</p>
-            </div>
-            <div class="flex items-center gap-2 ml-3 flex-shrink-0">
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusClass(s.status)}">${statusLabel(s.status)}</span>
-              <button class="view-session text-[12px] font-bold px-3 py-1.5 rounded-lg btn-primary" data-id="${s.id}">보기</button>
-              <button class="cancel-my-session text-[12px] font-medium px-2 py-1.5 rounded-lg transition-colors hover:bg-surface-container text-on-surface-variant" data-id="${s.id}">취소</button>
-            </div>
-          `;
-          el.appendChild(row);
-        });
+      // participant=me: host이거나 partner인 세션 모두 조회, upcoming=1: 현재 시간 이후만
+      const res = await FTApi.request('/api/sessions?participant=me&upcoming=1');
+      const items = res?.ok ? (res.body?.items || []) : [];
+      el.innerHTML = '';
 
-        el.querySelectorAll('.view-session').forEach(b => {
-          b.addEventListener('click', e => {
-            window.location.href = '/app/session.html?id=' + encodeURIComponent(e.currentTarget.dataset.id);
-          });
-        });
-        el.querySelectorAll('.cancel-my-session').forEach(b => {
-          b.addEventListener('click', async e => {
-            if (!confirm('정말 이 세션을 취소하시겠습니까?')) return;
-            const id = e.currentTarget.dataset.id;
-            try {
-              const r = await FTApi.request('/api/sessions/' + encodeURIComponent(id) + '/status', {
-                method: 'PATCH', body: { status: 'cancelled' }
-              });
-              if (r && r.ok) {
-                showToast('세션이 취소되었습니다.');
-                loadMySessions();
-              } else if (r && r.body && r.body.message) {
-                // surface server-provided message when available
-                alert(r.body.message);
-              } else {
-                showToast('취소 실패');
-              }
-            } catch (err) { console.error(err); showToast('서버 오류'); }
-          });
-        });
-      } else {
+      if (!items.length) {
         el.innerHTML = '<div class="text-[13px] text-on-surface-variant py-1">예정된 세션이 없습니다.</div>';
+        return;
       }
+
+      const myId = String(currentUser.id || '');
+      const focusLabel = { desk: '데스크', moving: '이동 중', any: '자유' };
+
+      items.forEach(s => {
+        const dateStr = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(s.startsAt));
+        const isHost  = String(s.hostId) === myId;
+        const other   = isHost ? s.partner : s.host;
+        const partnerLine = other
+          ? `<span class="text-[11px] text-on-surface-variant">· ${other.nickname || other.email || '상대방'}</span>`
+          : `<span class="text-[11px] text-on-surface-variant">· 파트너 대기 중</span>`;
+        const modeStr = focusLabel[s.focusMode] || s.focusMode || '';
+
+        const row = document.createElement('div');
+        row.className = 'bg-surface-container-lowest rounded-xl px-4 py-3.5 ambient-card';
+        row.dataset.sessionId = s.id;
+        row.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <p class="text-[13px] font-semibold text-on-surface">${dateStr}</p>
+                ${partnerLine}
+              </div>
+              <p class="text-[11px] text-on-surface-variant mt-0.5">${s.durationMin}분${modeStr ? ' · ' + modeStr : ''}${s.goalText ? ' · ' + s.goalText : ''}</p>
+            </div>
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusClass(s.status)}">${statusLabel(s.status)}</span>
+              <button class="view-session text-[11px] font-bold px-2.5 py-1.5 rounded-lg btn-primary" data-id="${s.id}">보기</button>
+              ${isHost ? `<button class="cancel-my-session text-[11px] font-medium px-2.5 py-1.5 rounded-lg border border-error/30 text-error hover:bg-error/5 transition-colors" data-id="${s.id}">취소</button>` : ''}
+            </div>
+          </div>
+        `;
+        el.appendChild(row);
+      });
+
+      el.querySelectorAll('.view-session').forEach(b =>
+        b.addEventListener('click', e =>
+          window.location.href = '/app/session.html?id=' + encodeURIComponent(e.currentTarget.dataset.id)));
+
+      el.querySelectorAll('.cancel-my-session').forEach(b =>
+        b.addEventListener('click', e => showProfileCancelModal(e.currentTarget.dataset.id)));
+
     } catch (e) {
       console.error(e);
       el.innerHTML = '<div class="text-[13px] text-on-surface-variant py-1">불러오기 실패</div>';
     }
   }
+
+  /* ── Cancel session modal (profile) ── */
+  let _profileCancelId = null;
+  function showProfileCancelModal(id) {
+    _profileCancelId = id;
+    const modal = document.getElementById('profileCancelModal');
+    const sheet = document.getElementById('profileCancelSheet');
+    modal.style.removeProperty('display');
+    requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; });
+  }
+  function hideProfileCancelModal() {
+    document.getElementById('profileCancelSheet').style.transform = 'translateY(100%)';
+    setTimeout(() => { document.getElementById('profileCancelModal').style.display = 'none'; _profileCancelId = null; }, 300);
+  }
+  document.getElementById('profileCancelOverlay').addEventListener('click', hideProfileCancelModal);
+  document.getElementById('profileCancelDismiss').addEventListener('click', hideProfileCancelModal);
+  document.getElementById('profileCancelConfirm').addEventListener('click', async () => {
+    const id = _profileCancelId;
+    if (!id) return;
+    hideProfileCancelModal();
+    try {
+      const r = await FTApi.request('/api/sessions/' + encodeURIComponent(id), { method: 'DELETE' });
+      if (r && r.ok) {
+        showToast('세션이 취소되었습니다.');
+        loadMySessions();
+      } else if (r?.status === 400 && r?.body?.error === 'too_late_to_cancel') {
+        showToast(r.body.message || '시작 15분 전까지만 취소 가능합니다.');
+      } else if (r?.status === 403) {
+        showToast('취소 권한이 없습니다.');
+      } else {
+        showToast('취소에 실패했습니다.');
+      }
+    } catch (err) { console.error(err); showToast('서버 오류'); }
+  });
 
   /* ── Back button ── */
   document.getElementById('profileBack').addEventListener('click', () => {
@@ -704,12 +758,12 @@
 
   /* ── ?edit=1 auto-enter edit mode ── */
   const params = new URLSearchParams(location.search);
+  // loadMySessions는 currentUser.id가 확보된 후 실행
   if (params.get('edit') === '1') {
-    fetchAndRender().then(enterEdit);
+    fetchAndRender().then(() => { loadMySessions(); enterEdit(); });
   } else {
-    fetchAndRender();
+    fetchAndRender().then(loadMySessions);
   }
-  loadMySessions();
 })();
 </script>
 </body>
